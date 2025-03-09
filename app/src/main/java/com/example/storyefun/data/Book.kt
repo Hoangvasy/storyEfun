@@ -1,4 +1,4 @@
-package com.example.storyefun.admin.data
+package com.example.storyefun.data
 
 data class Book(
     val id: String = "",
@@ -10,5 +10,7 @@ data class Book(
     val type: String = "",
     val follows: Int = 0,
     val likes: Int = 0,
-    val views: Int = 0
+    val views: Int = 0,
+    val chapters: List<Volume>
+
 )
