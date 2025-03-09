@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "743485598391",
+    "project_id": "storyefun-c75ba",
+    "storage_bucket": "storyefun-c75ba.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:743485598391:android:04b82d90628230bfc87b32",
+        "android_client_info": {
+          "package_name": "com.example.storyefun"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHvgtrPwC87mjWV7Lpc1pq57p1dQwOJHg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
