@@ -25,11 +25,11 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile")
     object MyStory : Screen("mystory")
     object Setting : Screen("setting")
-    object Category : Screen("AccountBox")
+    object Category : Screen("category")
 
-    object AdminMenu : Screen("MenuScreen")
-    object AdminUpload : Screen("UploadBook")
-    object ManageBook : Screen("ManageBook")
+    object AdminMenu : Screen("menuScreen")
+    object AdminUpload : Screen("uploadBook")
+    object ManageBook : Screen("manageBook")
 
 
 
@@ -45,7 +45,7 @@ sealed class Screen(val route: String) {
 fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewModel) {
     NavHost(
         navController = navController,
-        startDestination = Screen.AdminMenu.route
+        startDestination = Screen.Home.route
     ) {
         composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
         composable(Screen.BookDetail.route) {BookDetailScreen(navController, themeViewModel)}

@@ -31,7 +31,7 @@ fun MenuScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
         AdminButton("Manage Books") {
             // Add navigation late
-            navController.navigate("ManageBook")
+            navController.navigate("manageBook")
         }
         Spacer(modifier = Modifier.height(16.dp))
         AdminButton("Manage Categories") {

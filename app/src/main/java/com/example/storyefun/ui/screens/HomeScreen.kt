@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.storyefun.R
+import com.example.storyefun.navigation.nav
 import com.example.storyefun.ui.components.BottomBar
 import com.example.storyefun.ui.components.Header
 import com.example.storyefun.ui.theme.AppTheme
@@ -182,6 +183,7 @@ fun ContinueRead() {
 
 @Composable
 fun Stories(navController: NavController) {
+    val theme = LocalAppColors.current
     val backgroundImages = listOf(
         R.drawable.banner2,
         R.drawable.banner3,
@@ -216,7 +218,13 @@ fun Stories(navController: NavController) {
                     .width(80.dp)
                     .align(Alignment.CenterVertically)
             ) {
-                Text(text = "Xem tất cả")
+                Text(
+                    text = "Xem tất cả",
+                    style = TextStyle(fontStyle = FontStyle.Italic),
+                    color = theme.textSecondary,
+                    modifier = Modifier.clickable { navController.navigate("category") }
+
+                )
 
             }
         }

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -27,9 +28,6 @@ fun ManageBooksScreen(navController: NavController) {
     val books = remember { mutableStateListOf<Book>() }
     val db = Firebase.firestore
 
-    // Back button
-
-
     // Fetch books from Firestore
     LaunchedEffect(Unit) {
         db.collection("books")
@@ -46,43 +44,52 @@ fun ManageBooksScreen(navController: NavController) {
             }
     }
 
-    // Display books in a list
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        IconButton(onClick = { navController.popBackStack() }) {
-            Icon(
-                Icons.Default.ArrowBack,
-                contentDescription = "Back",
-            )
-        }
-        Text(
-            text = "Manage Books",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+    // Use a Box to overlay the FAB on top of the LazyColumn
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Display books in a list
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            // Back button
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                )
+            }
 
-        if (books.isEmpty()) {
-            Text("No books found.")
-        } else {
-            LazyColumn {
-                items(books) { book ->
-                    BookItem(book = book)
-                    Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Manage Books",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            if (books.isEmpty()) {
+                Text("No books found.")
+            } else {
+                LazyColumn {
+                    items(books) { book ->
+                        BookItem(book = book)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
             }
         }
 
-    }
-    Spacer(modifier = Modifier.height(18.dp))
-
-    IconButton(onClick = { navController.navigate("UploadBook") }) {
-        Icon(
-            Icons.Default.Add,
-            contentDescription = "Add book",
-        )
+        // Floating Action Button (FAB) at the bottom right
+        FloatingActionButton(
+            onClick = { navController.navigate("uploadBook") },
+            modifier = Modifier
+                .align(Alignment.BottomEnd) // Align to bottom-right corner
+                .padding(16.dp) // Add padding to avoid overlapping with the screen edge
+        ) {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = "Add book",
+            )
+        }
     }
 }
 @Composable

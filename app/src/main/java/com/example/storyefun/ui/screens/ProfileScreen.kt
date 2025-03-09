@@ -148,35 +148,42 @@ fun SettingsSection(
             onDarkModeToggle = { onDarkModeToggle(it) }
         )
         SettingItem(
-            title = "tai khoan",
+            title = "Tài khoản",
             icon = Icons.Default.Person,
             darkMode = darkMode,
             textColor = textColor,
             onClick = { navController.navigate("login") }
         )
         SettingItem(
-            title = "truyen yêu thích",
+            title = "Truyện yêu thích",
             icon = Icons.Default.Favorite,
             darkMode = darkMode,
             textColor = textColor,
-            onClick = { onItemClick("login") }
+            onClick = { navController.navigate("mystory") }
         )
         SettingItem(
-            title = "them truyen",
+            title = "Truyện đã đăng",
             icon = Icons.Default.Add,
             darkMode = darkMode,
             textColor = textColor,
-            onClick = { onItemClick("login") }
+            onClick = { navController.navigate("mystory")}
         )
         SettingItem(
-            title = "Lien he",
+            title = "Thêm truyện",
+            icon = Icons.Default.Add,
+            darkMode = darkMode,
+            textColor = textColor,
+            onClick = { onItemClick("upload") }
+        )
+        SettingItem(
+            title = "Liên hệ",
             icon = Icons.Default.Call,
             darkMode = darkMode,
             textColor = textColor,
             onClick = { onItemClick("login") }
         )
         SettingItem(
-            title = "Dang xuat",
+            title = "Log out",
             icon = Icons.Default.ExitToApp,
             darkMode = darkMode,
             textColor = textColor,

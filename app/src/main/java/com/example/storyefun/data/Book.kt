@@ -11,6 +11,6 @@ data class Book(
     val follows: Int = 0,
     val likes: Int = 0,
     val views: Int = 0,
-    val chapters: List<Volume>
+    val volume: List<Volume> = emptyList()
 
 )
