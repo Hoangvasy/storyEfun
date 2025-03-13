@@ -46,22 +46,22 @@ fun BottomBar(navController: NavController) {
             Item(
                 icon = Icons.Rounded.AccountBox,
                 color = Color(0xFF433E3F),
-                route = "AccountBox",
+                route = "mystory",
             ),
             Item(
                 icon = Icons.Rounded.AddCircle,
                 color = Color(0xFF433E3F),
-                route = "AddCircle"
+                route = "upload"
             ),
             Item(
                 icon = Icons.Rounded.FavoriteBorder,
                 color = Color(0xFF433E3F),
-                route = "FavoriteBorder"
+                route = "favourite"
             ),
             Item(
                 icon = Icons.Rounded.Settings,
                 color = Color(0xFF433E3F),
-                route = "Settings"
+                route = "setting"
             )
         )
     }

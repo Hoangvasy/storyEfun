@@ -26,19 +26,13 @@ sealed class Screen(val route: String) {
     object MyStory : Screen("mystory")
     object Setting : Screen("setting")
     object Category : Screen("category")
+    object Favorite : Screen("favourite")
 
     object AdminMenu : Screen("menuScreen")
     object AdminUpload : Screen("uploadBook")
     object ManageBook : Screen("manageBook")
 
-
-
-
-
 }
-
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,11 +51,10 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.MyStory.route) { MyStoryScreen(navController) }
         composable(Screen.Setting.route) { SettingScreen(navController, themeViewModel) }
         composable(Screen.Category.route) { CategoryScreen(navController) }
+        composable(Screen.Favorite.route) { FavoriteScreen(navController) }
 
         composable(Screen.AdminMenu.route) {MenuScreen(navController)}
         composable(Screen.AdminUpload.route) {AdminUploadScreen(navController)}
         composable(Screen.ManageBook.route) { ManageBooksScreen(navController) }
-
-
     }
 }
