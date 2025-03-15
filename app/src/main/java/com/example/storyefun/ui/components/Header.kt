@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.storyefun.R
-import com.example.storyefun.navigation.nav
+import com.example.storyefun.navigation.AppNavigation
 import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.ui.theme.ThemeViewModel
 

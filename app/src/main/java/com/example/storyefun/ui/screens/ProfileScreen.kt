@@ -173,7 +173,7 @@ fun SettingsSection(
             icon = Icons.Default.Add,
             darkMode = darkMode,
             textColor = textColor,
-            onClick = { onItemClick("upload") }
+            onClick = {navController.navigate("upload") }
         )
         SettingItem(
             title = "Liên hệ",

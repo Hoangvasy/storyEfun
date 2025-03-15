@@ -10,7 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
-import com.example.storyefun.ui.AppNavigation
+import com.example.storyefun.navigation.AppNavigation
 import com.example.storyefun.ui.screens.*
 import com.example.storyefun.ui.theme.AppTheme
 import com.example.storyefun.ui.theme.ThemeViewModel
