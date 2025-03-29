@@ -46,7 +46,7 @@ sealed class Screen(val route: String) {
 fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewModel) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.AdminMenu.route
     ) {
         composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
         composable(Screen.BookDetail.route) {BookDetailScreen(navController, themeViewModel)}

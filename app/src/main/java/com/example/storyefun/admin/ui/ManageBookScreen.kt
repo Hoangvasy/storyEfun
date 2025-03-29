@@ -10,39 +10,27 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.storyefun.R
+import com.example.storyefun.admin.viewModel.BookViewModel
 import com.example.storyefun.data.Book
+import com.example.storyefun.data.BookRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 @Composable
 fun ManageBooksScreen(navController: NavController) {
-    val books = remember { mutableStateListOf<Book>() }
-    val db = Firebase.firestore
-
-    // Fetch books from Firestore
-    LaunchedEffect(Unit) {
-        db.collection("books")
-            .get()
-            .addOnSuccessListener { result ->
-                for (document in result) {
-                    val book = document.toObject(Book::class.java)
-                    books.add(book.copy(id = document.id)) // Add document ID
-                }
-            }
-            .addOnFailureListener { exception ->
-                // Handle error
-                println("Error fetching books: $exception")
-            }
-    }
+    val bookViewModel : BookViewModel = viewModel()
+    val books by bookViewModel.books.observeAsState(emptyList())
 
     // Use a Box to overlay the FAB on top of the LazyColumn
     Box(modifier = Modifier.fillMaxSize()) {

@@ -64,6 +64,7 @@ dependencies {
 
     // Cloudinary
     implementation("com.cloudinary:cloudinary-android:2.3.1")
+    implementation(libs.androidx.runtime.livedata)
 
     // Testing
     testImplementation(libs.junit)
