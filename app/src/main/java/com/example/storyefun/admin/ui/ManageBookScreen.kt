@@ -2,8 +2,12 @@ package com.example.storyefun.admin.ui
 
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -14,6 +18,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -28,58 +33,131 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 @Composable
-fun ManageBooksScreen(navController: NavController) {
-    val bookViewModel : BookViewModel = viewModel()
-    val books by bookViewModel.books.observeAsState(emptyList())
+fun ManageBooksScreen(navController: NavController, viewModel: BookViewModel = viewModel()) {
+    var searchQuery by remember { mutableStateOf("") }
+    var sortOption by remember { mutableStateOf("Newest") }
+    val isLoading by viewModel.isLoading.observeAsState(false)
+    val books by viewModel.books.observeAsState(emptyList())
 
-    // Use a Box to overlay the FAB on top of the LazyColumn
     Box(modifier = Modifier.fillMaxSize()) {
-        // Display books in a list
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            // Back button
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    Icons.Default.ArrowBack,
-                    contentDescription = "Back",
+        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            // 🔍 Search & Sorting Row
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                }
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text("Search books...") },
+                    modifier = Modifier.weight(1f)
                 )
+                Spacer(modifier = Modifier.width(8.dp))
+                DropdownMenuButton(sortOption) { selected ->
+                    sortOption = selected
+                }
             }
 
-            Text(
-                text = "Manage Books",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+            Spacer(modifier = Modifier.height(12.dp))
 
-            if (books.isEmpty()) {
-                Text("No books found.")
-            } else {
-                LazyColumn {
-                    items(books) { book ->
-                        BookItem(book = book)
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+            val filteredBooks = books.filter { it.name.contains(searchQuery, ignoreCase = true) }
+            val sortedBooks = when (sortOption) {
+                "Most Viewed" -> filteredBooks.sortedByDescending { it.views }
+                "Most Liked" -> filteredBooks.sortedByDescending { it.likes }
+                else -> filteredBooks // Default is newest, assuming books are already ordered
+            }
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(sortedBooks) { book ->
+                    BookAdminItem(book, navController, viewModel)
                 }
+            }
+
+            // ➕ Floating Add Button
+            FloatingActionButton(
+                onClick = { navController.navigate("uploadBook") },
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(16.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Book")
             }
         }
 
-        // Floating Action Button (FAB) at the bottom right
-        FloatingActionButton(
-            onClick = { navController.navigate("uploadBook") },
-            modifier = Modifier
-                .align(Alignment.BottomEnd) // Align to bottom-right corner
-                .padding(16.dp) // Add padding to avoid overlapping with the screen edge
-        ) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = "Add book",
-            )
+        // 🔄 Centered Loading Overlay
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)) // Transparent overlay
+                    .wrapContentSize(Alignment.Center) // Centers the loading indicator
+            ) {
+                CircularProgressIndicator(color = Color.White)
+            }
         }
     }
 }
+
+// 🔽 Sorting Dropdown
+@Composable
+fun DropdownMenuButton(currentSort: String, onSortSelected: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val options = listOf("Newest", "Most Viewed", "Most Liked")
+
+    Box {
+        OutlinedButton(onClick = { expanded = true }) {
+            Text(currentSort)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onSortSelected(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+// 📖 Book Item for Admin Panel
+@Composable
+fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewModel) {
+    Card(
+        modifier = Modifier.padding(8.dp),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Image(
+                painter = rememberAsyncImagePainter(book.imageUrl),
+                contentDescription = "Book Cover",
+                modifier = Modifier.fillMaxWidth().height(150.dp),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(book.name, style = MaterialTheme.typography.headlineSmall)
+            Text("By ${book.author}", style = MaterialTheme.typography.bodyMedium)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Views: ${book.views}", style = MaterialTheme.typography.bodySmall)
+                Text("Likes: ${book.likes}", style = MaterialTheme.typography.bodySmall)
+            }
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                OutlinedButton(
+                    onClick = { viewModel.deleteBook(book.id) },
+                ) {
+                    Text("Delete")
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun BookItem(book: Book) {
     println("Book Image URL: ${book.imageUrl}") // Debugging

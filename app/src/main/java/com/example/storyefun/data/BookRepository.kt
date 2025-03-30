@@ -1,5 +1,6 @@
 package com.example.storyefun.data
 
+import androidx.lifecycle.MutableLiveData
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.toObject
@@ -9,6 +10,7 @@ import kotlinx.coroutines.tasks.await
 
 class BookRepository {
     private val db = Firebase.firestore
+    val isLoading = MutableLiveData(false)
 
     suspend fun getBooks() : List<Book>{
         return try {
@@ -39,8 +41,18 @@ class BookRepository {
     {
 
     }
-    fun deleteBook()
+    suspend fun deleteBook (bookId : String) : Boolean
     {
+        try {
+            db.collection("books").document(bookId).delete().await()
+            return true
+        }
+        catch (e : Exception)
+        {
+            println("Error when deleting book ${e.message}")
+
+        }
+        return false
 
     }
 
