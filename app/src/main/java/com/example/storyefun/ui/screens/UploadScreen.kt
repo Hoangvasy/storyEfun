@@ -37,22 +37,26 @@ fun UploadScreen(navController: NavController) {
     val context = LocalContext.current
     val categories = listOf("Tiểu thuyết", "Truyện ngắn", "Kinh dị", "Hành động", "Lãng mạn")
 
-    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        imageUri = uri
-    }
-
     // Hàm lưu vào Firebase
     val saveData = { title: String, author: String, description: String, categories: List<String>, imageUri: Uri? ->
         isLoading = true
-        saveBookToFirebase(title, author, description, categories, imageUri, context) { isSuccess ->
-            isLoading = false
-            if (isSuccess) {
-                Toast.makeText(context, "Dữ liệu đã được lưu thành công", Toast.LENGTH_SHORT).show()
-                navController.popBackStack()
-            } else {
-                Toast.makeText(context, "Lỗi khi lưu dữ liệu", Toast.LENGTH_SHORT).show()
+        saveBookToFirebase(
+            title = title,
+            author = author,
+            description = description,
+            categories = categories,
+            imageUri = imageUri,
+            context = context,
+            onComplete = { success ->
+                isLoading = false
+                if (success) {
+                    Toast.makeText(context, "Lưu sách thành công!", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack() // Quay lại màn hình trước đó nếu cần
+                } else {
+                    Toast.makeText(context, "Có lỗi xảy ra, vui lòng thử lại.", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
+        )
     }
 
     Column(
@@ -82,31 +86,31 @@ fun UploadScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Chọn ảnh
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-                .background(Color(0xFFF2F2F2))
-                .clickable { imagePickerLauncher.launch("image/*") },
-            contentAlignment = Alignment.Center
-        ) {
-            if (imageUri != null) {
-                Image(
-                    painter = rememberAsyncImagePainter(imageUri),
-                    contentDescription = "Selected Image",
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(imageVector = Icons.Outlined.Person, contentDescription = "Upload", tint = Color.Blue, modifier = Modifier.size(50.dp))
-                    Text("Upload your files here", color = Color.Gray)
-                    TextButton(onClick = { imagePickerLauncher.launch("image/*") }) {
-                        Text("Browse", color = Color.Blue)
-                    }
-                }
-            }
-        }
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(150.dp)
+//                .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
+//                .background(Color(0xFFF2F2F2))
+//                .clickable { imagePickerLauncher.launch("image/*") },
+//            contentAlignment = Alignment.Center
+//        ) {
+//            if (imageUri != null) {
+//                Image(
+//                    painter = rememberAsyncImagePainter(imageUri),
+//                    contentDescription = "Selected Image",
+//                    modifier = Modifier.fillMaxSize()
+//                )
+//            } else {
+//                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+//                    Icon(imageVector = Icons.Outlined.Person, contentDescription = "Upload", tint = Color.Blue, modifier = Modifier.size(50.dp))
+//                    Text("Upload your files here", color = Color.Gray)
+//                    TextButton(onClick = { imagePickerLauncher.launch("image/*") }) {
+//                        Text("Browse", color = Color.Blue)
+//                    }
+//                }
+//            }
+//        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -122,6 +126,7 @@ fun UploadScreen(navController: NavController) {
         }
     }
 }
+
 
 // TextField chung
 @Composable
@@ -224,3 +229,4 @@ fun saveBookToFirebase(
             }
     }
 }
+
