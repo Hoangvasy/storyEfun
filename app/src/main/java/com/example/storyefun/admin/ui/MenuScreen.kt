@@ -36,6 +36,8 @@ fun MenuScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
         AdminButton("Manage Categories") {
             // Add navigation later
+            navController.navigate("manageCategory")
+
         }
         Spacer(modifier = Modifier.height(16.dp))
         AdminButton("Violation Reports") {

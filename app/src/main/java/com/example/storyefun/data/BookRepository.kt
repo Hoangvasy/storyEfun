@@ -1,5 +1,6 @@
 package com.example.storyefun.data
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -29,8 +30,16 @@ class BookRepository {
     {
 
     }
-    fun addBook(book: Book)
+    suspend fun addBook(book: Book)
     {
+
+            try {
+                // Add book to Firestore
+                db.collection("books").document(book.id).set(book).await()
+                Log.d("Success","Book added successfully!")
+            } catch (e: Exception) {
+                Log.d("Error","Error adding book: ${e.message}")
+            }
 
     }
     fun addVolume(volume: Volume, book: Book)

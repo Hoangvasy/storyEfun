@@ -77,14 +77,15 @@ fun ManageBooksScreen(navController: NavController, viewModel: BookViewModel = v
             }
 
             // ➕ Floating Add Button
-            FloatingActionButton(
-                onClick = { navController.navigate("uploadBook") },
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(16.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Book")
-            }
+
+        }
+        FloatingActionButton(
+            onClick = { navController.navigate("uploadBook") },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add Book")
         }
 
         // 🔄 Centered Loading Overlay
