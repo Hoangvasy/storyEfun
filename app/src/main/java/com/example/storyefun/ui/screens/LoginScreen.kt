@@ -115,7 +115,13 @@ fun LoginScreen(navController: NavController) {
                             coroutineScope.launch {
                                 auth.signInWithEmailAndPassword(email, password)
                                     .addOnSuccessListener {
-                                        navController.navigate("home")
+                                        navController.navigate("home") {
+                                            popUpTo("login") {
+                                                inclusive = true
+                                            }
+                                            launchSingleTop = true
+                                        }
+
                                     }
                                     .addOnFailureListener {
                                         errorMessage = it.message ?: "Login failed"

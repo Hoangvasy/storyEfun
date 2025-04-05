@@ -1,6 +1,6 @@
-package com.example.storyefun.data
+package com.example.storyefun.data.repository
 
-import coil.annotation.ExperimentalCoilApi
+import com.example.storyefun.data.model.Category
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await

@@ -1,4 +1,4 @@
-package com.example.storyefun.data
+package com.example.storyefun.data.repository
 
 import android.net.Uri
 import com.cloudinary.android.MediaManager

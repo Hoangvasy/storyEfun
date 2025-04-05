@@ -1,4 +1,4 @@
-package com.example.storyefun.data
+package com.example.storyefun.data.model
 
 sealed class Chapter {
     abstract val id: String

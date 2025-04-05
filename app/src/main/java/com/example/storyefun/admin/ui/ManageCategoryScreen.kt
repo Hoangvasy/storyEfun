@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.storyefun.admin.viewModel.CategoryViewModel
-import com.example.storyefun.data.Category
+import com.example.storyefun.data.model.Category
 
 @Composable
 fun ManageCategoryScreen(navController: NavController, viewModel: CategoryViewModel = viewModel()) {

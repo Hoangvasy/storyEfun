@@ -64,7 +64,15 @@ fun Header(
                     fontSize = 13.sp,
                     color = theme.textSecondary,
                     modifier = Modifier.padding(start=8.dp)
-                        .clickable { navController.navigate("home") }
+                        .clickable {
+                            navController.navigate("home") {
+                                popUpTo("login") {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
+
+                        }
                 )
             }
             // Right

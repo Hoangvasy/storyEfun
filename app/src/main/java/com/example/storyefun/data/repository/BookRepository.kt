@@ -1,11 +1,11 @@
-package com.example.storyefun.data
+package com.example.storyefun.data.repository
 
 import androidx.lifecycle.MutableLiveData
+import com.example.storyefun.data.model.Book
+import com.example.storyefun.data.model.Chapter
+import com.example.storyefun.data.model.Volume
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
-import com.google.firebase.firestore.toObject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.tasks.await
 
 class BookRepository {
@@ -16,6 +16,10 @@ class BookRepository {
         return try {
             val snapshot = db.collection("books").get().await()
             snapshot.documents.mapNotNull { it.toObject(Book::class.java) }
+            snapshot.documents.mapNotNull { doc ->
+                val book = doc.toObject(Book::class.java)
+                book?.copy(id = doc.id) // inject the Firestore document ID into the Book object
+            }
 
         } catch (e : Exception)
         {
