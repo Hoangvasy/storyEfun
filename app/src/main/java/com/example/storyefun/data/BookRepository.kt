@@ -1,11 +1,14 @@
-package com.example.storyefun.data.repository
+package com.example.storyefun.data
 
+import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.storyefun.data.model.Book
-import com.example.storyefun.data.model.Chapter
-import com.example.storyefun.data.model.Volume
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.toObject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.tasks.await
 
 class BookRepository {
@@ -16,10 +19,6 @@ class BookRepository {
         return try {
             val snapshot = db.collection("books").get().await()
             snapshot.documents.mapNotNull { it.toObject(Book::class.java) }
-            snapshot.documents.mapNotNull { doc ->
-                val book = doc.toObject(Book::class.java)
-                book?.copy(id = doc.id) // inject the Firestore document ID into the Book object
-            }
 
         } catch (e : Exception)
         {
@@ -29,10 +28,31 @@ class BookRepository {
 
     }
 
-    fun getBookByUser()
-    {
+    fun getBookByUser(): LiveData<List<Book>> {
+        val liveData = MutableLiveData<List<Book>>()
 
+        db.collection("books")
+            .get()
+            .addOnSuccessListener { result ->
+                val books = result.documents.mapNotNull { document ->
+                    val name = document.getString("name")
+                    val posterUrl = document.getString("posterUrl") // hoặc "imageUrl"
+
+                    if (name != null && posterUrl != null) {
+                        Book(name, posterUrl)
+                    } else null // bỏ qua nếu thiếu dữ liệu
+                }
+                liveData.postValue(books)
+            }
+            .addOnFailureListener { exception ->
+                Log.e("BookRepository", "Error fetching books", exception)
+                liveData.postValue(emptyList())
+            }
+
+        return liveData
     }
+
+
     suspend fun addBook(book: Book): Boolean {
         return try {
             db.collection("books").add(book).await()  // Thêm sách vào Firestore

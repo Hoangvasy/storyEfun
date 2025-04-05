@@ -31,12 +31,9 @@ sealed class Screen(val route: String) {
     object AdminMenu : Screen("menuScreen")
     object AdminUpload : Screen("uploadBook")
     object ManageBook : Screen("manageBook")
-    object AddChapter : Screen("addChapter/{bookId}")
+    object AddChapter : Screen("addCChapter/{bookId}")
 
 }
-
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

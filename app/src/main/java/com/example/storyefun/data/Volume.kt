@@ -1,4 +1,4 @@
-package com.example.storyefun.data.model
+package com.example.storyefun.data
 
 data class Volume (
     val id: String,

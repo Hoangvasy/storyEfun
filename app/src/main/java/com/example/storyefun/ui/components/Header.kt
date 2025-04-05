@@ -1,6 +1,7 @@
 package com.example.storyefun.ui.components
 
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,7 +48,8 @@ fun Header(
         // Header 1
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .background(theme.header),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             // Left
@@ -62,17 +64,9 @@ fun Header(
                 Text(
                     text = "STORYEFUN",
                     fontSize = 13.sp,
-                    color = theme.textSecondary,
+                    color = theme.textPrimary,
                     modifier = Modifier.padding(start=8.dp)
-                        .clickable {
-                            navController.navigate("home") {
-                                popUpTo("login") {
-                                    inclusive = true
-                                }
-                                launchSingleTop = true
-                            }
-
-                        }
+                        .clickable { navController.navigate("home") }
                 )
             }
             // Right

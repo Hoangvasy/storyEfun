@@ -1,4 +1,4 @@
-package com.example.storyefun.data.model
+package com.example.storyefun.data
 
 data class Book(
     val id: String = "",
@@ -12,5 +12,4 @@ data class Book(
     val likes: Int = 0,
     val views: Int = 0,
     val volume: List<Volume> = emptyList()
-
 )

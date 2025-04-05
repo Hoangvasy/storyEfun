@@ -1,28 +1,51 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 
 package com.example.storyefun.ui.screens
 
 import android.annotation.SuppressLint
+import android.content.res.Resources.Theme
+import android.graphics.Paint.Align
+import android.util.Log
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -30,13 +53,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.storyefun.R
+import com.example.storyefun.admin.viewModel.BookViewModel
+import com.example.storyefun.data.Book
 import com.example.storyefun.ui.components.BottomBar
 import com.example.storyefun.ui.components.Header
+import com.example.storyefun.ui.theme.AppColors
 import com.example.storyefun.ui.theme.AppTheme
 import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.ui.theme.ThemeViewModel
+import com.google.android.gms.common.internal.safeparcel.SafeParcelable.Indicator
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @ExperimentalMaterial3Api
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -64,14 +100,14 @@ fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel) {
             Box(modifier = Modifier.fillMaxSize()) {
                 // In light mode, use a background image; in dark mode, use theme background color
                 if (!isDarkMode) {
-                    Image(
-                        painter = painterResource(id = R.drawable.background),
-                        contentDescription = "background",
-                        contentScale = ContentScale.FillBounds,
-                        modifier = Modifier
-                            .matchParentSize()
-                            .graphicsLayer(alpha = 0.5f)
-                    )
+//                    Image(
+//                        painter = colors.background(),
+//                        contentDescription = "background",
+//                        contentScale = ContentScale.FillBounds,
+//                        modifier = Modifier
+//                            .matchParentSize()
+//                            .graphicsLayer(alpha = 0.5f)
+//                    )
                 } else {
                     Box(
                         modifier = Modifier
@@ -88,43 +124,218 @@ fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel) {
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     item { Banner() }
-                    item { ContinueRead() }
-                    item { Stories(navController) }
+                    item { Channels(navController = navController, theme = colors) }
+                    item { Channel(navController = navController, theme = colors) }
+
+//                    item { Stories(navController) }
                 }
             }
         }
     }
 }
 
+// BANNER
 @Composable
 fun Banner() {
-    Box(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.bannerhome),
-            contentDescription = "Banner",
+    val images = listOf(
+        rememberAsyncImagePainter("https://i.pinimg.com/736x/f1/ab/0d/f1ab0db3bae065ccb0d4af75e45f5072.jpg"),
+        rememberAsyncImagePainter("https://i.pinimg.com/736x/2c/92/15/2c921587443963ef76414b6b26d37f7b.jpg"),
+        rememberAsyncImagePainter("https://i.pinimg.com/736x/30/6f/1a/306f1ae0f32e02b286638e12d3ea2782.jpg"),
+        rememberAsyncImagePainter("https://i.pinimg.com/736x/40/b8/97/40b89794a0abecb2801db9f251309ced.jpg"),
+        rememberAsyncImagePainter("https://i.pinimg.com/736x/e3/1f/d2/e31fd247b18e988e36bbd5787b38af60.jpg")
+    )
+
+    val pagerState = rememberPagerState(pageCount = { images.size })
+
+    // Chuyen dong
+    LaunchedEffect(Unit) {
+        while (true){
+            delay(3000)
+            val nextPage = (pagerState.currentPage + 1)%pagerState.pageCount
+            pagerState.scrollToPage(nextPage)
+        }
+    }
+
+    Column (
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        Box (modifier = Modifier.wrapContentSize()){
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.wrapContentSize()
+                    .padding(3.dp)
+            ) { currentPage ->
+                Card (
+                    modifier = Modifier.wrapContentSize()
+                        .padding(3.dp),
+                    elevation = CardDefaults.cardElevation(5.dp)
+                ){
+                    Image(
+                        painter = images[currentPage],
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+        }
+
+        PageIndicator(
+            pageCount = images.size,
+            currentPage = pagerState.currentPage,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-                .background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.2f))
-        )
-        Image(
-            painter = painterResource(id = R.drawable.poster1),
-            contentDescription = "Overlay Image",
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .offset(x = 16.dp)
-                .height(250.dp)
-                .clip(RoundedCornerShape(10.dp))
         )
     }
 }
+// Dots
+@Composable
+fun PageIndicator(pageCount: Int, currentPage: Int, modifier: Modifier.Companion) {
+    Row (
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+    ){
+        repeat(pageCount){
+            IndicatorDots(isSelected = it == currentPage, modifier = Modifier)
+        }
+    }
+}
+// Dots
+@Composable
+fun IndicatorDots(isSelected: Boolean, modifier:Modifier) {
+    val size = animateDpAsState(targetValue = if(isSelected) 12.dp else 10.dp, label = "")
+    Box(modifier = Modifier.padding(2.dp)
+        .size(size.value)
+        .clip(CircleShape)
+        .background(if(isSelected) Color(0xFF780000) else Color(0xFFD3D3D3)))
+}
+
+@Composable
+fun Channel(
+    navController: NavController,
+    theme: AppColors,
+    title: String = "Books",
+    viewModel: BookViewModel = viewModel()
+) {
+    val books = viewModel.books.observeAsState(emptyList())
+
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 5.dp)) {
+
+        HeaderRow(navController, title, theme)
+
+        LazyRow(modifier = Modifier.fillMaxWidth()) {
+            itemsIndexed(books.value) { _, book ->
+                Box(modifier = Modifier.width(150.dp).height(250.dp)) {
+                    Card(
+                        modifier = Modifier.wrapContentSize().padding(5.dp),
+                        elevation = CardDefaults.cardElevation(5.dp)
+                    ) {
+                        Column {
+                            if (!book.posterUrl.isNullOrEmpty()) {
+                                Image(
+                                    painter = rememberAsyncImagePainter(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(book.posterUrl)
+                                            .crossfade(true)
+                                            .build()
+                                    ),
+                                    contentDescription = "Book Cover",
+                                    modifier = Modifier.fillMaxWidth()
+                                        .fillMaxHeight(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight()
+                                        .background(Color.Gray)
+                                ) {
+                                    Text(
+                                        text = "No Image Available",
+                                        modifier = Modifier.align(Alignment.Center),
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun HeaderRow(navController: NavController, title: String, theme: AppColors) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = TextStyle(
+                fontWeight = FontWeight.Bold,
+                color = theme.textPrimary
+            )
+        )
+        Spacer(modifier = Modifier.weight(1f))
+
+        IconButton(
+            onClick = { navController.navigate("category") },
+            modifier = Modifier.width(80.dp).align(Alignment.CenterVertically)
+        ) {
+            Text(
+                text = "Xem tất cả",
+                style = TextStyle(fontStyle = FontStyle.Italic),
+                color = theme.textSecondary
+            )
+        }
+    }
+}
+
+
+@Composable
+fun Channels(navController: NavController, theme: AppColors, title: String = "Hãng truyện") {
+    val images = listOf(
+        rememberAsyncImagePainter("https://i.pinimg.com/736x/5d/b6/37/5db6377d25a3a8955fddd92541282aa4.jpg"),
+        rememberAsyncImagePainter("https://i.pinimg.com/736x/c6/f6/e0/c6f6e05b95ede8e55e06cba17e4507d4.jpg"),
+        rememberAsyncImagePainter("https://i.pinimg.com/474x/2b/fa/33/2bfa33c6c330498792ffdb73a70bd1f8.jpg"),
+        rememberAsyncImagePainter("https://i.pinimg.com/736x/0f/a9/0b/0fa90bd5c402250ed2157e09543cf971.jpg"),
+        rememberAsyncImagePainter("https://i.pinimg.com/736x/9a/bd/c5/9abdc53ede4fab53d5cc75e324a37ef9.jpg")
+    )
+
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)) {
+
+        HeaderRow(navController, title, theme)
+
+        LazyRow(modifier = Modifier.fillMaxWidth()) {
+            itemsIndexed(images) { _, imagePainter ->
+                Box(modifier = Modifier.width(150.dp).height(80.dp)) {
+                    Card(
+                        modifier = Modifier.wrapContentSize().padding(5.dp),
+                        elevation = CardDefaults.cardElevation(5.dp)
+                    ) {
+                        Image(
+                            painter = imagePainter,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 
 @Composable
 fun ContinueRead() {
@@ -265,5 +476,5 @@ fun Stories(navController: NavController) {
 @Composable
 fun PreviewHome() {
     // For preview purposes, you can create a dummy ThemeViewModel and NavController if needed.
-    // HomeScreen(navController = rememberNavController(), themeViewModel = DummyThemeViewModel())
+     HomeScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel())
 }
