@@ -19,7 +19,6 @@ class BookViewModel() : ViewModel()
     val _isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
     val isLoading: LiveData<Boolean> get() = _isLoading
 
-
     init {
         viewModelScope.launch {
             setState(true)

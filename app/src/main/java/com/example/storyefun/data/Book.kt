@@ -12,5 +12,4 @@ data class Book(
     val likes: Int = 0,
     val views: Int = 0,
     val volume: List<Volume> = emptyList()
-
 )
