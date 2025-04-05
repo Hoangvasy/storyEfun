@@ -126,7 +126,6 @@ fun DropdownMenuButton(currentSort: String, onSortSelected: (String) -> Unit) {
     }
 }
 
-// 📖 Book Item for Admin Panel
 @Composable
 fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewModel) {
     Card(
@@ -148,16 +147,28 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
                 Text("Views: ${book.views}", style = MaterialTheme.typography.bodySmall)
                 Text("Likes: ${book.likes}", style = MaterialTheme.typography.bodySmall)
             }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                OutlinedButton(
-                    onClick = { viewModel.deleteBook(book.id) },
-                ) {
-                    Text("Delete")
-                }
+
+            // Thêm nút Add nằm trên
+            OutlinedButton(
+                onClick = {
+                    navController.navigate("addChapter/${book.id}")
+                },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp) // Nút Add nằm trên
+            ) {
+                Text("Add Chapter")
+            }
+
+            // Thêm nút Delete nằm dưới
+            OutlinedButton(
+                onClick = { viewModel.deleteBook(book.id) },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp) // Nút Delete nằm dưới
+            ) {
+                Text("Delete")
             }
         }
     }
 }
+
 
 @Composable
 fun BookItem(book: Book) {

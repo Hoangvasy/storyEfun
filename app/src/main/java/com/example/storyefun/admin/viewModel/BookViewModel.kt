@@ -32,6 +32,9 @@ class BookViewModel() : ViewModel()
         }
 
     }
+    fun addBook(bookId: String) {
+
+    }
     fun deleteBook(bookId: String) {
         viewModelScope.launch {
             _isLoading.value = true

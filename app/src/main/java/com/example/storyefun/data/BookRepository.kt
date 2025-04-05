@@ -1,6 +1,5 @@
 package com.example.storyefun.data
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -30,17 +29,14 @@ class BookRepository {
     {
 
     }
-    suspend fun addBook(book: Book)
-    {
-
-            try {
-                // Add book to Firestore
-                db.collection("books").document(book.id).set(book).await()
-                Log.d("Success","Book added successfully!")
-            } catch (e: Exception) {
-                Log.d("Error","Error adding book: ${e.message}")
-            }
-
+    suspend fun addBook(book: Book): Boolean {
+        return try {
+            db.collection("books").add(book).await()  // Thêm sách vào Firestore
+            true
+        } catch (e: Exception) {
+            println("Error when adding book: ${e.message}")
+            false
+        }
     }
     fun addVolume(volume: Volume, book: Book)
     {

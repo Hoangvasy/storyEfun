@@ -277,5 +277,5 @@ fun ChapterListSection(theme: AppColors) {
 @Composable
 fun MangaDetailScreenPreview() {
     // stop preview when add parameter to class
-    // BookDetailScreen()
+//     BookDetailScreen()
 }
