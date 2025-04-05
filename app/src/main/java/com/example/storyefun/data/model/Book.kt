@@ -1,4 +1,4 @@
-package com.example.storyefun.data
+package com.example.storyefun.data.model
 
 data class Book(
     val id: String = "",

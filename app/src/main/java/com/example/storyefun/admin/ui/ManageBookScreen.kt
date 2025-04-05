@@ -1,14 +1,13 @@
 package com.example.storyefun.admin.ui
 
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -27,11 +26,8 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.storyefun.R
 import com.example.storyefun.admin.viewModel.BookViewModel
-import com.example.storyefun.data.Book
-import com.example.storyefun.data.BookRepository
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.example.storyefun.data.model.Book
+
 @Composable
 fun ManageBooksScreen(navController: NavController, viewModel: BookViewModel = viewModel()) {
     var searchQuery by remember { mutableStateOf("") }
@@ -77,14 +73,15 @@ fun ManageBooksScreen(navController: NavController, viewModel: BookViewModel = v
             }
 
             // ➕ Floating Add Button
-            FloatingActionButton(
-                onClick = { navController.navigate("uploadBook") },
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(16.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Book")
-            }
+
+        }
+        FloatingActionButton(
+            onClick = { navController.navigate("uploadBook") },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add Book")
         }
 
         // 🔄 Centered Loading Overlay
@@ -127,6 +124,7 @@ fun DropdownMenuButton(currentSort: String, onSortSelected: (String) -> Unit) {
 
 @Composable
 fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewModel) {
+    Log.d("book info", "book info: ${book}")
     Card(
         modifier = Modifier.padding(8.dp),
         shape = MaterialTheme.shapes.medium,
@@ -150,6 +148,7 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
             // Thêm nút Add nằm trên
             OutlinedButton(
                 onClick = {
+                    //Log.d("abc", book.id)
                     navController.navigate("addChapter/${book.id}")
                 },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp) // Nút Add nằm trên
