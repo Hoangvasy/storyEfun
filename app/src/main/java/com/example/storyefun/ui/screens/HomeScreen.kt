@@ -220,28 +220,22 @@ fun Channel(
     title: String = "Books",
     viewModel: BookViewModel = viewModel()
 ) {
-    // Lấy dữ liệu sách từ ViewModel
     val books = viewModel.books.observeAsState(emptyList())
 
-    // Cấu trúc giao diện
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 5.dp)) {
 
-        // Tiêu đề và nút điều hướng
         HeaderRow(navController, title, theme)
 
-        // Duyệt qua danh sách sách và hiển thị
         LazyRow(modifier = Modifier.fillMaxWidth()) {
             itemsIndexed(books.value) { _, book ->
-                // Kiểm tra xem book có URL hình ảnh hợp lệ không
                 Box(modifier = Modifier.width(150.dp).height(250.dp)) {
                     Card(
                         modifier = Modifier.wrapContentSize().padding(5.dp),
                         elevation = CardDefaults.cardElevation(5.dp)
                     ) {
                         Column {
-                            // Kiểm tra và hiển thị hình ảnh nếu URL hợp lệ
                             if (!book.posterUrl.isNullOrEmpty()) {
                                 Image(
                                     painter = rememberAsyncImagePainter(
@@ -256,7 +250,6 @@ fun Channel(
                                     contentScale = ContentScale.Crop
                                 )
                             } else {
-                                // Nếu không có URL hình ảnh, hiển thị một hình ảnh mặc định hoặc thông báo lỗi
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -285,7 +278,6 @@ fun HeaderRow(navController: NavController, title: String, theme: AppColors) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Hiển thị tiêu đề
         Text(
             text = title,
             style = TextStyle(
@@ -295,7 +287,6 @@ fun HeaderRow(navController: NavController, title: String, theme: AppColors) {
         )
         Spacer(modifier = Modifier.weight(1f))
 
-        // Nút "Xem tất cả" để điều hướng
         IconButton(
             onClick = { navController.navigate("category") },
             modifier = Modifier.width(80.dp).align(Alignment.CenterVertically)
@@ -312,7 +303,6 @@ fun HeaderRow(navController: NavController, title: String, theme: AppColors) {
 
 @Composable
 fun Channels(navController: NavController, theme: AppColors, title: String = "Hãng truyện") {
-    // Danh sách hình ảnh
     val images = listOf(
         rememberAsyncImagePainter("https://i.pinimg.com/736x/5d/b6/37/5db6377d25a3a8955fddd92541282aa4.jpg"),
         rememberAsyncImagePainter("https://i.pinimg.com/736x/c6/f6/e0/c6f6e05b95ede8e55e06cba17e4507d4.jpg"),
@@ -321,12 +311,10 @@ fun Channels(navController: NavController, theme: AppColors, title: String = "H�
         rememberAsyncImagePainter("https://i.pinimg.com/736x/9a/bd/c5/9abdc53ede4fab53d5cc75e324a37ef9.jpg")
     )
 
-    // Cấu trúc giao diện
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)) {
-        // Tiêu đề và nút điều hướng
+
         HeaderRow(navController, title, theme)
 
-        // Duyệt qua danh sách hình ảnh và hiển thị
         LazyRow(modifier = Modifier.fillMaxWidth()) {
             itemsIndexed(images) { _, imagePainter ->
                 Box(modifier = Modifier.width(150.dp).height(80.dp)) {
