@@ -157,12 +157,7 @@ fun RegisterScreen(navController: NavController) {
                             coroutineScope.launch {
                                 auth.createUserWithEmailAndPassword(email, password)
                                     .addOnSuccessListener {
-                                        navController.navigate("home") {
-                                            popUpTo("login") {
-                                                inclusive = true
-                                            }
-                                            launchSingleTop = true
-                                        }
+                                        navController.navigate("home")
                                     }
                                     .addOnFailureListener {
                                         errorMessage = it.message ?: "Register failed"
