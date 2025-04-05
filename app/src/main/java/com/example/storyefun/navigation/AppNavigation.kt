@@ -32,7 +32,7 @@ sealed class Screen(val route: String) {
     object AdminUpload : Screen("uploadBook")
     object ManageBook : Screen("manageBook")
     object AddChapter : Screen("addCChapter/{bookId}")
-
+    object EditBook : Screen("editBook/{bookId}")
 }
 
 
@@ -63,6 +63,10 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable("addChapter/{bookId}") { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
             AddChapter(navController, bookId)
+        }
+        composable("editBook/{bookId}") { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
+            EditBook(navController, bookId)
         }
 
     }

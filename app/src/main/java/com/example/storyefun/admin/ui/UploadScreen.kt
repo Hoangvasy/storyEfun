@@ -183,10 +183,10 @@ fun uploadBook(
                 .set(bookData)
                 .addOnSuccessListener {
                     // ✅ Sau khi upload sách xong, tạo chapter mặc định
-                    createDefaultChapters(bookId, db) {
-                        Toast.makeText(context, "Book uploaded with chapters!", Toast.LENGTH_SHORT).show()
+
+                        Toast.makeText(context, "Book uploaded successfully!", Toast.LENGTH_SHORT).show()
                         navController.popBackStack()
-                    }
+
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(context, "Failed: ${e.message}", Toast.LENGTH_SHORT).show()

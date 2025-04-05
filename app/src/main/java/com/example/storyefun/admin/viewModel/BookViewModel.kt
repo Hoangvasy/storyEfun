@@ -31,6 +31,16 @@ class BookViewModel() : ViewModel()
     fun addBook(bookId: String) {
 
     }
+    fun updateBook(book: Book) {
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            delay(2000)
+             bookRepository.updateBook(book)
+            _books.value = bookRepository.getBooks()
+            _isLoading.value = false
+        }
+    }
     fun deleteBook(bookId: String) {
         viewModelScope.launch {
             _isLoading.value = true

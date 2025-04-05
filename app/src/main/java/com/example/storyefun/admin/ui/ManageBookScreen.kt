@@ -39,6 +39,8 @@ fun ManageBooksScreen(navController: NavController, viewModel: BookViewModel = v
     val isLoading by viewModel.isLoading.observeAsState(false)
     val books by viewModel.books.observeAsState(emptyList())
 
+
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             // 🔍 Search & Sorting Row
@@ -154,8 +156,20 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
                 },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp) // Nút Add nằm trên
             ) {
-                Text("Add Chapter")
+                Text("Add")
             }
+
+            // nut update
+            OutlinedButton(
+                onClick = {
+                    navController.navigate("editBook/${book.id}")
+                    viewModel.updateBook(book)
+                },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp) // Nút Add nằm trên
+            ) {
+                Text("Update")
+            }
+
 
             // Thêm nút Delete nằm dưới
             OutlinedButton(
