@@ -1,6 +1,5 @@
-package com.example.storyefun.admin.viewModel
+package com.example.storyefun.viewModel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

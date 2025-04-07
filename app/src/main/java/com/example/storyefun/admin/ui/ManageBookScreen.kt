@@ -4,11 +4,9 @@ package com.example.storyefun.admin.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -21,21 +19,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.storyefun.R
-import com.example.storyefun.admin.viewModel.BookViewModel
+import com.example.storyefun.viewModel.BookViewModel
 import com.example.storyefun.data.Book
-import com.example.storyefun.data.BookRepository
-import com.example.storyefun.ui.screens.HomeScreen
-import com.example.storyefun.ui.theme.ThemeViewModel
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+
 @Composable
 fun ManageBooksScreen(navController: NavController, viewModel: BookViewModel = viewModel()) {
     var searchQuery by remember { mutableStateOf("") }

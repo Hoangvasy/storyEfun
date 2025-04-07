@@ -1,22 +1,27 @@
-package com.example.storyefun.admin.viewModel
+package com.example.storyefun.viewModel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.storyefun.data.Book
 import com.example.storyefun.data.BookRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 class BookViewModel() : ViewModel()
 {
     private val bookRepository: BookRepository = BookRepository()
     private val _books = MutableLiveData<List<Book>>()
+
+
+    private val _book = MutableLiveData<Book?>()
+    val book: LiveData<Book?> get() = _book
+
     val books : LiveData<List<Book>> get() = _books
     val _isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
+
     val isLoading: LiveData<Boolean> get() = _isLoading
 
     init {
@@ -33,9 +38,18 @@ class BookViewModel() : ViewModel()
     fun deleteBook(bookId: String) {
         viewModelScope.launch {
             _isLoading.value = true
-            delay(2000) // Simulate API call
             bookRepository.deleteBook(bookId)
+            delay(2000) // Simulate API call
             _books.value = bookRepository.getBooks() // Reload books after deletion
+            _isLoading.value = false
+        }
+    }
+    fun fetchBook(bookId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = bookRepository.getBook(bookId)
+            _book.value = result
+            Log.e("info of loaded book: ", result.toString())
             _isLoading.value = false
         }
     }

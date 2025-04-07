@@ -1,7 +1,8 @@
 package com.example.storyefun.data
 
-data class Volume (
-    val id: String,
-    val name: String,
-    val chapters: List<Chapter> = emptyList()// List of chapters
+data class Volume(
+    var id: String = "",
+    var name: String = "",
+    var title: String = "",
+    var chapters: List<Chapter> = emptyList()
 )

@@ -18,7 +18,7 @@ import com.example.storyefun.admin.ui.*
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
-    object BookDetail : Screen("bookDetail")
+    object BookDetail : Screen("bookDetail/{bookId}")
     object Login : Screen("login")
     object Upload : Screen("upload")
     object Reader : Screen("reader")
@@ -44,7 +44,10 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 //        startDestination = Screen.Upload.route
     ) {
         composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
-        composable(Screen.BookDetail.route) {BookDetailScreen(navController, themeViewModel)}
+        composable("bookDetail/{bookId}") { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
+            BookDetailScreen(navController, themeViewModel, bookId)
+        }
         composable(Screen.Login.route) { LoginScreen(navController) }
         composable(Screen.Register.route) { RegisterScreen(navController) }
         composable(Screen.Reader.route) { ReaderScreen(navController) }

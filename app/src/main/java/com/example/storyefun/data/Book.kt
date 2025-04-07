@@ -11,5 +11,8 @@ data class Book(
     val follows: Int = 0,
     val likes: Int = 0,
     val views: Int = 0,
-    val volume: List<Volume> = emptyList()
+    var volume: List<Volume> = emptyList(),
+    var categoryIDs: List<String> = emptyList(), // for get list of category id from firebase
+    var category: List<Category> = emptyList() // for save catogory list as obj
+
 )
