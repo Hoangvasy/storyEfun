@@ -21,6 +21,7 @@ data class AppColors(
     val backgroundContrast1: Color,
     val backgroundContrast2: Color,
     val header: Color,
+    val buttonOrange: Color
 
     )
 
@@ -36,8 +37,8 @@ val LightColors = AppColors(
     backgroundColor = Color.White,
     tagColor = Color.DarkGray,
     backgroundContrast1 = Color.Black,
-    backgroundContrast2 = Color.DarkGray
-
+    backgroundContrast2 = Color.DarkGray,
+    buttonOrange = Color(0xFFFFA500)
 
 )
 
@@ -53,7 +54,8 @@ val DarkColors = AppColors(
     backgroundColor = Color.Black,
     tagColor = Color.Gray,
     backgroundContrast1 = Color.White,
-    backgroundContrast2 = Color.Gray
+    backgroundContrast2 = Color.Gray,
+    buttonOrange = Color(0xFFFFA500)
 )
 
 // Create a Local variable to store colors

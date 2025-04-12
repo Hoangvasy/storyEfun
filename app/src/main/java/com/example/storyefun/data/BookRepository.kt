@@ -70,6 +70,19 @@ class BookRepository {
     {
 
     }
+    suspend fun updateBook(book: Book): Boolean {
+        return try {
+            db.collection("books")
+                .document(book.id)  // Use book's ID to identify the document
+                .set(book)  // Replace the entire document with the new data
+                .await()
+            true
+        } catch (e: Exception) {
+            println("Error when updating book: ${e.message}")
+            false
+        }
+    }
+
     suspend fun deleteBook (bookId : String) : Boolean
     {
         try {
