@@ -190,11 +190,11 @@ fun DiscoverMoreCard(onClick: () -> Unit) {
         }
     }
 }
-val books = listOf(
-    Book("Things Fall Apart", "Chinua Achebe", 3.5f, "300 pages", R.drawable.poster6),
-    Book("Jane Eyre", "Charlotte Bronte", 4.0f, "280 pages", R.drawable.poster3),
-    Book("Lararium", "Paulo Coelho", 3.8f, "250 pages", R.drawable.poster2)
-)
+//val books = listOf(
+//    Book("Things Fall Apart", "Chinua Achebe", 3.5f, "300 pages", R.drawable.poster6),
+//    Book("Jane Eyre", "Charlotte Bronte", 4.0f, "280 pages", R.drawable.poster3),
+//    Book("Lararium", "Paulo Coelho", 3.8f, "250 pages", R.drawable.poster2)
+//)
 @Composable
 fun Favorite() {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -214,14 +214,14 @@ fun Favorite() {
                 .fillMaxWidth()
         ) {
             // Danh sách các sách
-            books.forEach { book ->
-                BookCard(book)
-                Divider(
-                    color = Color.Gray,
-                    thickness = 1.dp,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
+//            books.forEach { book ->
+//                BookCard(book)
+//                Divider(
+//                    color = Color.Gray,
+//                    thickness = 1.dp,
+//                    modifier = Modifier.padding(horizontal = 16.dp)
+//                )
+//            }
         }
     }
 }

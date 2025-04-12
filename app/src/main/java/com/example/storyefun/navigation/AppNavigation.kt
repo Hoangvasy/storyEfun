@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+import com.example.storyefun.ui.screens.CategoryScreen
 import com.example.profileui.ProfileScreen
 import com.example.storyefun.ui.screens.*
 import com.example.storyefun.ui.theme.ThemeViewModel
