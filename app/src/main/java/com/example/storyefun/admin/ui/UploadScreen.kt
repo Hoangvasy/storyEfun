@@ -10,6 +10,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -25,11 +26,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
+import com.example.storyefun.ui.theme.LocalAppColors
 import java.util.*
 
 @Composable
 fun AdminUploadScreen(navController: NavController) {
     val context = LocalContext.current
+    val theme = LocalAppColors.current
 
     var bookName by remember { mutableStateOf("") }
     var authorName by remember { mutableStateOf("") }
@@ -49,89 +52,114 @@ fun AdminUploadScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         ) {
-            IconButton(onClick = { navController.popBackStack() }) {
+            IconButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier.align(Alignment.CenterStart)
+            ) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back")
             }
 
-            // Input Fields
-            OutlinedTextField(
-                value = bookName,
-                onValueChange = { bookName = it },
-                label = { Text("Book Name") },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                shape = MaterialTheme.shapes.medium,
+            Text(
+                text = "Upload Book",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.align(Alignment.Center)
             )
-
-            OutlinedTextField(
-                value = authorName,
-                onValueChange = { authorName = it },
-                label = { Text("Author Name") },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                shape = MaterialTheme.shapes.medium,
-            )
-
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Description") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                maxLines = 4,
-                shape = MaterialTheme.shapes.medium,
-            )
-            // lấy hàm  category
-            CategoryBook(
-                selectedCategory = selectedCategory,
-                onCategorySelected = { category ->
-                    selectedCategory = if (selectedCategory.contains(category)) {
-                        selectedCategory - category
-                    } else {
-                        selectedCategory + category
-                    }
-                }
-            )
-
-            // Pick Images
-            ImagePickerBox(imageUri, "Choose Book Image") { imagePicker.launch("image/*") }
-            ImagePickerBox(posterUri, "Choose Poster Image") { posterPicker.launch("image/*") }
         }
 
-        // Upload Button
+
+        OutlinedTextField(
+            value = bookName,
+            onValueChange = { bookName = it },
+            label = { Text("\uD83D\uDCDA Book Name") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            shape = RoundedCornerShape(5.dp)
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        OutlinedTextField(
+            value = authorName,
+            onValueChange = { authorName = it },
+            label = { Text(" \uD83D\uDC64 Author Name") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            shape = RoundedCornerShape(5.dp)
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            label = { Text("\uD83D\uDCDD Description") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp),
+            shape = RoundedCornerShape(5.dp),
+            maxLines = 5
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        CategoryBook(
+            selectedCategory = selectedCategory,
+            onCategorySelected = { category ->
+                selectedCategory = if (selectedCategory.contains(category)) {
+                    selectedCategory - category
+                } else {
+                    selectedCategory + category
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            ImagePickerBox(imageUri, " Book Image") { imagePicker.launch("image/*") }
+            ImagePickerBox(posterUri, "Poster Image") { posterPicker.launch("image/*") }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         Button(
             onClick = {
                 uploadBook(bookName, authorName, description, selectedCategory, context, navController, imageUri, posterUri)
             },
             enabled = bookName.isNotBlank() && authorName.isNotBlank() && description.isNotBlank() && imageUri != null && posterUri != null,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            colors = ButtonDefaults.buttonColors(containerColor = theme.buttonOrange), // màu cam đẹp
+            shape = RoundedCornerShape(5.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
         ) {
-            Text("Upload Book")
+            Text("☁\uFE0F Upload Book", color = theme.textPrimary)
         }
     }
 }
 
 @Composable
+
 fun ImagePickerBox(uri: Uri?, placeholder: String, onClick: () -> Unit) {
-    Box(
+    val theme = LocalAppColors.current
+    Card(
+        shape = RoundedCornerShape(5.dp),
+        colors = CardDefaults.cardColors(containerColor = theme.backgroundColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
             .size(150.dp)
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
+            .clickable { onClick() }
     ) {
         if (uri != null) {
             Image(
@@ -140,12 +168,16 @@ fun ImagePickerBox(uri: Uri?, placeholder: String, onClick: () -> Unit) {
                 modifier = Modifier.fillMaxSize()
             )
         } else {
-            Button(onClick = onClick) {
-                Text(placeholder)
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(placeholder, style = MaterialTheme.typography.bodyMedium)
             }
         }
     }
 }
+
 
 // Upload book function
 fun uploadBook(
@@ -178,15 +210,16 @@ fun uploadBook(
                 "type" to "novel"
             )
 
+            // Save book information to Firestore
             db.collection("books")
                 .document(bookId)
                 .set(bookData)
                 .addOnSuccessListener {
-                    // ✅ Sau khi upload sách xong, tạo chapter mặc định
-
-                        Toast.makeText(context, "Book uploaded successfully!", Toast.LENGTH_SHORT).show()
-                        navController.popBackStack()
-
+                    // Create volume and chapters after book is uploaded
+//                    createVolumeAndChapters(bookId, db) {
+                    Toast.makeText(context, "Book uploaded successfully!", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()  // Go back after upload
+//                    }
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(context, "Failed: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -195,39 +228,6 @@ fun uploadBook(
     }
 }
 
-// Create default chapters when book is uploaded
-fun createDefaultChapters(bookId: String, db: FirebaseFirestore, onComplete: () -> Unit) {
-    val chapters = listOf(
-        mapOf(
-            "title" to "Chapter 1: Introduction",
-            "content" to "This is the beginning of the story...",
-            "order" to 1,
-            "createdAt" to System.currentTimeMillis()
-        ),
-        mapOf(
-            "title" to "Chapter 2: The Journey Begins",
-            "content" to "The adventure truly starts here...",
-            "order" to 2,
-            "createdAt" to System.currentTimeMillis()
-        )
-    )
-
-    val batch = db.batch()
-
-    for (chapter in chapters) {
-        val chapterRef = db.collection("books")
-            .document(bookId)
-            .collection("chapter")
-            .document()
-        batch.set(chapterRef, chapter)
-    }
-
-    batch.commit().addOnSuccessListener {
-        onComplete()
-    }.addOnFailureListener { e ->
-        Log.e("Firestore", "Error creating chapters: ${e.message}")
-    }
-}
 
 // Upload image to Cloudinary
 fun uploadToCloudinary(uri: Uri, folder: String, onSuccess: (String) -> Unit) {

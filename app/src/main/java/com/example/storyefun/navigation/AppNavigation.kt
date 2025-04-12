@@ -31,12 +31,13 @@ sealed class Screen(val route: String) {
     object AdminMenu : Screen("menuScreen")
     object AdminUpload : Screen("uploadBook")
     object ManageBook : Screen("manageBook")
-    object AddChapter : Screen("addCChapter/{bookId}")
+//    object AddChapter : Screen("addCChapter/{bookId}")
     object EditBook : Screen("editBook/{bookId}")
+    object AddVolume : Screen("addVolume/{bookId}")
+    object ListChapter : Screen("listChapter/{bookId}/{volumeId}")
+    object AddChapter : Screen("addChapter/{bookId}/{volumeId}")
+
 }
-
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,14 +61,26 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.AdminMenu.route) {MenuScreen(navController)}
         composable(Screen.AdminUpload.route) {AdminUploadScreen(navController)}
         composable(Screen.ManageBook.route) { ManageBooksScreen(navController) }
-        composable("addChapter/{bookId}") { backStackEntry ->
-            val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
-            AddChapter(navController, bookId)
-        }
+
         composable("editBook/{bookId}") { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
             EditBook(navController, bookId)
         }
+        composable("addVolume/{bookId}") { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
+            AddVolumeScreen(navController, bookId)
+        }
+        composable("chapter_list_screen/{bookId}/{volumeId}") { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
+            val volumeId = backStackEntry.arguments?.getString("volumeId") ?: "Unknown"
+            ListChapterScreen(navController, bookId, volumeId)
+        }
+        composable("addChapter/{bookId}/{volumeId}") { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
+            val volumeId = backStackEntry.arguments?.getString("volumeId") ?: "Unknown"
+            AddChapterScreen(navController, bookId, volumeId)
+        }
+
 
     }
 }
