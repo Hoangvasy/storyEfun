@@ -124,8 +124,8 @@ fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel) {
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     item { Banner() }
-                    item { Channels(navController = navController, theme = colors) }
-                    item { Channel(navController = navController, theme = colors) }
+                    item { Channels(navController = navController, theme = colors, navigationTarget: NavigationTarget) }
+                    item { Channel(navController = navController, theme = colors, navigationTarget: NavigationTarget) }
 
 //                    item { Stories(navController) }
                 }
@@ -218,7 +218,7 @@ fun Channel(
     navController: NavController,
     theme: AppColors,
     title: String = "Books",
-    viewModel: BookViewModel = viewModel()
+    viewModel: BookViewModel = viewModel(),
 ) {
     val books = viewModel.books.observeAsState(emptyList())
 
@@ -273,7 +273,7 @@ fun Channel(
 
 
 @Composable
-fun HeaderRow(navController: NavController, title: String, theme: AppColors) {
+fun HeaderRow(navController: NavController, title: String, theme: AppColors, currentFunction: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -288,13 +288,21 @@ fun HeaderRow(navController: NavController, title: String, theme: AppColors) {
         Spacer(modifier = Modifier.weight(1f))
 
         IconButton(
-            onClick = { navController.navigate("category") },
-            modifier = Modifier.width(80.dp).align(Alignment.CenterVertically)
+            onClick = {
+                when (currentFunction) {
+                    ::Channels -> navController.navigate("home")
+                    ::ContinueRead -> navController.navigate("category")
+                    else -> navController.navigate("home")
+                }
+            },
+            modifier = Modifier
+                .width(80.dp)
+                .align(Alignment.CenterVertically)
         ) {
             Text(
                 text = "Xem tất cả",
                 style = TextStyle(fontStyle = FontStyle.Italic),
-                color = theme.textSecondary
+                color = MaterialTheme.colorScheme.secondary // Thay thế theme.textSecondary bằng MaterialTheme
             )
         }
     }
@@ -302,7 +310,7 @@ fun HeaderRow(navController: NavController, title: String, theme: AppColors) {
 
 
 @Composable
-fun Channels(navController: NavController, theme: AppColors, title: String = "Hãng truyện") {
+fun Channels(navController: NavController, theme: AppColors, title: String = "Hãng truyện", currentFunction: () -> Unit) {
     val images = listOf(
         rememberAsyncImagePainter("https://i.pinimg.com/736x/5d/b6/37/5db6377d25a3a8955fddd92541282aa4.jpg"),
         rememberAsyncImagePainter("https://i.pinimg.com/736x/c6/f6/e0/c6f6e05b95ede8e55e06cba17e4507d4.jpg"),
@@ -313,7 +321,7 @@ fun Channels(navController: NavController, theme: AppColors, title: String = "H�
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)) {
 
-        HeaderRow(navController, title, theme)
+        HeaderRow(navController, title, theme, currentFunction)
 
         LazyRow(modifier = Modifier.fillMaxWidth()) {
             itemsIndexed(images) { _, imagePainter ->
@@ -391,85 +399,85 @@ fun ContinueRead() {
     }
 }
 
-@Composable
-fun Stories(navController: NavController) {
-    val theme = LocalAppColors.current
-    val backgroundImages = listOf(
-        R.drawable.banner2,
-        R.drawable.banner3,
-        R.drawable.banner4,
-        R.drawable.bannerhome,
-        R.drawable.bannerhome
-    )
-    val overlayImages = listOf(
-        R.drawable.poster2,
-        R.drawable.poster3,
-        R.drawable.poster6,
-        R.drawable.poster5,
-        R.drawable.poster4
-    )
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "Truyện ngắn")
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(
-                onClick = {},
-                modifier = Modifier
-                    .width(80.dp)
-                    .align(Alignment.CenterVertically)
-            ) {
-                Text(
-                    text = "Xem tất cả",
-                    style = TextStyle(fontStyle = FontStyle.Italic),
-                    color = theme.textSecondary,
-                    modifier = Modifier.clickable { navController.navigate("category") }
-
-                )
-
-            }
-        }
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { navController.navigate("bookDetail") }
-        ) {
-            itemsIndexed(backgroundImages) { index, backgroundImage ->
-                Box(
-                    modifier = Modifier
-                        .width(200.dp)
-                        .height(150.dp)
-                ) {
-                    Image(
-                        painter = painterResource(id = backgroundImage),
-                        contentDescription = "Banner",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-                    Image(
-                        painter = painterResource(id = overlayImages[index]),
-                        contentDescription = "Overlay",
-                        modifier = Modifier
-                            .align(Alignment.CenterStart)
-                            .fillMaxWidth(0.5f)
-                            .height(250.dp)
-                    )
-                }
-            }
-        }
-    }
-}
+//@Composable
+//fun Stories(navController: NavController) {
+//    val theme = LocalAppColors.current
+//    val backgroundImages = listOf(
+//        R.drawable.banner2,
+//        R.drawable.banner3,
+//        R.drawable.banner4,
+//        R.drawable.bannerhome,
+//        R.drawable.bannerhome
+//    )
+//    val overlayImages = listOf(
+//        R.drawable.poster2,
+//        R.drawable.poster3,
+//        R.drawable.poster6,
+//        R.drawable.poster5,
+//        R.drawable.poster4
+//    )
+//
+//    Column(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(horizontal = 16.dp)
+//    ) {
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = 16.dp),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            Text(text = "Truyện ngắn")
+//            Spacer(modifier = Modifier.weight(1f))
+//            IconButton(
+//                onClick = {},
+//                modifier = Modifier
+//                    .width(80.dp)
+//                    .align(Alignment.CenterVertically)
+//            ) {
+//                Text(
+//                    text = "Xem tất cả",
+//                    style = TextStyle(fontStyle = FontStyle.Italic),
+//                    color = theme.textSecondary,
+//                    modifier = Modifier.clickable { navController.navigate("category") }
+//
+//                )
+//
+//            }
+//        }
+//        LazyRow(
+//            horizontalArrangement = Arrangement.spacedBy(16.dp),
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .clickable { navController.navigate("bookDetail") }
+//        ) {
+//            itemsIndexed(backgroundImages) { index, backgroundImage ->
+//                Box(
+//                    modifier = Modifier
+//                        .width(200.dp)
+//                        .height(150.dp)
+//                ) {
+//                    Image(
+//                        painter = painterResource(id = backgroundImage),
+//                        contentDescription = "Banner",
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .clip(RoundedCornerShape(8.dp))
+//                    )
+//                    Image(
+//                        painter = painterResource(id = overlayImages[index]),
+//                        contentDescription = "Overlay",
+//                        modifier = Modifier
+//                            .align(Alignment.CenterStart)
+//                            .fillMaxWidth(0.5f)
+//                            .height(250.dp)
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
