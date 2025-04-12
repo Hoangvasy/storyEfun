@@ -60,7 +60,7 @@ import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.storyefun.R
-import com.example.storyefun.admin.viewModel.BookViewModel
+import com.example.storyefun.viewModel.BookViewModel
 import com.example.storyefun.data.Book
 import com.example.storyefun.ui.components.BottomBar
 import com.example.storyefun.ui.components.Header

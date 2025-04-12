@@ -33,7 +33,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.storyefun.R
-import com.example.storyefun.admin.viewModel.BookViewModel
+import com.example.storyefun.viewModel.BookViewModel
 import com.example.storyefun.data.Book
 import com.example.storyefun.data.BookRepository
 import com.example.storyefun.ui.screens.HomeScreen

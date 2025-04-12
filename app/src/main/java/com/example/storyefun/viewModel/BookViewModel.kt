@@ -1,5 +1,6 @@
 package com.example.storyefun.viewModel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,10 @@ class BookViewModel() : ViewModel()
     private val bookRepository: BookRepository = BookRepository()
     private val _books = MutableLiveData<List<Book>>()
     val books : LiveData<List<Book>> get() = _books
+    private val _book = MutableLiveData<Book?>()
+    val book: LiveData<Book?> get() = _book
+
+
     val _isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
     val isLoading: LiveData<Boolean> get() = _isLoading
 
@@ -27,6 +32,16 @@ class BookViewModel() : ViewModel()
         }
 
     }
+    fun fetchBook(bookId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = bookRepository.getBook(bookId)
+            _book.value = result
+            Log.e("info of loaded book: ", result.toString())
+            _isLoading.value = false
+        }
+    }
+
     fun addBook(bookId: String) {
 
     }
