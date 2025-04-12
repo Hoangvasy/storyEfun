@@ -23,7 +23,7 @@ sealed class Screen(val route: String) {
 
     object Login : Screen("login")
     object Upload : Screen("upload")
-    object Reader : Screen("reader")
+    object Reading : Screen("reading/{bookId}/{volumeOrder}/{chapterOrder}")
     object Register : Screen("register")
     object Profile : Screen("profile")
     object MyStory : Screen("mystory")
@@ -43,24 +43,29 @@ sealed class Screen(val route: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewModel) {
+fun AppNavigation(navController: NavHostController) {
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
 //        startDestination = Screen.Upload.route
     ) {
-        composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
+        composable(Screen.Home.route) { HomeScreen(navController) }
         composable("bookDetail/{bookId}") { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
-            BookDetailScreen(navController, themeViewModel, bookId)
+            BookDetailScreen(navController, bookId)
         }
         composable(Screen.Login.route) { LoginScreen(navController) }
+        composable(Screen.Reading.route) { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getString("bookId") ?: "unknown"
+            val volumeOrder = backStackEntry.arguments?.getInt("volumeOrder") ?:1
+            val chapterOrder = backStackEntry.arguments?.getInt("chapterOrder") ?: 1
+            ReaderScreen(navController, bookId, volumeOrder, chapterOrder)
+        }
         composable(Screen.Register.route) { RegisterScreen(navController) }
-        composable(Screen.Reader.route) { ReaderScreen(navController) }
-        composable(Screen.Profile.route) { ProfileScreen(navController, themeViewModel) }
+        composable(Screen.Profile.route) { ProfileScreen(navController) }
         composable(Screen.Upload.route) { UploadScreen(navController) }
         composable(Screen.MyStory.route) { MyStoryScreen(navController) }
-        composable(Screen.Setting.route) { SettingScreen(navController, themeViewModel) }
+        composable(Screen.Setting.route) { SettingScreen(navController) }
         composable(Screen.CategoryList.route) { CategoryScreen(navController) }
 
         composable(Screen.AdminMenu.route) {MenuScreen(navController)}

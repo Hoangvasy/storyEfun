@@ -77,7 +77,7 @@ import kotlinx.coroutines.tasks.await
 @ExperimentalMaterial3Api
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel) {
+fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel = viewModel()) {
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     val isDarkMode by themeViewModel.isDarkTheme.collectAsState()
@@ -231,15 +231,17 @@ fun BookStory(
             itemsIndexed(books.value) { _, book ->
                 Box(modifier = Modifier.width(150.dp).height(250.dp)) {
                     Card(
-                        modifier = Modifier.wrapContentSize().padding(5.dp),
+                        modifier = Modifier.wrapContentSize().padding(5.dp)
+                            .clickable { navController.navigate("bookDetail/${book.id}") }
+                        ,
                         elevation = CardDefaults.cardElevation(5.dp)
                     ) {
                         Column {
-                            if (!book.posterUrl.isNullOrEmpty()) {
+                            if (!book.imageUrl.isNullOrEmpty()) {
                                 Image(
                                     painter = rememberAsyncImagePainter(
                                         model = ImageRequest.Builder(LocalContext.current)
-                                            .data(book.posterUrl)
+                                            .data(book.imageUrl)
                                             .crossfade(true)
                                             .build()
                                     ),

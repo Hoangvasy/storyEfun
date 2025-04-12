@@ -16,11 +16,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.ui.theme.ThemeViewModel
 @Composable
-fun SettingScreen(navController: NavController? = null, themeViewModel: ThemeViewModel) {
+fun SettingScreen(navController: NavController? = null, themeViewModel: ThemeViewModel = viewModel()) {
     val theme = LocalAppColors.current
 
     Box(

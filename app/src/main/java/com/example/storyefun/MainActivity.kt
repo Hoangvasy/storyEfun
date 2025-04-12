@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val themeViewModel: ThemeViewModel = viewModel()  // Tạo ViewModel
             AppTheme(darkTheme = themeViewModel.isDarkTheme.collectAsState().value) {
-                AppNavigation(navController, themeViewModel)
+                AppNavigation(navController)
             }
         }
     }

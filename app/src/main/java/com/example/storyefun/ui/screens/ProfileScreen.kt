@@ -28,12 +28,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.storyefun.R
 import com.example.storyefun.ui.theme.ThemeViewModel
 
 @Composable
-fun ProfileScreen(navController: NavController, themeViewModel: ThemeViewModel) {
+fun ProfileScreen(navController: NavController, themeViewModel: ThemeViewModel = viewModel()) {
     // Use shared dark mode state from ThemeViewModel
     val isDarkMode by themeViewModel.isDarkTheme.collectAsState()
     val backgroundColor = if (isDarkMode) Color.Black else Color.White

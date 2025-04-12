@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.storyefun.data.Book
 import com.example.storyefun.data.BookRepository
+import com.example.storyefun.data.Chapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -68,6 +69,83 @@ class BookViewModel() : ViewModel()
     fun setState(state : Boolean)
     {
         _isLoading.value = state
+    }
+
+    // Helper function to get chapter content
+    fun getChapterContent(volumeOrder: Int, chapterOrder: Int): Chapter? {
+        val currentBook = _book.value ?: return null
+        val volume = currentBook.volume.find { it.order == volumeOrder }
+        return volume?.chapters?.find { it.order == chapterOrder }
+    }
+
+    // Helper function to get previous chapter
+    fun getPreviousChapter(volumeOrder: Int, chapterOrder: Int): Triple<Boolean, Int?, Int?> {
+        val currentBook = _book.value ?: return Triple(false, null, null)
+
+        // Sort volumes by name to ensure consistent order
+        val sortedVolumes = currentBook.volume.sortedBy { it.name }
+        val volumeIndex = sortedVolumes.indexOfFirst { it.order == volumeOrder }
+        if (volumeIndex == -1) return Triple(false, null, null)
+
+        val volume = sortedVolumes[volumeIndex]
+        // Sort chapters by order to ensure consistent order
+        val sortedChapters = volume.chapters.sortedBy { it.order }
+        val chapterIndex = sortedChapters.indexOfFirst { it.order == chapterOrder }
+        if (chapterIndex == -1) return Triple(false, null, null)
+
+        // If there's a previous chapter in the same volume
+        if (chapterIndex > 0) {
+            return Triple(true, volumeOrder, sortedChapters[chapterIndex - 1].order)
+        }
+
+        // If we're at the first chapter of the volume, go to the last chapter of the previous volume
+        if (volumeIndex > 0) {
+            val prevVolume = sortedVolumes[volumeIndex - 1]
+            val sortedPrevChapters = prevVolume.chapters.sortedBy { it.order }
+            val lastChapter = sortedPrevChapters.lastOrNull()
+            return if (lastChapter != null) {
+                Triple(true, prevVolume.order, lastChapter.order)
+            } else {
+                Triple(false, null, null)
+            }
+        }
+
+        return Triple(false, null, null)
+    }
+
+    // Helper function to get next chapter
+    fun getNextChapter(volumeOrder: Int, chapterOrder: Int): Triple<Boolean, Int?, Int?> {
+        val currentBook = _book.value ?: return Triple(false, null, null)
+
+        // Sort volumes by name to ensure consistent order
+        val sortedVolumes = currentBook.volume.sortedBy { it.order }
+        val volumeIndex = sortedVolumes.indexOfFirst { it.order == volumeOrder }
+        if (volumeIndex == -1) return Triple(false, null, null)
+
+        val volume = sortedVolumes[volumeIndex]
+        // Sort chapters by order to ensure consistent order
+        val sortedChapters = volume.chapters.sortedBy { it.order }
+        val chapterIndex = sortedChapters.indexOfFirst { it.order == chapterOrder }
+        if (chapterIndex == -1) return Triple(false, null, null)
+
+        // If there's a next chapter in the same volume
+        if (chapterIndex < sortedChapters.size - 1) {
+            return Triple(true, volumeOrder, sortedChapters[chapterIndex + 1].order)
+        }
+
+        // If we're at the last chapter of the volume, go to the first chapter of the next volume
+        if (volumeIndex < sortedVolumes.size - 1) {
+            val nextVolume = sortedVolumes[volumeIndex + 1]
+            val sortedNextChapters = nextVolume.chapters.sortedBy { it.order }
+            val firstChapter = sortedNextChapters.firstOrNull()
+            return if (firstChapter != null) {
+                Triple(true, nextVolume.order, firstChapter.order)
+            } else {
+                Triple(false, null, null)
+            }
+        }
+
+        return Triple(false, null, null)
     }
 
 
