@@ -40,17 +40,17 @@ sealed class Screen(val route: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(navController: NavHostController) {
+fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewModel) {
 
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
 //        startDestination = Screen.Upload.route
     ) {
-        composable(Screen.Home.route) { HomeScreen(navController) }
+        composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
         composable("bookDetail/{bookId}") { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
-            BookDetailScreen(navController, bookId)
+            BookDetailScreen(navController, bookId, themeViewModel)
         }
         composable(Screen.Login.route) { LoginScreen(navController) }
         composable(Screen.Reading.route) { backStackEntry ->
@@ -63,13 +63,13 @@ fun AppNavigation(navController: NavHostController) {
             val chapterOrder = chapterOrderStr.toIntOrNull() ?: 1
 
             //Log.d("chapter and voluume ", "chapter $chapterOrder  volume $volumeOrder")
-            ReaderScreen(navController, bookId, volumeOrder, chapterOrder)
+            ReaderScreen(navController, bookId, volumeOrder, chapterOrder, themeViewModel)
         }
         composable(Screen.Register.route) { RegisterScreen(navController) }
-        composable(Screen.Profile.route) { ProfileScreen(navController) }
+        composable(Screen.Profile.route) { ProfileScreen(navController, themeViewModel) }
         composable(Screen.Upload.route) { UploadScreen(navController) }
         composable(Screen.MyStory.route) { MyStoryScreen(navController) }
-        composable(Screen.Setting.route) { SettingScreen(navController) }
+        composable(Screen.Setting.route) { SettingScreen(navController, themeViewModel) }
         composable(Screen.CategoryList.route) { CategoryScreen(navController) }
 
         composable(Screen.AdminMenu.route) {MenuScreen(navController)}

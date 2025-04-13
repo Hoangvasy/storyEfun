@@ -31,7 +31,7 @@ import com.example.storyefun.R
 import com.example.storyefun.viewModel.ThemeViewModel
 
 @Composable
-fun ProfileScreen(navController: NavController, themeViewModel: ThemeViewModel = viewModel()) {
+fun ProfileScreen(navController: NavController, themeViewModel: ThemeViewModel) {
     // Use shared dark mode state from ThemeViewModel
     val isDarkMode by themeViewModel.isDarkTheme.collectAsState()
     val backgroundColor = if (isDarkMode) Color.Black else Color.White

@@ -47,7 +47,10 @@ import com.example.storyefun.R
 import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.utils.downloadTextFile
 import com.example.storyefun.viewModel.BookViewModel
+import com.example.storyefun.viewModel.ThemeViewModel
 import kotlinx.coroutines.launch
+
+
 
 @Composable
 fun ReaderScreen(
@@ -55,10 +58,13 @@ fun ReaderScreen(
     bookId: String,
     volumeOrder: Int,
     chapterOrder: Int,
-    viewModel: BookViewModel = viewModel()
+    themeViewModel: ThemeViewModel,
+
+    viewModel: BookViewModel = viewModel(),
 ) {
     var isUIVisible by remember { mutableStateOf(true) }
     val book by viewModel.book.observeAsState()
+    val theme = LocalAppColors.current
 
     var currentVolumeOrder by remember { mutableStateOf(volumeOrder) }
     var currentChapterOrder by remember { mutableStateOf(chapterOrder) }
@@ -84,7 +90,10 @@ fun ReaderScreen(
                 onBack = { navController.popBackStack() }
             )
 
-            Box(modifier = Modifier.weight(1f)) {
+            Box(modifier = Modifier.weight(1f)
+                .background(theme.backgroundColor)
+
+            ) {
                 if (book != null) {
                     val isManga = !book!!.isNovel()
                     val chapterContent = viewModel.getChapterContent(currentVolumeOrder, currentChapterOrder)
@@ -101,7 +110,7 @@ fun ReaderScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("Chapter not found")
+                            Text("Chapter not found", color = theme.textPrimary)
                         }
                     }
                 } else {
@@ -109,7 +118,7 @@ fun ReaderScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = theme.textPrimary)
                     }
                 }
             }
@@ -118,8 +127,8 @@ fun ReaderScreen(
                 CustomBottomBar(
                     isVisible = isUIVisible,
                     viewModel = viewModel,
-                    volumeOrder = currentVolumeOrder,  // Pass currentVolumeOrder
-                    chapterOrder = currentChapterOrder,  // Pass currentChapterOrder
+                    volumeOrder = currentVolumeOrder,
+                    chapterOrder = currentChapterOrder,
                     onPreviousChapter = {
                         val (hasPrevious, prevVolumeOrder, prevChapterOrder) = viewModel.getPreviousChapter(currentVolumeOrder, currentChapterOrder)
                         if (hasPrevious && prevVolumeOrder != null && prevChapterOrder != null) {
@@ -139,6 +148,7 @@ fun ReaderScreen(
         }
     }
 }
+
 @Composable
 fun CustomTopBar(
     isVisible: Boolean,
@@ -147,9 +157,9 @@ fun CustomTopBar(
 ) {
     val theme = LocalAppColors.current
     val configuration = LocalConfiguration.current
-    val fontScale = configuration.fontScale // System font scale (e.g., 1.0 for normal, 1.3 for large)
-    val baseHeight = 56.dp // Desired height at fontScale = 1.0
-    val adjustedHeight = baseHeight / fontScale // Adjust height to counteract font scale
+    val fontScale = configuration.fontScale
+    val baseHeight = 56.dp
+    val adjustedHeight = baseHeight / fontScale
 
     AnimatedVisibility(
         visible = isVisible,
@@ -159,7 +169,7 @@ fun CustomTopBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(adjustedHeight) // Use adjusted height
+                .height(adjustedHeight)
                 .background(theme.background)
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.CenterStart
@@ -169,19 +179,20 @@ fun CustomTopBar(
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.Black
+                        tint = theme.backgroundColor
                     )
                 }
                 Text(
                     text = chapterName,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
-                    color = Color.Black
+                    color = theme.textPrimary
                 )
             }
         }
     }
 }
+
 @Composable
 fun CustomBottomBar(
     isVisible: Boolean,
@@ -193,9 +204,9 @@ fun CustomBottomBar(
 ) {
     val theme = LocalAppColors.current
     val configuration = LocalConfiguration.current
-    val fontScale = configuration.fontScale // System font scale
-    val baseHeight = 56.dp // Desired height at fontScale = 1.0
-    val adjustedHeight = baseHeight / fontScale // Adjust height to counteract font scale
+    val fontScale = configuration.fontScale
+    val baseHeight = 56.dp
+    val adjustedHeight = baseHeight / fontScale
 
     AnimatedVisibility(
         visible = isVisible,
@@ -205,7 +216,7 @@ fun CustomBottomBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(adjustedHeight) // Use adjusted height
+                .height(adjustedHeight)
                 .background(theme.background)
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center
@@ -223,13 +234,13 @@ fun CustomBottomBar(
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Previous",
-                        tint = if (hasPrevious) Color.Black else Color.Gray
+                        tint = if (hasPrevious) theme.backgroundColor else Color.Gray
                     )
                 }
                 Text(
                     text = "Chương trước",
                     fontSize = 14.sp,
-                    color = if (hasPrevious) Color.Black else Color.Gray
+                    color = if (hasPrevious) theme.textSecondary else Color.Gray
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -238,7 +249,7 @@ fun CustomBottomBar(
                 Text(
                     text = "Chương sau",
                     fontSize = 14.sp,
-                    color = if (hasNext) Color.Black else Color.Gray
+                    color = if (hasNext) theme.textSecondary else Color.Gray
                 )
                 IconButton(
                     onClick = { if (hasNext) onNextChapter() },
@@ -247,7 +258,7 @@ fun CustomBottomBar(
                     Icon(
                         imageVector = Icons.Default.ArrowForward,
                         contentDescription = "Next",
-                        tint = if (hasNext) Color.Black else Color.Gray
+                        tint = if (hasNext) theme.backgroundColor else Color.Gray
                     )
                 }
             }
@@ -257,10 +268,13 @@ fun CustomBottomBar(
 
 @Composable
 fun NovelContent(fileUrls: List<String>) {
+
+    val theme = LocalAppColors.current
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+
     ) {
         items(fileUrls) { url ->
             var content by remember { mutableStateOf("Đang tải...") }
@@ -280,6 +294,7 @@ fun NovelContent(fileUrls: List<String>) {
             Text(
                 text = content,
                 fontSize = 16.sp,
+                color = theme.textPrimary,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }

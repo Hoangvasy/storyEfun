@@ -55,7 +55,7 @@ import kotlinx.coroutines.delay
 @ExperimentalMaterial3Api
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel = viewModel()) {
+fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel ) {
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     val isDarkMode by themeViewModel.isDarkTheme.collectAsState()

@@ -20,7 +20,8 @@ import androidx.navigation.NavController
 import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.viewModel.ThemeViewModel
 @Composable
-fun SettingScreen(navController: NavController? = null, themeViewModel: ThemeViewModel = viewModel() ) {
+fun SettingScreen(navController: NavController? = null, themeViewModel: ThemeViewModel) {
+
     val theme = LocalAppColors.current
 
     Box(

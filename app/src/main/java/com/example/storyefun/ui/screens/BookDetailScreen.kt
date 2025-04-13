@@ -36,7 +36,7 @@ import coil.compose.AsyncImage
 
 
 @Composable
-fun BookDetailScreen(navController: NavController, bookId : String, themeViewModel: ThemeViewModel = viewModel(), viewModel: BookViewModel = viewModel()) {
+fun BookDetailScreen(navController: NavController, bookId : String, themeViewModel: ThemeViewModel, viewModel: BookViewModel = viewModel()) {
     var theme = LocalAppColors.current
     var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
