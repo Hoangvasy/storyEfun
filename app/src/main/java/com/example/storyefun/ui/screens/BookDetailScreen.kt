@@ -2,7 +2,6 @@ package com.example.storyefun.ui.screens
 
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,28 +17,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
 import com.example.storyefun.R
 import com.example.storyefun.data.Book
 import com.example.storyefun.viewModel.BookViewModel
 import com.example.storyefun.ui.components.*
 import com.example.storyefun.ui.theme.AppColors
 import com.example.storyefun.ui.theme.LocalAppColors
-import com.example.storyefun.ui.theme.ThemeViewModel
+import com.example.storyefun.viewModel.ThemeViewModel
 import coil.compose.AsyncImage
 
 
+
 @Composable
-fun BookDetailScreen(navController: NavController, bookId : String,themeViewModel: ThemeViewModel = viewModel(),  viewModel: BookViewModel = viewModel()) {
+fun BookDetailScreen(navController: NavController, bookId : String, themeViewModel: ThemeViewModel = viewModel(), viewModel: BookViewModel = viewModel()) {
     var theme = LocalAppColors.current
     var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -79,7 +76,7 @@ fun BookDetailScreen(navController: NavController, bookId : String,themeViewMode
                     Header(text, active, onQueryChange = { text = it }, onActiveChange = { active = it }, navController)
                 }
 
-                item { MangaInfo(theme, book!!) }  // safe to use !! here after null check
+                item { MangaInfo(theme, book!!, navController) }  // safe to use !! here after null check
 
                 item {
                     TabRow(
@@ -117,22 +114,24 @@ fun BookDetailScreen(navController: NavController, bookId : String,themeViewMode
     }
 }
 
-
-
 @Composable
-fun MangaInfo(theme: AppColors, book: Book) {
+fun MangaInfo(theme: AppColors, book: Book, navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 15.dp)
+            .padding(bottom = 16.dp)
     ) {
-        // Box to hold both banner and poster (overlay)
+        // Banner with gradient overlay
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(16f / 9f) // Tỷ lệ khung hình 16:9 cho banner
+                .aspectRatio(16f / 9f)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(Color.Black.copy(alpha = 0.5f), Color.Transparent)
+                    )
+                )
         ) {
-            // Banner image (background)
             AsyncImage(
                 model = book.posterUrl,
                 contentDescription = "Banner",
@@ -141,163 +140,293 @@ fun MangaInfo(theme: AppColors, book: Book) {
                 error = painterResource(R.drawable.error),
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(16.dp)) // Bo góc cho banner
-                    .background(Color.Gray.copy(alpha = 0.5f)) // Debug background
+                    .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
             )
 
-            // Poster image (overlay on the left)
-            AsyncImage(
-                model = book.imageUrl,
-                contentDescription = "Poster",
-                contentScale = ContentScale.FillWidth,
-                placeholder = painterResource(R.drawable.placeholder),
-                error = painterResource(R.drawable.error),
+            // Card with poster and book info
+            Card(
                 modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .width(185.dp)
-                    .fillMaxHeight()
-                    .padding(start = 16.dp)
-                    .clip(RoundedCornerShape(12.dp)) // Bo góc cho poster
-            )
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(horizontal = 16.dp)
+                    .align(Alignment.BottomCenter)
+                    .offset(y = 40.dp), // Offset to overlap with banner
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = theme.backgroundColor)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Poster
+                    AsyncImage(
+                        model = book.imageUrl,
+                        contentDescription = "Poster",
+                        contentScale = ContentScale.FillHeight,
+                        placeholder = painterResource(R.drawable.placeholder),
+                        error = painterResource(R.drawable.error),
+                        modifier = Modifier
+                            .width(100.dp)
+                            .aspectRatio(2f / 3f) // Poster ratio 2:3
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+
+                    // Book details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(top = 8.dp)
+                    ) {
+                        Text(
+                            text = book.name,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = theme.textPrimary,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = book.author,
+                            fontSize = 14.sp,
+                            color = theme.textSecondary,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                        Row(
+                            modifier = Modifier.padding(top = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_views),
+                                    contentDescription = "Views",
+                                    tint = theme.textSecondary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "${book.views}",
+                                    fontSize = 12.sp,
+                                    color = theme.textSecondary
+                                )
+                            }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_follows),
+                                    contentDescription = "Follows",
+                                    tint = theme.textSecondary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "${book.follows}",
+                                    fontSize = 12.sp,
+                                    color = theme.textSecondary
+                                )
+                            }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_likes),
+                                    contentDescription = "Likes",
+                                    tint = theme.textSecondary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "${book.likes}K",
+                                    fontSize = 12.sp,
+                                    color = theme.textSecondary
+                                )
+                            }
+                        }
+
+                        // Start Reading Button
+                        Button(
+                            onClick = {
+                                navController.navigate("reading/${book.id}/1/1")
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = "Bắt đầu đọc",
+                                fontSize = 16.sp,
+                                color = theme.textPrimary
+                            )
+                        }
+                    }
+                }
+            }
         }
-
-        // Book details (below the images)
-        Text(
-            text = book.name,
-            fontSize = 24.sp,
-            color = theme.textPrimary,
-            modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp)
-        )
-        Text(
-            text = book.author,
-            fontSize = 16.sp,
-            color = theme.textSecondary,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp)
-        )
-
-        // Stats Row
-        Row(
-            modifier = Modifier
-                .padding(top = 8.dp, start = 16.dp, end = 16.dp)
-        ) {
-            Text(
-                text = "👁️ ${book.views}  |  📅 ${book.follows}  |  ❤️ ${book.likes}K",
-                fontSize = 14.sp,
-                color = theme.textSecondary
-            )
-        }
-
-        Divider(
-            color = theme.textSecondary,
-            thickness = 1.dp,
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
-        )
     }
 }
 
 @Composable
 fun GenreTag(text: String, theme: AppColors) {
-    Text(
-        text = text,
-        maxLines = 1, // Ensure text stays on one line
-        overflow = TextOverflow.Clip, // Clip text if it overflows (or use Ellipsis if desired)
-        softWrap = false, // Prevent wrapping in the middle of a word
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = Color.Gray.copy(alpha = 0.2f),
         modifier = Modifier
-            .wrapContentWidth() // Let the width wrap content
+            .wrapContentSize()
             .padding(4.dp)
-            .background(Color.Gray, RoundedCornerShape(8.dp))
-            .padding(8.dp),
-        color = theme.backgroundColor
-    )
+    ) {
+        Text(
+            text = text,
+            fontSize = 12.sp,
+            color = theme.textPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+        )
+    }
 }
-
-
-
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun InformationSection(navController: NavController, theme: AppColors, book: Book)
-{
+fun InformationSection(navController: NavController, theme: AppColors, book: Book) {
     val genres = book.category
-    Column(modifier = Modifier.padding(8.dp)) {
-        Box(modifier = Modifier.height(200.dp)) { // ✅ Fixed height to avoid infinite constraints
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 90.dp),
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(genres.size) { index ->
-                    GenreTag(genres[index].name, theme)
-                }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        // Genres Section
+        Text(
+            text = "Thể loại",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = theme.textPrimary,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            genres.forEach { genre ->
+                GenreTag(text = genre.name, theme = theme)
             }
         }
+
+
+        // Description Section
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Giới thiệu",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = theme.textPrimary,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        var expanded by remember { mutableStateOf(false) }
+        val maxLines = if (expanded) Int.MAX_VALUE else 3
 
         Text(
             text = book.description,
             fontSize = 14.sp,
-            modifier = Modifier.padding(top = 8.dp),
-            color = theme.textPrimary
-        )
-    }
-
-    Button(
-        onClick = { /* Start Reading */ },
-        colors = ButtonDefaults.buttonColors(Color.Red),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp)
-    ) {
-        Text("Bắt đầu đọc", fontSize = 18.sp, color = theme.textPrimary,
-            modifier = Modifier.clickable { navController.navigate("reading/${book.id}/1/1") }
-
+            color = theme.textSecondary,
+            maxLines = maxLines,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp)
         )
 
+        if (book.description.length > 100) {
+            Text(
+                text = if (expanded) "Thu gọn" else "Xem thêm",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Red,
+                modifier = Modifier
+                    .clickable { expanded = !expanded }
+                    .padding(top = 4.dp)
+            )
+        }
     }
+
     CommentSection(theme)
 }
-
 @Composable
 fun ChapterListSection(theme: AppColors, book: Book, navController: NavController) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
-            text = "Volumes ( ${book.volume.size})",
+            text = "Volumes (${book.volume.size})",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 4.dp),
             color = theme.textPrimary
         )
+
         Text(
             text = "Cập nhật mới nhất 29/02/2024",
             fontSize = 14.sp,
             color = theme.textSecondary,
-            modifier = Modifier.padding(bottom = 12.dp), // Space below the update info
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Sample chapters
-        for (volume in book.volume) {
-            Text(
-                text = "Tập ${volume.name}",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+        book.volume.forEach { volume ->
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = theme.backgroundContrast2),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Tập ${volume.name}",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = theme.textPrimary
+                    )
 
-                modifier = Modifier.padding(top = 12.dp, bottom = 4.dp) ,
-                color = theme.textPrimary
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            )
-            for (chapter in volume.chapters) {
-                Text(
-                    text = "Chương ${chapter.title}",
-                    fontSize = 14.sp,
-                    color = theme.textSecondary,
-                    modifier = Modifier.padding(start = 16.dp, bottom = 6.dp) // Indent and space chapters
-                        .clickable {
-                            // Điều hướng đến màn hình đọc khi nhấp vào chapter
-                            navController.navigate("reading/${book.id}/${volume.order}/${chapter.order}")
+                    volume.chapters.forEach { chapter ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    navController.navigate("reading/${book.id}/${volume.order}/${chapter.order}")
+                                }
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_chapter), // Thay bằng icon chương bạn có
+                                contentDescription = null,
+                                tint = theme.textSecondary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Chương ${chapter.title}",
+                                fontSize = 14.sp,
+                                color = theme.textSecondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
-                )
+                    }
+                }
             }
         }
     }
 }
+
 
 
 @Preview(showBackground = true)

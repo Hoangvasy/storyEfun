@@ -1,6 +1,5 @@
 package com.example.storyefun.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,9 +18,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.storyefun.ui.theme.LocalAppColors
-import com.example.storyefun.ui.theme.ThemeViewModel
+import com.example.storyefun.viewModel.ThemeViewModel
 @Composable
-fun SettingScreen(navController: NavController? = null, themeViewModel: ThemeViewModel = viewModel()) {
+fun SettingScreen(navController: NavController? = null, themeViewModel: ThemeViewModel = viewModel() ) {
     val theme = LocalAppColors.current
 
     Box(

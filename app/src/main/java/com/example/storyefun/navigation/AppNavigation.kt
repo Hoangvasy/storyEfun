@@ -2,20 +2,16 @@ package com.example.storyefun.navigation
 
 
 import UploadScreen
-import android.util.Log
 import androidx.compose.runtime.Composable
-import androidx.compose.foundation.clickable
 import androidx.compose.material3.*
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.storyefun.ui.screens.CategoryScreen
 import com.example.profileui.ProfileScreen
 import com.example.storyefun.ui.screens.*
-import com.example.storyefun.ui.theme.ThemeViewModel
 
 import com.example.storyefun.admin.ui.*
+import com.example.storyefun.viewModel.ThemeViewModel
 
 
 sealed class Screen(val route: String) {
@@ -45,6 +41,7 @@ sealed class Screen(val route: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(navController: NavHostController) {
+
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route

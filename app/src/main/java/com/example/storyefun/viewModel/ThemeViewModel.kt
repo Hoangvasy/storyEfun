@@ -1,5 +1,6 @@
-package com.example.storyefun.ui.theme
+package com.example.storyefun.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,5 +11,7 @@ class ThemeViewModel : ViewModel() {
 
     fun toggleTheme() {
         _isDarkTheme.value = !_isDarkTheme.value
+        Log.d("viewmode change value", "to " + _isDarkTheme.value)
+
     }
 }
