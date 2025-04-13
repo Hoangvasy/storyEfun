@@ -1,14 +1,24 @@
 package com.example.storyefun.ui.screens
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -17,16 +27,27 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.storyefun.R
 import com.example.storyefun.ui.theme.LocalAppColors
+import com.example.storyefun.utils.downloadTextFile
 import com.example.storyefun.viewModel.BookViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun ReaderScreen(
@@ -72,6 +93,7 @@ fun ReaderScreen(
                         if (isManga) {
                             MangaContent(chapterContent.content)
                         } else {
+                            Log.d("novel check", "this book is novel")
                             NovelContent(chapterContent.content)
                         }
                     } else {
@@ -79,7 +101,7 @@ fun ReaderScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("Chapter not found" + chapterOrder + volumeOrder)
+                            Text("Chapter not found")
                         }
                     }
                 } else {
@@ -117,7 +139,6 @@ fun ReaderScreen(
         }
     }
 }
-
 @Composable
 fun CustomTopBar(
     isVisible: Boolean,
@@ -125,6 +146,11 @@ fun CustomTopBar(
     onBack: () -> Unit
 ) {
     val theme = LocalAppColors.current
+    val configuration = LocalConfiguration.current
+    val fontScale = configuration.fontScale // System font scale (e.g., 1.0 for normal, 1.3 for large)
+    val baseHeight = 56.dp // Desired height at fontScale = 1.0
+    val adjustedHeight = baseHeight / fontScale // Adjust height to counteract font scale
+
     AnimatedVisibility(
         visible = isVisible,
         enter = fadeIn(),
@@ -133,7 +159,7 @@ fun CustomTopBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(adjustedHeight) // Use adjusted height
                 .background(theme.background)
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.CenterStart
@@ -156,7 +182,6 @@ fun CustomTopBar(
         }
     }
 }
-
 @Composable
 fun CustomBottomBar(
     isVisible: Boolean,
@@ -167,6 +192,10 @@ fun CustomBottomBar(
     onNextChapter: () -> Unit
 ) {
     val theme = LocalAppColors.current
+    val configuration = LocalConfiguration.current
+    val fontScale = configuration.fontScale // System font scale
+    val baseHeight = 56.dp // Desired height at fontScale = 1.0
+    val adjustedHeight = baseHeight / fontScale // Adjust height to counteract font scale
 
     AnimatedVisibility(
         visible = isVisible,
@@ -176,7 +205,7 @@ fun CustomBottomBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(adjustedHeight) // Use adjusted height
                 .background(theme.background)
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center
@@ -234,8 +263,22 @@ fun NovelContent(fileUrls: List<String>) {
             .padding(16.dp)
     ) {
         items(fileUrls) { url ->
+            var content by remember { mutableStateOf("Đang tải...") }
+
+            LaunchedEffect(url) {
+                if (url.endsWith(".txt")) {
+                    content = try {
+                        downloadTextFile(url)
+                    } catch (e: Exception) {
+                        "Lỗi tải file: ${e.message}"
+                    }
+                } else {
+                    content = "Chưa hỗ trợ định dạng này: $url"
+                }
+            }
+
             Text(
-                text = "Content from $url",
+                text = content,
                 fontSize = 16.sp,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
@@ -245,16 +288,108 @@ fun NovelContent(fileUrls: List<String>) {
 
 @Composable
 fun MangaContent(imageUrls: List<String>) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
+    val scale = remember { Animatable(1f) }
+    val offsetX = remember { Animatable(0f) }
+    val offsetY = remember { Animatable(0f) }
+    val coroutineScope = rememberCoroutineScope()
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp.dp
+    val screenWidthPx = with(LocalDensity.current) { screenWidthDp.toPx() }
+
+    val isZoomed = scale.value > 1f
+    val verticalScrollState = rememberScrollState()
+
+    // Tổng chiều cao ảnh (dp)
+    var totalContentHeightDp by remember { mutableStateOf(0.dp) }
+    val density = LocalDensity.current // lấy trước
+
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTransformGestures { _, pan, zoom, _ ->
+                    coroutineScope.launch {
+                        // Tính scale
+                        val newScale = (scale.value * zoom).coerceIn(1f, 5f)
+                        scale.snapTo(newScale)
+
+                        if (newScale > 1f) {
+                            // Tính giới hạn offset
+                            val contentWidth = screenWidthPx * newScale
+                            val contentHeight = with(density) { totalContentHeightDp.toPx() } * newScale
+
+                            val maxOffsetX = ((contentWidth - screenWidthPx) / 2f).coerceAtLeast(0f)
+                            val maxOffsetY = ((contentHeight - screenWidthPx * 2f) / 2f).coerceAtLeast(0f) // cho margin lớn hơn 1 tí
+
+                            val newOffsetX = (offsetX.value + pan.x).coerceIn(-maxOffsetX, maxOffsetX)
+                            val newOffsetY = (offsetY.value + pan.y).coerceIn(-maxOffsetY, maxOffsetY)
+
+                            offsetX.snapTo(newOffsetX)
+                            offsetY.snapTo(newOffsetY)
+                        } else {
+                            scale.snapTo(1f)
+                            offsetX.snapTo(0f)
+                            offsetY.snapTo(0f)
+                        }
+                    }
+                }
+            }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = {
+                        coroutineScope.launch {
+                            scale.animateTo(1f)
+                            offsetX.animateTo(0f)
+                            offsetY.animateTo(0f)
+                        }
+                    }
+                )
+            }
+            .clipToBounds()
     ) {
-        items(imageUrls) { imageUrl ->
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = "Manga Page",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.fillMaxWidth()
-            )
+        // Scroll dọc khi chưa zoom
+        val scrollModifier = if (!isZoomed) {
+            Modifier.verticalScroll(verticalScrollState)
+        } else {
+            Modifier
+        }
+
+        var accumulatedHeight = 0.dp
+
+        Column(
+            modifier = scrollModifier
+                .graphicsLayer {
+                    scaleX = scale.value
+                    scaleY = scale.value
+                    translationX = offsetX.value
+                    translationY = offsetY.value
+                    transformOrigin = TransformOrigin(0.5f, 0f)
+                }
+        ) {
+            imageUrls.forEach { imageUrl ->
+                var imageHeight by remember { mutableStateOf(500.dp) }
+
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Manga Page",
+                    contentScale = ContentScale.FillWidth,
+                    onSuccess = { state ->
+                        val width = state.painter.intrinsicSize.width
+                        val height = state.painter.intrinsicSize.height
+                        if (width > 0) {
+                            val ratio = height / width
+                            imageHeight = screenWidthDp * ratio
+                            // Cộng dồn chiều cao
+                            accumulatedHeight += imageHeight + 8.dp
+                            totalContentHeightDp = accumulatedHeight
+                        }
+                    },
+                    modifier = Modifier
+                        .width(screenWidthDp)
+                        .height(imageHeight)
+                        .padding(bottom = 8.dp)
+                )
+            }
         }
     }
 }

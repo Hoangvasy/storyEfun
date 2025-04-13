@@ -2,6 +2,7 @@ package com.example.storyefun.navigation
 
 
 import UploadScreen
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.*
@@ -57,8 +58,14 @@ fun AppNavigation(navController: NavHostController) {
         composable(Screen.Login.route) { LoginScreen(navController) }
         composable(Screen.Reading.route) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId") ?: "unknown"
-            val volumeOrder = backStackEntry.arguments?.getInt("volumeOrder") ?:1
-            val chapterOrder = backStackEntry.arguments?.getInt("chapterOrder") ?: 1
+            val volumeOrderStr = backStackEntry.arguments?.getString("volumeOrder") ?: "1"
+            val chapterOrderStr = backStackEntry.arguments?.getString("chapterOrder") ?: "1"
+
+            // Parse strings to Int
+            val volumeOrder = volumeOrderStr.toIntOrNull() ?: 1
+            val chapterOrder = chapterOrderStr.toIntOrNull() ?: 1
+
+            //Log.d("chapter and voluume ", "chapter $chapterOrder  volume $volumeOrder")
             ReaderScreen(navController, bookId, volumeOrder, chapterOrder)
         }
         composable(Screen.Register.route) { RegisterScreen(navController) }

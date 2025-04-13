@@ -29,6 +29,7 @@ class BookViewModel() : ViewModel()
         viewModelScope.launch {
             setState(true)
             _books.value = bookRepository.getBooks()
+            Log.e("book list got", _books.value.toString())
             setState(false)
         }
 

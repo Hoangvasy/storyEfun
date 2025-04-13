@@ -103,7 +103,7 @@ fun BookDetailScreen(navController: NavController, bookId : String,themeViewMode
                 item {
                     when (selectedTabIndex) {
                         0 -> InformationSection(navController, theme, book!!)
-                        1 -> ChapterListSection(theme, book!!)
+                        1 -> ChapterListSection(theme, book!!, navController)
                     }
                 }
             }
@@ -256,7 +256,7 @@ fun InformationSection(navController: NavController, theme: AppColors, book: Boo
 }
 
 @Composable
-fun ChapterListSection(theme: AppColors, book: Book) {
+fun ChapterListSection(theme: AppColors, book: Book, navController: NavController) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
             text = "Volumes ( ${book.volume.size})",
@@ -289,6 +289,10 @@ fun ChapterListSection(theme: AppColors, book: Book) {
                     fontSize = 14.sp,
                     color = theme.textSecondary,
                     modifier = Modifier.padding(start = 16.dp, bottom = 6.dp) // Indent and space chapters
+                        .clickable {
+                            // Điều hướng đến màn hình đọc khi nhấp vào chapter
+                            navController.navigate("reading/${book.id}/${volume.order}/${chapter.order}")
+                        }
                 )
             }
         }

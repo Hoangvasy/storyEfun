@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation("androidx.navigation:navigation-compose:2.7.6")
+    implementation ("androidx.compose.foundation:foundation:1.6.0")
 
     // Firebase (using BoM)
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))

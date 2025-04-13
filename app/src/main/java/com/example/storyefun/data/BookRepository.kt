@@ -21,7 +21,7 @@ class BookRepository {
             snapshot.documents.mapNotNull { it.toObject(Book::class.java) }
         } catch (e : Exception)
         {
-            println("Error when getting book:   ${e.message}")
+            Log.e("error when getting books","Error when getting book:   ${e.message}")
             emptyList()
         }
 
