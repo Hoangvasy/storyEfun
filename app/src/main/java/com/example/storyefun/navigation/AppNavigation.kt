@@ -44,7 +44,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.Home.route
 //        startDestination = Screen.Upload.route
     ) {
         composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }

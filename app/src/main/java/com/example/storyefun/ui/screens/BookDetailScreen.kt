@@ -1,6 +1,7 @@
 package com.example.storyefun.ui.screens
 
 
+import CommentSection
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -380,14 +381,14 @@ fun ChapterListSection(theme: AppColors, book: Book, navController: NavControlle
             Card(
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = theme.backgroundContrast2),
+                colors = CardDefaults.cardColors(containerColor = theme.backgroundColor),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Tập ${volume.name}",
+                        text = "Tập ${volume.title}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = theme.textPrimary
