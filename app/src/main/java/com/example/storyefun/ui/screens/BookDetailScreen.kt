@@ -195,57 +195,40 @@ fun MangaInfo(theme: AppColors, book: Book, navController: NavController) {
                             color = theme.textSecondary,
                             modifier = Modifier.padding(top = 4.dp)
                         )
+                        var isLiked by remember { mutableStateOf(false) }
+                        var isFollowed by remember { mutableStateOf(false) }
+
                         Row(
-                            modifier = Modifier.padding(top = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier = Modifier
+                                .padding(top = 8.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            // Views (không bấm được)
+                            StatItem(
+                                icon = R.drawable.ic_views,
+                                text = "${book.views}",
+                                color = theme.textSecondary,
+                                onClick = null
+                            )
+
+                            // Follow (bấm để toggle)
+                            StatItem(
+                                icon = R.drawable.ic_follows,
+                                text = if (isFollowed) "" else "Theo dõi",
+                                color = if (isFollowed) Color.Red else theme.textSecondary
                             ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_views),
-                                    contentDescription = "Views",
-                                    tint = theme.textSecondary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    text = "${book.views}",
-                                    fontSize = 12.sp,
-                                    color = theme.textSecondary
-                                )
+                                isFollowed = !isFollowed
                             }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+
+                            // Like (bấm để toggle)
+                            StatItem(
+                                icon = R.drawable.ic_likes,
+                                text = if (isLiked) "" else "Thích",
+                                color = if (isLiked) Color.Red else theme.textSecondary
                             ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_follows),
-                                    contentDescription = "Follows",
-                                    tint = theme.textSecondary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    text = "${book.follows}",
-                                    fontSize = 12.sp,
-                                    color = theme.textSecondary
-                                )
-                            }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_likes),
-                                    contentDescription = "Likes",
-                                    tint = theme.textSecondary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    text = "${book.likes}K",
-                                    fontSize = 12.sp,
-                                    color = theme.textSecondary
-                                )
+                                isLiked = !isLiked
                             }
                         }
 
@@ -360,6 +343,41 @@ fun InformationSection(navController: NavController, theme: AppColors, book: Boo
 
     CommentSection(theme)
 }
+
+@Composable
+fun StatItem(
+    icon: Int,
+    text: String,
+    color: Color,
+    onClick: (() -> Unit)? = null
+) {
+    val modifier = Modifier
+        .padding(horizontal = 8.dp)
+        .then(
+            if (onClick != null) Modifier.clickable { onClick() }
+            else Modifier
+        )
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(20.dp) // Tăng kích thước icon
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = text,
+            fontSize = 14.sp,
+            color = color,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+}
+
 @Composable
 fun ChapterListSection(theme: AppColors, book: Book, navController: NavController) {
     Column(modifier = Modifier.padding(16.dp)) {
