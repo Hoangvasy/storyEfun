@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.camera.core)
 
     // Testing
     testImplementation(libs.junit)
