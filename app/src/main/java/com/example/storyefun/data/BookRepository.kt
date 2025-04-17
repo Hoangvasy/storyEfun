@@ -19,13 +19,57 @@ class BookRepository {
         return try {
             val snapshot = db.collection("books").get().await()
             snapshot.documents.mapNotNull { it.toObject(Book::class.java) }
-
         } catch (e : Exception)
         {
-            println("Error when getting book:   ${e.message}")
+            Log.e("error when getting books","Error when getting book:   ${e.message}")
             emptyList()
         }
 
+    }
+    suspend fun getBook(bookId : String) : Book? {
+        try {
+            val bookRef = db.collection("books").document(bookId)
+            val book = bookRef.get().await()
+            val result = book.toObject(Book::class.java)
+            if (result != null)
+            {
+                val volumesSnapshot = bookRef.collection("volumes").get().await()
+                val volumeList = mutableListOf<Volume>()
+
+                for (volumeDoc in volumesSnapshot.documents) {
+                    var volume = volumeDoc.toObject(Volume::class.java)
+                    if (volume != null) {
+                        // Fetch chapters for this volume
+                        val chaptersSnapshot = volumeDoc.reference.collection("chapters").get().await()
+                        val chapterList = chaptersSnapshot.mapNotNull { it.toObject(Chapter::class.java) }
+
+                        volume.chapters = chapterList
+                        volumeList.add(volume)
+                    }
+                }
+                result.volume = volumeList
+
+                // 2. Get full category objects from IDs
+                val categoryIds = result.categoryIDs ?: emptyList()
+                val categoryList = mutableListOf<Category>()
+                for (categoryId in categoryIds) {
+                    val catSnapshot = db.collection("category").document(categoryId).get().await()
+                    catSnapshot.toObject(Category::class.java)?.let { categoryList.add(it) }
+                }
+                result.category = categoryList // <- Gắn vào một field mới
+
+
+
+
+            }
+            return result
+
+        }
+        catch (e : Exception)
+        {
+            Log.e("Error", e.message.toString())
+            return null
+        }
     }
 
     fun getBookByUser(): LiveData<List<Book>> {
@@ -53,6 +97,8 @@ class BookRepository {
     }
 
 
+
+
     suspend fun addBook(book: Book): Boolean {
         return try {
             db.collection("books").add(book).await()  // Thêm sách vào Firestore
@@ -70,19 +116,6 @@ class BookRepository {
     {
 
     }
-    suspend fun updateBook(book: Book): Boolean {
-        return try {
-            db.collection("books")
-                .document(book.id)  // Use book's ID to identify the document
-                .set(book)  // Replace the entire document with the new data
-                .await()
-            true
-        } catch (e: Exception) {
-            println("Error when updating book: ${e.message}")
-            false
-        }
-    }
-
     suspend fun deleteBook (bookId : String) : Boolean
     {
         try {
@@ -96,6 +129,18 @@ class BookRepository {
         }
         return false
 
+    }
+    suspend fun updateBook(book: Book): Boolean {
+        return try {
+            db.collection("books")
+                .document(book.id)  // Use book's ID to identify the document
+                .set(book)  // Replace the entire document with the new data
+                .await()
+            true
+        } catch (e: Exception) {
+            println("Error when updating book: ${e.message}")
+            false
+        }
     }
 
 

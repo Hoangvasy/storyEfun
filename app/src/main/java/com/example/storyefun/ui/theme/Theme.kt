@@ -1,5 +1,6 @@
 package com.example.storyefun.ui.theme
 
+import android.util.Log
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -23,7 +24,7 @@ data class AppColors(
     val header: Color,
     val buttonOrange: Color
 
-    )
+)
 
 // Light Theme
 val LightColors = AppColors(
@@ -67,6 +68,7 @@ fun AppTheme(
     darkTheme: Boolean,  // Biến này quyết định dùng Light hay Dark theme
     content: @Composable () -> Unit
 ) {
+    Log.d("App them upadte", " update")
     val colors = remember(darkTheme) {
         if (darkTheme) DarkColors else LightColors
     }

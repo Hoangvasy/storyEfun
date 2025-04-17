@@ -237,4 +237,3 @@ fun uploadChapterToCloudinary(uri: Uri, folder: String, onSuccess: (String) -> U
         })
         .dispatch()
 }
-
