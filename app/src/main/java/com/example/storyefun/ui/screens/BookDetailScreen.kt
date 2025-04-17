@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.storyefun.R
-import com.example.storyefun.data.Book
+import com.example.storyefun.data.models.Book
 import com.example.storyefun.viewModel.BookViewModel
 import com.example.storyefun.ui.components.*
 import com.example.storyefun.ui.theme.AppColors
