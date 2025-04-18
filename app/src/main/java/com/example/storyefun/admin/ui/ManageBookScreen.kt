@@ -30,7 +30,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.storyefun.R
 import com.example.storyefun.viewModel.BookViewModel
-import com.example.storyefun.data.Book
+import com.example.storyefun.data.models.Book
 import com.example.storyefun.ui.theme.LocalAppColors
 
 @Composable
