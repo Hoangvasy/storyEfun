@@ -35,6 +35,7 @@ sealed class Screen(val route: String) {
     object AddVolume : Screen("addVolume/{bookId}")
     object ListChapter : Screen("listChapter/{bookId}/{volumeId}")
     object AddChapter : Screen("addChapter/{bookId}/{volumeId}")
+    object AddCategory : Screen("AddCategoryScreen")
 
 }
 
@@ -44,7 +45,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 
     NavHost(
         navController = navController,
-        startDestination = Screen.AdminUpload.route
+        startDestination = Screen.AddCategory.route
 //        startDestination = Screen.Upload.route
     ) {
         composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
@@ -75,6 +76,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.AdminMenu.route) {MenuScreen(navController)}
         composable(Screen.AdminUpload.route) {AdminUploadScreen(navController)}
         composable(Screen.ManageBook.route) { ManageBooksScreen(navController) }
+        composable(Screen.ManageBook.route) { ManageBooksScreen(navController) }
 
         composable("editBook/{bookId}") { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
@@ -95,6 +97,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             AddChapterScreen(navController, bookId, volumeId)
         }
 
+        composable(Screen.AddCategory.route) { AddCategory(navController) }
 
     }
 }
