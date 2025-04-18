@@ -17,6 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+
 
 @Composable
 fun AddCategory(navController: NavHostController) {
@@ -106,13 +109,13 @@ fun MenuCard(item: MenuItem) {
                     fontSize = 14.sp
                 )
             }
-//            IconButton(onClick = { /* TODO: Handle click */ }) {
+            IconButton(onClick = { /* TODO: Handle click */ }) {
 //                Icon(
 //                    painter = painterResource(id = R.drawable.ic_arrow_right),
 //                    contentDescription = "Arrow Right",
 //                    tint = Color.Gray
 //                )
-//            }
+            }
         }
     }
 }
