@@ -72,6 +72,11 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation(libs.androidx.runtime.livedata)
+    implementation(fileTree(mapOf(
+        "dir" to "C:\\zaloPay",
+        "include" to listOf("*.aar", "*.jar"),
+        "exclude" to listOf("")
+    )))
 
     // Testing
     testImplementation(libs.junit)

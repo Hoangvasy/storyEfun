@@ -27,10 +27,10 @@ import com.example.storyefun.R
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import androidx.compose.material3.*
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun RegisterScreen(navController: NavController) {
-
 
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
@@ -43,13 +43,13 @@ fun RegisterScreen(navController: NavController) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Box(
-        modifier = Modifier.fillMaxSize() // Căn full màn hình
+        modifier = Modifier.fillMaxSize()
     ) {
         Image(
             painter = painterResource(id = R.drawable.screen),
             contentDescription = "Ảnh Screen",
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop // Cắt ảnh để vừa khung
+            contentScale = ContentScale.Crop
         )
         Text(
             text = "Hello,",
@@ -57,26 +57,23 @@ fun RegisterScreen(navController: NavController) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .size(150.dp)
-                                                                                                                                                                                                                                .align(Alignment.TopStart) // Căn giữa trên c                                                                                                                                                                                                                  ùng màn hình
-                                                                                                                                                                                                                                .padding(top = 60.dp, start = 20.dp) // Tạo khoảng cách với mép trên
+                .align(Alignment.TopStart)
+                .padding(top = 60.dp, start = 20.dp)
         )
         Text(
             text = "Register",
             style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,fontSize = 55.sp,
+            fontWeight = FontWeight.Bold,
+            fontSize = 55.sp,
             modifier = Modifier
-
-                .align(Alignment.TopStart) // Căn giữa trên cùng màn hình
-                .padding(top = 100.dp, start = 20.dp) // Tạo khoảng cách với mép trên
+                .align(Alignment.TopStart)
+                .padding(top = 100.dp, start = 20.dp)
         )
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-
-
             Spacer(modifier = Modifier.padding(100.dp))
             if (errorMessage != null) {
                 Text(
@@ -94,8 +91,7 @@ fun RegisterScreen(navController: NavController) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)) // Làm mờ nền
-
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
@@ -106,8 +102,7 @@ fun RegisterScreen(navController: NavController) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)) // Làm mờ nền
-
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -119,10 +114,7 @@ fun RegisterScreen(navController: NavController) {
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth()
-                    .background(
-                        MaterialTheme
-                            .colorScheme.surface.copy(alpha = 0.8f)
-                    ) // Làm mờ nền
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
@@ -133,16 +125,10 @@ fun RegisterScreen(navController: NavController) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
-                    .background(
-                        MaterialTheme
-                            .colorScheme.surface.copy(alpha = 0.8f)
-                    ) // Làm mờ nền
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
             )
             Spacer(modifier = Modifier.height(40.dp))
 
-
-
-            // Nút đăng nhập
             Button(
                 onClick = {
                     when {
@@ -150,14 +136,34 @@ fun RegisterScreen(navController: NavController) {
                             errorMessage = "All fields are required"
                         }
                         password != confirmPassword -> {
-                            errorMessage = "Sai"
+                            errorMessage = "Passwords do not match"
                         }
-
                         else -> {
                             coroutineScope.launch {
                                 auth.createUserWithEmailAndPassword(email, password)
                                     .addOnSuccessListener {
-                                        navController.navigate("home")
+                                        // Lưu thông tin người dùng vào Firestore sau khi đăng ký thành công
+                                        val user = auth.currentUser
+                                        val db = FirebaseFirestore.getInstance()
+
+                                        // Lưu thông tin vào Firestore với auto-generated Document ID
+                                        val userInfo = hashMapOf(
+                                            "username" to username,
+                                            "email" to email,
+                                            "uid"    to user?.uid, // Lưu UID từ Firebase Authentication
+                                            "coin" to 100
+                                        )
+
+                                        db.collection("users")
+                                            .document(user!!.uid)
+                                            .set(userInfo)
+                                            .addOnSuccessListener {
+                                                // Điều hướng đến trang chủ sau khi lưu thành công
+                                                navController.navigate("home")
+                                            }
+                                            .addOnFailureListener { e ->
+                                                errorMessage = "Error adding user to Firestore: ${e.message}"
+                                            }
                                     }
                                     .addOnFailureListener {
                                         errorMessage = it.message ?: "Register failed"
@@ -166,22 +172,19 @@ fun RegisterScreen(navController: NavController) {
                         }
                     }
                 },
-
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E90FF)) // Đúng cho Material 3
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E90FF))
             ) {
                 Text("Register", fontSize = 25.sp)
             }
 
-
             TextButton(
                 onClick = { navController.navigate("login") },
                 modifier = Modifier.padding(top = 10.dp)
-
             ) {
-                Text("Don't have an account? Sign up here!",  color = Color(0xFF1E90FF))
+                Text("Don't have an account? Sign up here!", color = Color(0xFF1E90FF))
             }
         }
     }

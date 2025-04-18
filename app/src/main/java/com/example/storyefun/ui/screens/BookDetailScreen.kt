@@ -32,7 +32,7 @@ import com.example.storyefun.ui.theme.AppColors
 import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.viewModel.ThemeViewModel
 import coil.compose.AsyncImage
-
+import com.example.storyefun.navigation.Screen
 
 
 @Composable
@@ -395,27 +395,38 @@ fun ChapterListSection(theme: AppColors, book: Book, navController: NavControlle
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    volume.chapters.forEach { chapter ->
+                    // them ổ khóa khi có chapter
+
+
+                    volume.chapters.forEachIndexed { index, chapter ->
+                        val isLocked = index >= 1 // Khóa từ chapter thứ 3
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    navController.navigate("reading/${book.id}/${volume.order}/${chapter.order}")
+                                    if (!isLocked) {
+                                        navController.navigate("reading/${book.id}/${volume.order}/${chapter.order}")
+                                    }else{
+                                        navController.navigate("coin")
+                                    }
                                 }
                                 .padding(vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_chapter), // Thay bằng icon chương bạn có
+                                painter = painterResource(
+                                    if (isLocked) R.drawable.ic_views else R.drawable.ic_chapter
+                                ),
                                 contentDescription = null,
-                                tint = theme.textSecondary,
+                                tint = theme.textSecondary.copy(alpha = if (isLocked) 0.4f else 1f),
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Chương ${chapter.title}",
                                 fontSize = 14.sp,
-                                color = theme.textSecondary,
+                                color = theme.textSecondary.copy(alpha = if (isLocked) 0.4f else 1f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )

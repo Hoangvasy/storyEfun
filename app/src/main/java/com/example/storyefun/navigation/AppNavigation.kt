@@ -36,6 +36,9 @@ sealed class Screen(val route: String) {
     object ListChapter : Screen("listChapter/{bookId}/{volumeId}")
     object AddChapter : Screen("addChapter/{bookId}/{volumeId}")
 
+    object Desposite : Screen("desposite")
+    object Coin : Screen("coin")
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,7 +47,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Coin.route
 //        startDestination = Screen.Upload.route
     ) {
         composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
@@ -71,6 +74,8 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.MyStory.route) { MyStoryScreen(navController) }
         composable(Screen.Setting.route) { SettingScreen(navController, themeViewModel) }
         composable(Screen.CategoryList.route) { CategoryScreen(navController) }
+        composable(Screen.Desposite.route) { DespositeScreen(navController) }
+        composable(Screen.Coin.route) { CoinScreen(navController) }
 
         composable(Screen.AdminMenu.route) {MenuScreen(navController)}
         composable(Screen.AdminUpload.route) {AdminUploadScreen(navController)}
