@@ -5,13 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.storyefun.data.Book
-import com.example.storyefun.data.BookRepository
-import com.example.storyefun.data.Chapter
-import kotlinx.coroutines.CoroutineScope
+import com.example.storyefun.data.models.Book
+import com.example.storyefun.data.repository.BookRepository
+import com.example.storyefun.data.models.Chapter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 class BookViewModel() : ViewModel()
 {

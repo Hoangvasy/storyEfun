@@ -1,4 +1,4 @@
-package com.example.storyefun.data
+package com.example.storyefun.data.models
 
 data class Chapter(
     val id: String = "",        // Default value
