@@ -1,14 +1,18 @@
 package com.example.storyefun.admin.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -17,20 +21,71 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.example.storyefun.data.models.Category
+import com.example.storyefun.data.repository.CategoryFirebase
 
 @Composable
-fun AddCategory(navController: NavHostController) {
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            TopBar()
-            MenuList()
-            AddButton()
+fun AddCategory(navController: NavHostController, onCategoryAdded: () -> Unit) {
+    var name by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center
+    ) {
+        TextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Category Name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        TextField(
+            value = description,
+            onValueChange = { description = it },
+            label = { Text("Description") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = {
+                if (name.isNotBlank() && description.isNotBlank()) {
+                    val category = Category(name = name, description = description)
+                    CategoryFirebase(category) { isSuccess ->
+                        if (isSuccess) {
+                            Toast.makeText(context, "Category added successfully", Toast.LENGTH_SHORT).show()
+                            onCategoryAdded()
+                        } else {
+                            Toast.makeText(context, "Failed to add category", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    Toast.makeText(context, "Please fill out all fields", Toast.LENGTH_SHORT).show()
+                }
+            }
+        ) {
+            Text("Add Category")
         }
     }
 }
+
+//@Composable
+//fun AddCategory(navController: NavHostController) {
+//    Surface(modifier = Modifier.fillMaxSize()) {
+//        Column(modifier = Modifier.fillMaxSize()) {
+//            TopBar()
+//            MenuList()
+//            AddButton()
+//        }
+//    }
+//}
 
 @Composable
 fun TopBar() {

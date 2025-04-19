@@ -60,6 +60,7 @@ dependencies {
     implementation("com.google.firebase:firebase-storage-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-analytics")
+    implementation ("com.google.firebase:firebase-database-ktx")
 
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.6.0")
