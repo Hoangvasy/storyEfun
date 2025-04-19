@@ -8,8 +8,11 @@ import com.example.storyefun.data.models.Category
 import com.example.storyefun.data.models.Chapter
 import com.example.storyefun.data.models.Comment
 import com.example.storyefun.data.models.Volume
+import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 
@@ -188,7 +191,53 @@ class BookRepository {
         }
     }
 
+    suspend fun favoriteBooks(): List<Book> {
+        val firestore = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
 
+        val userId = auth.currentUser?.uid ?: return emptyList()
+        val userDoc = firestore.collection("users").document(userId).get().await()
+        val likedBookIds = userDoc.get("likedBooks") as? List<String> ?: emptyList()
+
+        if (likedBookIds.isEmpty()) return emptyList()
+
+        val books = mutableListOf<Book>()
+
+        for (bookId in likedBookIds) {
+            val bookSnapshot = firestore.collection("books").document(bookId).get().await()
+            val book = bookSnapshot.toObject(Book::class.java)?.copy(id = bookSnapshot.id)
+
+            if (book != null) {
+                val volumeSnapshots = firestore.collection("books")
+                    .document(bookId)
+                    .collection("volumes")
+                    .get()
+                    .await()
+
+                val volumes = volumeSnapshots.mapNotNull { volumeDoc ->
+                    val volume = volumeDoc.toObject(Volume::class.java)
+                    val chapterSnapshots = volumeDoc.reference
+                        .collection("chapters")
+                        .get()
+                        .await()
+
+                    val chapters = chapterSnapshots.mapNotNull { it.toObject(Chapter::class.java) }
+                    volume?.apply { this.chapters = chapters }
+                }
+
+                book.volume = volumes
+                books.add(book)
+            }
+        }
+
+        return books
+    }
+
+
+
+    private suspend fun <T> List<Task<T>>.awaitAll(): List<T> {
+        return map { it.await() }
+    }
 
 
 }

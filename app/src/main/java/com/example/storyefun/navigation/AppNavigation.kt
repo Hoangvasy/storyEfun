@@ -25,7 +25,7 @@ sealed class Screen(val route: String) {
     object Reading : Screen("reading/{bookId}/{volumeOrder}/{chapterOrder}")
     object Register : Screen("register")
     object Profile : Screen("profile")
-    object MyStory : Screen("mystory")
+    object Favourite : Screen("favourite")
     object Setting : Screen("setting")
     object CategoryList : Screen("category")
 
@@ -82,7 +82,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.Register.route) { RegisterScreen(navController) }
         composable(Screen.Profile.route) { ProfileScreen(navController, themeViewModel) }
         composable(Screen.Upload.route) { UploadScreen(navController) }
-        composable(Screen.MyStory.route) { MyStoryScreen(navController) }
+        composable(Screen.Favourite.route) { FavouriteScreen(themeViewModel, navController) }
         composable(Screen.Setting.route) { SettingScreen(navController, themeViewModel) }
         composable(Screen.CategoryList.route) { CategoryScreen(navController) }
         composable(Screen.Desposite.route) { DespositeScreen(navController) }

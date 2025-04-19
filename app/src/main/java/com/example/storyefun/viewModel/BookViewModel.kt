@@ -9,6 +9,8 @@ import com.example.storyefun.data.models.Book
 import com.example.storyefun.data.repository.BookRepository
 import com.example.storyefun.data.models.Chapter
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class BookViewModel() : ViewModel()
@@ -19,6 +21,8 @@ class BookViewModel() : ViewModel()
     private val _book = MutableLiveData<Book?>()
     val book: LiveData<Book?> get() = _book
 
+    private val _favoriteBooks = MutableStateFlow<List<Book>>(emptyList())
+    val favoriteBooks: StateFlow<List<Book>> = _favoriteBooks
 
     val _isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
     val isLoading: LiveData<Boolean> get() = _isLoading
@@ -27,7 +31,10 @@ class BookViewModel() : ViewModel()
         viewModelScope.launch {
             setState(true)
             _books.value = bookRepository.getBooks()
+            // Load favorite for favorite screen
+            loadFavorites()
             setState(false)
+
         }
 
     }
@@ -152,6 +159,11 @@ class BookViewModel() : ViewModel()
         }
 
         return Triple(false, null, null)
+    }
+
+    private suspend fun loadFavorites() {
+        // TODO: Load từ Firebase hoặc local
+        _favoriteBooks.value = bookRepository.favoriteBooks() // Replace with real fetch
     }
 
 

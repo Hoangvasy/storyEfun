@@ -6,4 +6,3 @@ data class Chapter(
     val order: Int = 0,
     val content: List<String> = emptyList()
 )
-

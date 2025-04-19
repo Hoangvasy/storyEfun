@@ -19,5 +19,13 @@ data class Book(
     fun isNovel(): Boolean {
         return category.any { it.name.equals("Novel", ignoreCase = true) }
     }
+    fun getLatestChapter(): Chapter? {
+        return volume
+            .flatMap { it.chapters }
+            .maxByOrNull { it.order }
+    }
+    fun getLatestVolume(): Volume? {
+        return volume.maxByOrNull { it.order }
+    }
 
 }
