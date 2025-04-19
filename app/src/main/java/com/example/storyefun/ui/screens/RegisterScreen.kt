@@ -27,6 +27,8 @@ import com.example.storyefun.R
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import androidx.compose.material3.*
+import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun RegisterScreen(navController: NavController) {
@@ -142,7 +144,6 @@ fun RegisterScreen(navController: NavController) {
 
 
 
-            // Nút đăng nhập
             Button(
                 onClick = {
                     when {
@@ -150,14 +151,39 @@ fun RegisterScreen(navController: NavController) {
                             errorMessage = "All fields are required"
                         }
                         password != confirmPassword -> {
-                            errorMessage = "Sai"
+                            errorMessage = "Passwords do not match"
                         }
-
                         else -> {
                             coroutineScope.launch {
                                 auth.createUserWithEmailAndPassword(email, password)
-                                    .addOnSuccessListener {
-                                        navController.navigate("home")
+                                    .addOnSuccessListener { authResult ->
+                                        val user = authResult.user
+                                        user?.let {
+                                            // 1. Update Firebase Auth profile with display name
+                                            val profileUpdates = UserProfileChangeRequest.Builder()
+                                                .setDisplayName(username)
+                                                .build()
+
+                                            it.updateProfile(profileUpdates)
+
+                                            // 2. Save user info to Firestore (excluding password)
+                                            val userMap = hashMapOf(
+                                                "uid" to it.uid,
+                                                "name" to username,
+                                                "email" to email
+                                            )
+
+                                            FirebaseFirestore.getInstance()
+                                                .collection("users")
+                                                .document(it.uid)
+                                                .set(userMap)
+                                                .addOnSuccessListener {
+                                                    navController.navigate("home")
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    errorMessage = e.message ?: "Failed to save user data"
+                                                }
+                                        }
                                     }
                                     .addOnFailureListener {
                                         errorMessage = it.message ?: "Register failed"
@@ -165,15 +191,11 @@ fun RegisterScreen(navController: NavController) {
                             }
                         }
                     }
-                },
-
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E90FF)) // Đúng cho Material 3
+                }
             ) {
-                Text("Register", fontSize = 25.sp)
+                Text("Register")
             }
+
 
 
             TextButton(

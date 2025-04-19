@@ -31,11 +31,11 @@ sealed class Screen(val route: String) {
     object AdminUpload : Screen("uploadBook")
     object ManageBook : Screen("manageBook")
     //    object AddChapter : Screen("addCChapter/{bookId}")
-    object EditBook : Screen("editBook/{bookId}")
+    /*object EditBook : Screen("editBook/{bookId}")
     object AddVolume : Screen("addVolume/{bookId}")
     object ListChapter : Screen("listChapter/{bookId}/{volumeId}")
     object AddChapter : Screen("addChapter/{bookId}/{volumeId}")
-
+*/
     object Desposite : Screen("desposite")
     object Coin : Screen("coin")
 
@@ -47,7 +47,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Login.route
 //        startDestination = Screen.Upload.route
     ) {
         composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
