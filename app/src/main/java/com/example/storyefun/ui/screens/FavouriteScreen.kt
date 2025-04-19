@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,7 +25,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,16 +41,19 @@ import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.viewModel.BookViewModel
 import com.example.storyefun.viewModel.ThemeViewModel
 import com.example.storyefun.viewModel.UserViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavouriteScreen(
     themeViewModel: ThemeViewModel,
     navController: NavController,
-    viewModel: BookViewModel = viewModel()
+    viewModel: BookViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel()
 ) {
     var searchText by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     val isDarkMode by themeViewModel.isDarkTheme.collectAsState()
     val favoriteBooks by viewModel.favoriteBooks.collectAsState()
@@ -97,9 +103,17 @@ fun FavouriteScreen(
                     }
 
                     items(favoriteBooks) { book ->
-                        FavoriteBookItem(navController, book = book, theme = colors) {
-                            navController.navigate("detail/${book.id}")
-                        }
+                        FavoriteBookItem(
+                            navController = navController,
+                            book = book,
+                            theme = colors,
+                            onClick = { navController.navigate("bookDetail/${book.id}") },
+                            onRemove = { scope.launch{
+                                userViewModel.unlikingBook(it.id)
+                                viewModel.loadFavorites() // <- cập nhật lại danh sách sau khi xoá
+
+                            }} // hoặc viewModel.removeFavorite(book.id)
+                        )
                     }
                 }
             }
@@ -107,14 +121,22 @@ fun FavouriteScreen(
     }
 }
 
-
 @Composable
-fun FavoriteBookItem(navController: NavController, book: Book, theme: AppColors, onClick: () -> Unit) {
+fun FavoriteBookItem(
+    navController: NavController,
+    book: Book,
+    theme: AppColors,
+    onClick: () -> Unit,
+    onRemove: (Book) -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .clickable { onClick() }
+        ,
+        verticalAlignment = Alignment.CenterVertically
+
     ) {
         AsyncImage(
             model = book.imageUrl,
@@ -125,12 +147,15 @@ fun FavoriteBookItem(navController: NavController, book: Book, theme: AppColors,
             modifier = Modifier
                 .size(80.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .clickable { navController.navigate("bookDetail/${book.id}") }
+
         )
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        Column(modifier = Modifier.weight(1f)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+        ) {
             Text(
                 text = book.name,
                 color = theme.textPrimary,
@@ -146,15 +171,28 @@ fun FavoriteBookItem(navController: NavController, book: Book, theme: AppColors,
                 modifier = Modifier.padding(top = 4.dp)
             )
             Text(
-                //text = "Chương mới nhất " + (book.getLatestChapter()?.title ?:"" ),
-                text =  (book.getLatestVolume()?.title ?:"" ) + " - " + (book.getLatestChapter()?.title),
+                text = (book.getLatestVolume()?.title ?: "") + " - " + (book.getLatestChapter()?.title ?: ""),
                 fontSize = 14.sp,
                 color = theme.textPrimary,
-                modifier = Modifier.padding(top = 2.dp)
+                modifier = Modifier
+                    .padding(top = 2.dp)
                     .clickable {
                         navController.navigate("reading/${book.id}/${book.getLatestVolume()?.order}/${book.getLatestChapter()?.order}")
-                     }
+                    }
+            )
+        }
+
+        // Nút xóa
+        IconButton(
+            onClick = { onRemove(book) },
+            modifier = Modifier.padding(start = 8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Remove",
+                tint = Color.Red
             )
         }
     }
 }
+

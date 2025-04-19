@@ -73,8 +73,8 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             val chapterOrderStr = backStackEntry.arguments?.getString("chapterOrder") ?: "1"
 
             // Parse strings to Int
-            val volumeOrder = volumeOrderStr.toIntOrNull() ?: 1
-            val chapterOrder = chapterOrderStr.toIntOrNull() ?: 1
+            val volumeOrder = volumeOrderStr.toLongOrNull() ?: 1
+            val chapterOrder = chapterOrderStr.toLongOrNull() ?: 1
 
             //Log.d("chapter and voluume ", "chapter $chapterOrder  volume $volumeOrder")
             ReaderScreen(navController, bookId, volumeOrder, chapterOrder, themeViewModel)

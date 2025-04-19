@@ -85,14 +85,14 @@ class BookViewModel() : ViewModel()
     }
 
     // Helper function to get chapter content
-    fun getChapterContent(volumeOrder: Int, chapterOrder: Int): Chapter? {
+    fun getChapterContent(volumeOrder: Long, chapterOrder: Long): Chapter? {
         val currentBook = _book.value ?: return null
         val volume = currentBook.volume.find { it.order == volumeOrder }
         return volume?.chapters?.find { it.order == chapterOrder }
     }
 
     // Helper function to get previous chapter
-    fun getPreviousChapter(volumeOrder: Int, chapterOrder: Int): Triple<Boolean, Int?, Int?> {
+    fun getPreviousChapter(volumeOrder: Long, chapterOrder: Long): Triple<Boolean, Long?, Long?> {
         val currentBook = _book.value ?: return Triple(false, null, null)
 
         // Sort volumes by name to ensure consistent order
@@ -127,7 +127,7 @@ class BookViewModel() : ViewModel()
     }
 
     // Helper function to get next chapter
-    fun getNextChapter(volumeOrder: Int, chapterOrder: Int): Triple<Boolean, Int?, Int?> {
+    fun getNextChapter(volumeOrder: Long, chapterOrder: Long): Triple<Boolean, Long?, Long?> {
         val currentBook = _book.value ?: return Triple(false, null, null)
 
         // Sort volumes by name to ensure consistent order
@@ -161,7 +161,7 @@ class BookViewModel() : ViewModel()
         return Triple(false, null, null)
     }
 
-    private suspend fun loadFavorites() {
+    suspend fun loadFavorites() {
         // TODO: Load từ Firebase hoặc local
         _favoriteBooks.value = bookRepository.favoriteBooks() // Replace with real fetch
     }
