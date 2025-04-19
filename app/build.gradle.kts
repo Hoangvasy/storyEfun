@@ -12,11 +12,10 @@ android {
 
     defaultConfig {
         applicationId = "com.example.storyefun"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -66,7 +65,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.6.0")
 
     // Cloudinary
-    implementation("com.cloudinary:cloudinary-android:2.3.1")
+    implementation(libs.cloudinary.android)
 
     implementation(libs.firebase.auth)
     implementation(libs.androidx.credentials)
@@ -78,6 +77,9 @@ dependencies {
         "include" to listOf("*.aar", "*.jar"),
         "exclude" to listOf("")
     )))
+
+    implementation("xmlpull:xmlpull:1.1.3.4d_b4_min")
+
 
     // Testing
     testImplementation(libs.junit)

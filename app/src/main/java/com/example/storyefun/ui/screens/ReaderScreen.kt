@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +57,7 @@ import com.example.storyefun.R
 import com.example.storyefun.data.models.Book
 import com.example.storyefun.ui.theme.AppColors
 import com.example.storyefun.ui.theme.LocalAppColors
+import com.example.storyefun.utils.downloadAndExtractDocx
 import com.example.storyefun.utils.downloadTextFile
 import com.example.storyefun.viewModel.BookViewModel
 import com.example.storyefun.viewModel.ThemeViewModel
@@ -479,7 +481,16 @@ fun NovelContent(
                     } catch (e: Exception) {
                         "Lỗi tải file: ${e.message}"
                     }
-                } else {
+                } else if (url.endsWith((".docx")))
+                {
+                    content = try {
+                        downloadAndExtractDocx(url)
+                    } catch (e: Exception) {
+                        "Lỗi tải file: ${e.message}"
+                    }
+                }
+
+                else {
                     content = "Chưa hỗ trợ định dạng này: $url"
                 }
             }
