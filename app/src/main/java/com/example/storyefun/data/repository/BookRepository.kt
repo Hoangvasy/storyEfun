@@ -58,7 +58,7 @@ class BookRepository {
                 val categoryIds = result.categoryIDs ?: emptyList()
                 val categoryList = mutableListOf<Category>()
                 for (categoryId in categoryIds) {
-                    val catSnapshot = db.collection("category").document(categoryId).get().await()
+                    val catSnapshot = db.collection("categories").document(categoryId).get().await()
                     catSnapshot.toObject(Category::class.java)?.let { categoryList.add(it) }
                 }
                 result.category = categoryList // <- Gắn vào một field mới

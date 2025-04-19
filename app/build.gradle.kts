@@ -78,7 +78,6 @@ dependencies {
         "include" to listOf("*.aar", "*.jar"),
         "exclude" to listOf("")
     )))
-    implementation(libs.androidx.camera.core)
 
     // Testing
     testImplementation(libs.junit)
