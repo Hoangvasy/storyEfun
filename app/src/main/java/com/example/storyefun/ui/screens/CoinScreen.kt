@@ -29,7 +29,7 @@ fun CoinScreen(navController: NavController) {
 
     var selectedOption by remember { mutableStateOf(10) }
 
-    val originalPrice = 100
+    val originalPrice = 1001
     val discount = options.firstOrNull { it.second == selectedOption }?.second ?: 0
     val total = originalPrice - (originalPrice * discount / 100)
 
@@ -130,18 +130,55 @@ fun CoinScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Button(
-            onClick = {
-                navController.navigate("desposite")
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Text("Nạp tiền")
+        if (coinBalance != null && coinBalance!! < total) {
+            Button(
+                onClick = {
+                    navController.navigate("desposite")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Text("Nạp tiền")
+            }
+        }else{
+            Button(
+                onClick = {
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid
+                    if (uid != null) {
+                        val db = FirebaseFirestore.getInstance()
+                        val userDoc = db.collection("users").document(uid)
+
+                        db.runTransaction { transaction ->
+                            val snapshot = transaction.get(userDoc)
+                            val currentCoin = snapshot.getLong("coin") ?: 0
+                            if (currentCoin >= total) {
+                                transaction.update(userDoc, "coin", currentCoin - total)
+                                // TODO: Lưu trạng thái chương đã mở khóa tại đây nếu cần
+                            }
+                        }.addOnSuccessListener {
+                            // Hiển thị thông báo hoặc chuyển màn hình
+                            println("Mở khóa thành công")
+                        }.addOnFailureListener {
+                            println("Mở khóa thất bại: ${it.message}")
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)) // Xanh lá
+            ) {
+                Text("Mở khóa")
+            }
         }
-    }
+
+
+        }
+
+
 }
 
 @Composable

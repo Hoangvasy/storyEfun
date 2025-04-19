@@ -33,6 +33,7 @@ import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.viewModel.ThemeViewModel
 import coil.compose.AsyncImage
 import com.example.storyefun.navigation.Screen
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 @Composable
@@ -359,84 +360,60 @@ fun InformationSection(navController: NavController, theme: AppColors, book: Boo
 
     CommentSection(theme)
 }
+
+
 @Composable
-fun ChapterListSection(theme: AppColors, book: Book, navController: NavController) {
+fun ChapterListSection(
+    theme: AppColors,
+    book: Book,
+    navController: NavController
+) {
+    val userId = "user123" // TODO: thay bằng ID thật từ FirebaseAuth
+    val firestore = FirebaseFirestore.getInstance()
+
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
             text = "Volumes (${book.volume.size})",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = theme.textPrimary
+            color = theme.textPrimary,
+            modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        Text(
-            text = "Cập nhật mới nhất 29/02/2024",
-            fontSize = 14.sp,
-            color = theme.textSecondary,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        book.volume.forEachIndexed { volumeIndex, volume ->
+            Text(
+                text = "Tập ${volumeIndex + 1}",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = theme.textSecondary,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
 
-        book.volume.forEach { volume ->
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = theme.backgroundContrast2),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Tập ${volume.name}",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = theme.textPrimary
-                    )
+            volume.chapters.forEachIndexed { chapterIndex, chapter ->
+                val chapterKey = "${book.id}_${volumeIndex}_${chapterIndex}"
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Chương ${chapterIndex + 1}: ${chapter.title}",
+                    color = theme.textPrimary,
+                    modifier = Modifier
+                        .clickable {
+                            // ✅ Lưu trạng thái đã đọc/mở vào Firestore
+                            firestore.collection("users").document(userId)
+                                .collection("unlockedChapters")
+                                .document(chapterKey)
+                                .set(mapOf("chapterKey" to chapterKey))
 
-                    // them ổ khóa khi có chapter
-
-
-                    volume.chapters.forEachIndexed { index, chapter ->
-                        val isLocked = index >= 1 // Khóa từ chapter thứ 3
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    if (!isLocked) {
-                                        navController.navigate("reading/${book.id}/${volume.order}/${chapter.order}")
-                                    }else{
-                                        navController.navigate("coin")
-                                    }
-                                }
-                                .padding(vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                painter = painterResource(
-                                    if (isLocked) R.drawable.ic_views else R.drawable.ic_chapter
-                                ),
-                                contentDescription = null,
-                                tint = theme.textSecondary.copy(alpha = if (isLocked) 0.4f else 1f),
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Chương ${chapter.title}",
-                                fontSize = 14.sp,
-                                color = theme.textSecondary.copy(alpha = if (isLocked) 0.4f else 1f),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            // ✅ Điều hướng đến màn hình đọc chương
+                            navController.navigate("reading/${book.id}/${volumeIndex + 1}/${chapterIndex + 1}")
                         }
-                    }
-                }
+                        .padding(vertical = 4.dp)
+                )
             }
         }
     }
 }
+
+
 
 
 

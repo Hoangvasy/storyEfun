@@ -18,6 +18,9 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object BookDetail : Screen("bookDetail/{bookId}")
 
+    object ProductOrder : Screen("productOrder")
+
+
     object Login : Screen("login")
     object Upload : Screen("upload")
     object Reading : Screen("reading/{bookId}/{volumeOrder}/{chapterOrder}")
@@ -47,7 +50,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Coin.route
+        startDestination = Screen.Home.route
 //        startDestination = Screen.AdminMenu.route
 //        startDestination = Screen.Upload.route
     ) {
@@ -75,7 +78,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.MyStory.route) { MyStoryScreen(navController) }
         composable(Screen.Setting.route) { SettingScreen(navController, themeViewModel) }
         composable(Screen.CategoryList.route) { CategoryScreen(navController) }
-        composable(Screen.Desposite.route) { DespositeScreen(navController) }
+//        composable(Screen.Desposite.route) { DespositeScreen(navController) }
         composable(Screen.Coin.route) { CoinScreen(navController) }
 
         composable(Screen.AdminMenu.route) {MenuScreen(navController)}
@@ -99,6 +102,14 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
             val volumeId = backStackEntry.arguments?.getString("volumeId") ?: "Unknown"
             AddChapterScreen(navController, bookId, volumeId)
+        }
+
+
+        composable(Screen.ProductOrder.route) {
+            ProductOrderScreen()
+        }
+        composable(Screen.Desposite.route) {
+            DespositeScreen()
         }
 
 
