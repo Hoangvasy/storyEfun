@@ -22,7 +22,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.storyefun.R
@@ -33,11 +35,14 @@ import com.example.storyefun.ui.theme.AppColors
 import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.viewModel.ThemeViewModel
 import coil.compose.AsyncImage
-
+import com.example.storyefun.viewModel.UserViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @Composable
-fun BookDetailScreen(navController: NavController, bookId : String, themeViewModel: ThemeViewModel, viewModel: BookViewModel = viewModel()) {
+fun BookDetailScreen(navController: NavController, bookId : String, themeViewModel: ThemeViewModel, viewModel: BookViewModel = viewModel(), userViewModel: UserViewModel = viewModel()) {
     var theme = LocalAppColors.current
     var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -77,7 +82,7 @@ fun BookDetailScreen(navController: NavController, bookId : String, themeViewMod
                     Header(text, active, onQueryChange = { text = it }, onActiveChange = { active = it }, navController)
                 }
 
-                item { MangaInfo(theme, book!!, navController) }  // safe to use !! here after null check
+                item { MangaInfo(theme, book!!, navController, userViewModel) }  // safe to use !! here after null check
 
                 item {
                     TabRow(
@@ -115,9 +120,19 @@ fun BookDetailScreen(navController: NavController, bookId : String, themeViewMod
 
     }
 }
-
 @Composable
-fun MangaInfo(theme: AppColors, book: Book, navController: NavController) {
+fun MangaInfo(theme: AppColors, book: Book, navController: NavController, viewModel: UserViewModel) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    var isLiked by remember { mutableStateOf(false) }
+    var isFollowed by remember { mutableStateOf(false) }
+
+    LaunchedEffect(book.id) {
+        isLiked = withContext(Dispatchers.IO) { viewModel.isLikedBook(book.id) }
+        isFollowed = withContext(Dispatchers.IO) { viewModel.isFollowedBook(book.id) }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -145,14 +160,13 @@ fun MangaInfo(theme: AppColors, book: Book, navController: NavController) {
                     .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
             )
 
-            // Card with poster and book info
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(horizontal = 16.dp)
                     .align(Alignment.BottomCenter)
-                    .offset(y = 40.dp), // Offset to overlap with banner
+                    .offset(y = 40.dp),
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                 colors = CardDefaults.cardColors(containerColor = theme.backgroundColor)
@@ -172,11 +186,10 @@ fun MangaInfo(theme: AppColors, book: Book, navController: NavController) {
                         error = painterResource(R.drawable.error),
                         modifier = Modifier
                             .width(100.dp)
-                            .aspectRatio(2f / 3f) // Poster ratio 2:3
+                            .aspectRatio(2f / 3f)
                             .clip(RoundedCornerShape(8.dp))
                     )
 
-                    // Book details
                     Column(
                         modifier = Modifier
                             .weight(1f)
@@ -196,8 +209,6 @@ fun MangaInfo(theme: AppColors, book: Book, navController: NavController) {
                             color = theme.textSecondary,
                             modifier = Modifier.padding(top = 4.dp)
                         )
-                        var isLiked by remember { mutableStateOf(false) }
-                        var isFollowed by remember { mutableStateOf(false) }
 
                         Row(
                             modifier = Modifier
@@ -206,34 +217,56 @@ fun MangaInfo(theme: AppColors, book: Book, navController: NavController) {
                             horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Views (không bấm được)
-                            StatItem(
+                            /*StatItem(
                                 icon = R.drawable.ic_views,
                                 text = "${book.views}",
                                 color = theme.textSecondary,
                                 onClick = null
                             )
-
-                            // Follow (bấm để toggle)
+*/
                             StatItem(
                                 icon = R.drawable.ic_follows,
-                                text = if (isFollowed) "" else "Theo dõi",
+                                text = if (isFollowed) "" + book.follows else "Follow " + book.follows,
                                 color = if (isFollowed) Color.Red else theme.textSecondary
                             ) {
-                                isFollowed = !isFollowed
+                                scope.launch {
+                                    if (isFollowed)
+                                    {
+                                        viewModel.unfollowingBook(book.id)
+                                        book.follows--
+                                        isFollowed = false
+                                    }
+                                    else
+                                    {
+                                        viewModel.followingBook(book.id)
+                                        book.follows++
+                                        isFollowed = true
+                                    }
+                                }
                             }
 
-                            // Like (bấm để toggle)
                             StatItem(
                                 icon = R.drawable.ic_likes,
-                                text = if (isLiked) "" else "Thích",
+                                text = if (isLiked) "" + book.likes else "Like " + book.likes,
                                 color = if (isLiked) Color.Red else theme.textSecondary
                             ) {
-                                isLiked = !isLiked
+                                scope.launch {
+                                    if (isLiked)
+                                    {
+                                        viewModel.unlikingBook(book.id)
+                                        book.likes--
+                                        isLiked = false
+                                    }
+                                    else
+                                    {
+                                        viewModel.likingBook(book.id)
+                                        book.likes++
+                                        isLiked = true
+                                    }
+                                }
                             }
                         }
 
-                        // Start Reading Button
                         Button(
                             onClick = {
                                 navController.navigate("reading/${book.id}/1/1")
@@ -371,7 +404,7 @@ fun StatItem(
         Spacer(modifier = Modifier.width(6.dp))
         Text(
             text = text,
-            fontSize = 14.sp,
+            fontSize = 12.sp,
             color = color,
             fontWeight = FontWeight.SemiBold
         )

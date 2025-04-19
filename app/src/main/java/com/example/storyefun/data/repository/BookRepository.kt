@@ -9,6 +9,7 @@ import com.example.storyefun.data.models.Chapter
 import com.example.storyefun.data.models.Comment
 import com.example.storyefun.data.models.Volume
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 
@@ -152,6 +153,41 @@ class BookRepository {
             false
         }
     }
+
+    suspend fun valueIncrease(type: String, bookId: String) {
+        try {
+            val bookRef = db.collection("books").document(bookId)
+
+            val field = when (type.lowercase()) {
+                "like" -> "likes"
+                "follow" -> "follows"
+                else -> return // invalid type
+            }
+
+            bookRef.update(field, FieldValue.increment(1)).await()
+            Log.d("valueIncrease", "Increased $field for book $bookId")
+        } catch (e: Exception) {
+            Log.e("valueIncrease", "Error increasing value: ${e.message}")
+        }
+    }
+
+    suspend fun valueDecrease(type: String, bookId: String) {
+        try {
+            val bookRef = db.collection("books").document(bookId)
+
+            val field = when (type.lowercase()) {
+                "like" -> "likes"
+                "follow" -> "follows"
+                else -> return // invalid type
+            }
+
+            bookRef.update(field, FieldValue.increment(-1)).await()
+            Log.d("valueDecrease", "Decreased $field for book $bookId")
+        } catch (e: Exception) {
+            Log.e("valueDecrease", "Error decreasing value: ${e.message}")
+        }
+    }
+
 
 
 
