@@ -38,6 +38,7 @@ sealed class Screen(val route: String) {
     object AddVolume : Screen("addVolume/{bookId}")
     object ListChapter : Screen("listChapter/{bookId}/{volumeId}")
     object AddChapter : Screen("addChapter/{bookId}/{volumeId}")
+    object AddCategory : Screen("addCategory")
 
     object Desposite : Screen("desposite")
     object Coin : Screen("coin")
@@ -50,9 +51,11 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.AdminMenu.route
 //        startDestination = Screen.AdminMenu.route
 //        startDestination = Screen.Upload.route
+
+
     ) {
         composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
         composable("bookDetail/{bookId}") { backStackEntry ->
@@ -78,12 +81,18 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.MyStory.route) { MyStoryScreen(navController) }
         composable(Screen.Setting.route) { SettingScreen(navController, themeViewModel) }
         composable(Screen.CategoryList.route) { CategoryScreen(navController) }
-//        composable(Screen.Desposite.route) { DespositeScreen(navController) }
+        composable(Screen.Desposite.route) { DespositeScreen() }
         composable(Screen.Coin.route) { CoinScreen(navController) }
 
         composable(Screen.AdminMenu.route) {MenuScreen(navController)}
         composable(Screen.AdminUpload.route) {AdminUploadScreen(navController)}
         composable(Screen.ManageBook.route) { ManageBooksScreen(navController) }
+        composable(Screen.AddCategory.route) { AddCategory(navController, onCategoryAdded = {
+            // Xử lý khi category được thêm, ví dụ:
+            navController.navigate(Screen.Home.route) {
+                popUpTo(Screen.AddCategory.route) { inclusive = true }
+            }
+        }) }
 
         composable("editBook/{bookId}") { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
@@ -111,6 +120,8 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.Desposite.route) {
             DespositeScreen()
         }
+
+
 
 
     }
