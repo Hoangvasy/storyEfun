@@ -5,7 +5,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -14,34 +17,52 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Face
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.storyefun.R
+import com.example.storyefun.data.models.Book
+import com.example.storyefun.ui.theme.AppColors
 import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.utils.downloadTextFile
 import com.example.storyefun.viewModel.BookViewModel
 import com.example.storyefun.viewModel.ThemeViewModel
 import kotlinx.coroutines.launch
+
+
+
 
 
 
@@ -96,7 +117,7 @@ fun ReaderScreen(
                             MangaContent(chapterContent.content)
                         } else {
                             Log.d("novel check", "this book is novel")
-                            NovelContent(chapterContent.content)
+                            NovelContent(chapterContent.content, viewModel.fontSize.value, viewModel.lineSpacing.value)
                         }
                     } else {
                         Box(
@@ -122,6 +143,7 @@ fun ReaderScreen(
                     viewModel = viewModel,
                     volumeOrder = currentVolumeOrder,
                     chapterOrder = currentChapterOrder,
+                    book = book!!,
                     onPreviousChapter = {
                         val (hasPrevious, prevVolumeOrder, prevChapterOrder) = viewModel.getPreviousChapter(currentVolumeOrder, currentChapterOrder)
                         if (hasPrevious && prevVolumeOrder != null && prevChapterOrder != null) {
@@ -135,7 +157,8 @@ fun ReaderScreen(
                             currentVolumeOrder = nextVolumeOrder
                             currentChapterOrder = nextChapterOrder
                         }
-                    }
+                    },
+                    themeViewModel
                 )
             }
         }
@@ -170,9 +193,9 @@ fun CustomTopBar(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onBack) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = theme.backgroundColor
+                        tint = theme.textPrimary
                     )
                 }
                 Text(
@@ -185,89 +208,266 @@ fun CustomTopBar(
         }
     }
 }
-
 @Composable
 fun CustomBottomBar(
     isVisible: Boolean,
     viewModel: BookViewModel,
     volumeOrder: Long,
     chapterOrder: Long,
+    book: Book,
     onPreviousChapter: () -> Unit,
-    onNextChapter: () -> Unit
+    onNextChapter: () -> Unit,
+    themeViewModel: ThemeViewModel,
 ) {
     val theme = LocalAppColors.current
     val configuration = LocalConfiguration.current
     val fontScale = configuration.fontScale
-    val baseHeight = 56.dp
+    val baseHeight = 64.dp
     val adjustedHeight = baseHeight / fontScale
+    val fontSize by viewModel.fontSize
+    val lineSpacing by viewModel.lineSpacing // Observe lineSpacing from ViewModel
+
+    var darkMode by remember { mutableStateOf(false) }
+    var fontSelectorExpanded by remember { mutableStateOf(false) }
+    var lineSpacingSelectorExpanded by remember { mutableStateOf(false) }
 
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(),
-        exit = fadeOut()
+        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(adjustedHeight)
                 .background(theme.background)
-                .padding(horizontal = 16.dp),
-            contentAlignment = Alignment.Center
+                .shadow(4.dp, shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                .padding(vertical = 8.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(adjustedHeight)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                val (hasPrevious, _, _) = viewModel.getPreviousChapter(volumeOrder, chapterOrder)
-                IconButton(
-                    onClick = { if (hasPrevious) onPreviousChapter() },
-                    enabled = hasPrevious
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Previous",
-                        tint = if (hasPrevious) theme.backgroundColor else Color.Gray
-                    )
-                }
-                Text(
-                    text = "Chương trước",
-                    fontSize = 14.sp,
-                    color = if (hasPrevious) theme.textSecondary else Color.Gray
+                // Previous Chapter
+                ChapterNavigationButton(
+                    enabled = viewModel.getPreviousChapter(volumeOrder, chapterOrder).first,
+                    icon = Icons.Default.ArrowBack,
+                    text = "",
+                    theme = theme,
+                    onClick = onPreviousChapter
                 )
 
-                Spacer(modifier = Modifier.weight(1f))
-
-                val (hasNext, _, _) = viewModel.getNextChapter(volumeOrder, chapterOrder)
-                Text(
-                    text = "Chương sau",
-                    fontSize = 14.sp,
-                    color = if (hasNext) theme.textSecondary else Color.Gray
-                )
+                // Dark Mode Toggle
                 IconButton(
-                    onClick = { if (hasNext) onNextChapter() },
-                    enabled = hasNext
+                    onClick = {
+                        darkMode = !darkMode
+                        themeViewModel.toggleTheme()
+                    },
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            theme.backgroundColor.copy(alpha = 0.1f),
+                            CircleShape
+                        )
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "Next",
-                        tint = if (hasNext) theme.backgroundColor else Color.Gray
+                        painter = painterResource(id = if (darkMode) R.drawable.dark else R.drawable.light),
+                        contentDescription = "Toggle Dark Mode",
+                        tint = theme.textPrimary,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
+
+                // Font Size Selector (for novels)
+                if (book.isNovel() == true) {
+                    FontSizeSelector(
+                        fontSize = fontSize,
+                        expanded = fontSelectorExpanded,
+                        theme = theme,
+                        onExpandedChange = { fontSelectorExpanded = it },
+                        onFontSizeSelected = { size ->
+                            viewModel.setFontSize(size) // Update fontSize in ViewModel
+                            fontSelectorExpanded = false
+                        }
+                    )
+                    LineSpacingSelector(
+                        lineSpacing = lineSpacing,
+                        expanded = lineSpacingSelectorExpanded,
+                        theme = theme,
+                        onExpandedChange = { lineSpacingSelectorExpanded = it },
+                        onLineSpacingSelected = { spacing ->
+                            viewModel.setLineSpacing(spacing)
+                            lineSpacingSelectorExpanded = false
+                        }
+                    )
+                }
+
+                // Next Chapter
+                ChapterNavigationButton(
+                    enabled = viewModel.getNextChapter(volumeOrder, chapterOrder).first,
+                    icon = Icons.AutoMirrored.Filled.ArrowForward,
+                    text = "",
+                    theme = theme,
+                    onClick = onNextChapter
+
+                )
             }
         }
     }
 }
 
 @Composable
-fun NovelContent(fileUrls: List<String>) {
+private fun LineSpacingSelector(
+    lineSpacing: Float,
+    expanded: Boolean,
+    theme: AppColors,
+    onExpandedChange: (Boolean) -> Unit,
+    onLineSpacingSelected: (Float) -> Unit,
+) {
+    Box {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .background(theme.background.copy(alpha = 0.9f), RoundedCornerShape(8.dp))
+                .clickable { onExpandedChange(!expanded) }
+                .padding(horizontal = 8.dp, vertical = 6.dp)
+        ) {
+            Text(
+                text = "↕",
+                fontSize = 14.sp,
+                color = theme.textSecondary,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "${String.format("%.1f", lineSpacing)}x",
+                fontSize = 14.sp,
+                color = theme.textPrimary,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
 
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) },
+            modifier = Modifier
+                .background(theme.background)
+                .border(1.dp, theme.textSecondary.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+        ) {
+            listOf(1.0f, 1.5f, 2.0f, 2.5f).forEach { spacing ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = "${String.format("%.1f", spacing)}x",
+                            fontSize = 14.sp,
+                            color = theme.textPrimary,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    },
+                    onClick = { onLineSpacingSelected(spacing) }
+                )
+            }
+        }
+    }
+}
+@Composable
+private fun ChapterNavigationButton(
+    enabled: Boolean,
+    icon: ImageVector,
+    text: String,
+    theme: AppColors,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clickable(enabled = enabled) { onClick() }
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = text,
+            tint = if (enabled) theme.textPrimary else theme.textSecondary.copy(alpha = 0.5f),
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = text,
+            fontSize = 12.sp,
+            color = if (enabled) theme.textPrimary else theme.textSecondary.copy(alpha = 0.5f),
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun FontSizeSelector(
+    fontSize: Float,
+    expanded: Boolean,
+    theme: AppColors,
+    onExpandedChange: (Boolean) -> Unit,
+    onFontSizeSelected: (Float) -> Unit
+) {
+    Box {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .background(theme.background.copy(alpha = 0.9f), RoundedCornerShape(8.dp))
+                .clickable { onExpandedChange(!expanded) }
+                .padding(horizontal = 8.dp, vertical = 6.dp)
+        ) {
+            Text(
+                text = "Aa",
+                fontSize = 14.sp,
+                color = theme.textSecondary,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "${fontSize.toInt()}sp",
+                fontSize = 14.sp,
+                color = theme.textPrimary,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) },
+            modifier = Modifier
+                .background(theme.background)
+                .border(1.dp, theme.textSecondary.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+        ) {
+            listOf(12, 14, 16, 18, 20, 24, 26, 28, 30, 32, 34, 36, 38, 40).forEach { size ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = "$size sp",
+                            fontSize = 14.sp,
+                            color = theme.textPrimary,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    },
+                    onClick = { onFontSizeSelected(size.toFloat()) }
+                )
+            }
+        }
+    }
+}
+@Composable
+fun NovelContent(
+    fileUrls: List<String>,
+    fontSize: Float, // Add fontSize parameter,
+    lineSpacing: Float
+) {
     val theme = LocalAppColors.current
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-
     ) {
         items(fileUrls) { url ->
             var content by remember { mutableStateOf("Đang tải...") }
@@ -286,14 +486,14 @@ fun NovelContent(fileUrls: List<String>) {
 
             Text(
                 text = content,
-                fontSize = 16.sp,
+                fontSize = fontSize.sp, // Use the passed fontSize
                 color = theme.textPrimary,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp),
+                lineHeight = (fontSize * lineSpacing).sp, // Apply line spacing
             )
         }
     }
 }
-
 @Composable
 fun MangaContent(imageUrls: List<String>) {
     val scale = remember { Animatable(1f) }

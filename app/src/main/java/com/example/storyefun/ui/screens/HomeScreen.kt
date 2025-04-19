@@ -73,7 +73,7 @@ fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel ) {
                     navController = navController,
                 )
             },
-            bottomBar = { BottomBar(navController) }
+            bottomBar = { BottomBar(navController, "home") }
         ) { paddingValues ->
             Box(modifier = Modifier.fillMaxSize()) {
                 // In light mode, use a background image; in dark mode, use theme background color

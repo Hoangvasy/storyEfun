@@ -51,7 +51,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
     val currentUser = auth.currentUser
     val start : String
     if (currentUser != null) {
-        start = Screen.AddCategory.route
+        start = Screen.Home.route
     } else {
         // Người dùng chưa đăng nhập, yêu cầu đăng nhập
         start = Screen.Login.route
