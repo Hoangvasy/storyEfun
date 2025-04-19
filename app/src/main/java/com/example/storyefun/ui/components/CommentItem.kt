@@ -1,8 +1,9 @@
 package com.example.storyefun.ui.components
 
+import coil.compose.rememberImagePainter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,22 +14,40 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.storyefun.R
 import com.example.storyefun.ui.theme.AppColors
-import androidx.compose.foundation.shape.CircleShape
+import com.example.storyefun.R
+import com.example.storyefun.data.models.Book
+import com.example.storyefun.viewModel.BookViewModel
+
 @Composable
-fun CommentItem(username: String, date: String, comment: String, theme: AppColors) {
+fun CommentItem(
+    username: String,
+    date: String,
+    comment: String,
+    theme: AppColors,
+    userImageUrl: String?,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        // Load image using Coil, default to local resource if null
+        val imagePainter = rememberImagePainter(
+            data = userImageUrl,
+            builder = {
+                crossfade(true)
+                fallback(R.drawable.ic_user) // fallback to a default image if URL is null or invalid
+            }
+        )
+
         Image(
-            painter = painterResource(id = R.drawable.ic_user),
-            contentDescription = null,
+            painter = imagePainter,
+            contentDescription = "User Avatar",
             modifier = Modifier
                 .size(40.dp)
-                .clip(CircleShape),
-            colorFilter = ColorFilter.tint(theme.textPrimary)
+                .clip(CircleShape)
         )
 
         Spacer(modifier = Modifier.width(12.dp))

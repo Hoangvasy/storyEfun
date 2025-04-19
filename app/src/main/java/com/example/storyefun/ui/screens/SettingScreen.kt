@@ -19,6 +19,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.viewModel.ThemeViewModel
+import com.google.firebase.auth.FirebaseAuth
+
 @Composable
 fun SettingScreen(navController: NavController? = null, themeViewModel: ThemeViewModel) {
 
@@ -111,7 +113,13 @@ fun SettingScreen(navController: NavController? = null, themeViewModel: ThemeVie
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = theme.textPrimary,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.clickable {   val auth = FirebaseAuth.getInstance()
+                        auth.signOut()
+                        if (navController != null) {
+                            navController.navigate("Login")
+                        }
+                    }
                 )
             }
         }

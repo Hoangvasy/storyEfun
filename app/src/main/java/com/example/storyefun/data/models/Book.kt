@@ -14,7 +14,7 @@ data class Book(
     var volume: List<Volume> = emptyList(),
     var categoryIDs: List<String> = emptyList(), // for get list of category id from firebase
     var category: List<Category> = emptyList(), // for save catogory list as obj
-
+    var comments: MutableList<Comment> = mutableListOf(), // Make sure this is mutable
 ) {
     fun isNovel(): Boolean {
         return category.any { it.name.equals("Novel", ignoreCase = true) }

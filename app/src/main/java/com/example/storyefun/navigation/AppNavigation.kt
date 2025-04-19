@@ -12,6 +12,8 @@ import com.example.storyefun.ui.screens.*
 
 import com.example.storyefun.admin.ui.*
 import com.example.storyefun.viewModel.ThemeViewModel
+import com.google.common.base.Objects
+import com.google.firebase.auth.FirebaseAuth
 
 
 sealed class Screen(val route: String) {
@@ -44,10 +46,19 @@ sealed class Screen(val route: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewModel) {
-
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
+    val start : String
+    if (currentUser != null) {
+        start = Screen.Home.route
+    } else {
+        // Người dùng chưa đăng nhập, yêu cầu đăng nhập
+        start = Screen.Login.route
+    }
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+
+        startDestination = start
 //        startDestination = Screen.Upload.route
     ) {
         composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }

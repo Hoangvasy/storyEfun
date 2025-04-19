@@ -103,6 +103,7 @@ fun BookDetailScreen(navController: NavController, bookId : String, themeViewMod
                         0 -> InformationSection(navController, theme, book!!)
                         1 -> ChapterListSection(theme, book!!, navController)
                     }
+                    CommentSection(theme, book!!.id, book!!.comments)
                 }
             }
         } else {
@@ -341,7 +342,6 @@ fun InformationSection(navController: NavController, theme: AppColors, book: Boo
         }
     }
 
-    CommentSection(theme)
 }
 
 @Composable

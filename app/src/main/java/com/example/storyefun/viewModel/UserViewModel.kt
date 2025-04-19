@@ -74,4 +74,16 @@ class UserViewModel() : ViewModel() {
             }
         }
     }
+    fun likingBook(bookId : String)
+    {
+
+    }
+    fun followingBook(bookId: String)
+    {
+
+    }
+    fun buyChapter(bookId: String, volumeOrder: String, chapterId: String)
+    {
+
+    }
 }

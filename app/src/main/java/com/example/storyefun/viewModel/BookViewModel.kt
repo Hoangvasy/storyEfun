@@ -27,7 +27,6 @@ class BookViewModel() : ViewModel()
         viewModelScope.launch {
             setState(true)
             _books.value = bookRepository.getBooks()
-            Log.e("book list got", _books.value.toString())
             setState(false)
         }
 
@@ -36,11 +35,19 @@ class BookViewModel() : ViewModel()
         viewModelScope.launch {
             _isLoading.value = true
             val result = bookRepository.getBook(bookId)
-            _book.value = result
-            Log.e("info of loaded book: ", result.toString())
+
+            // Debugging log to check if result has comments
+            if (result != null) {
+                Log.d("info of loaded book comment : ", result.comments.toString())
+            } else {
+                Log.d("info", "No book found for ID: $bookId")
+            }
+
+            _book.value = result // Set the book after fetching comments
             _isLoading.value = false
         }
     }
+
 
     fun addBook(bookId: String) {
 

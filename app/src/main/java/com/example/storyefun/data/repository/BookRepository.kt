@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import com.example.storyefun.data.models.Book
 import com.example.storyefun.data.models.Category
 import com.example.storyefun.data.models.Chapter
+import com.example.storyefun.data.models.Comment
 import com.example.storyefun.data.models.Volume
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -58,10 +59,19 @@ class BookRepository {
                 }
                 result.category = categoryList // <- Gắn vào một field mới
 
+                // 3. Get comments for the book
+                val commentsSnapshot = bookRef.collection("comments").get().await()
+                val commentList = commentsSnapshot.documents.mapNotNull {
+                    it.toObject(Comment::class.java)
+                }
 
-
+                //result.comments = commentList.toMutableList() // Ensure this is a mutable list
 
             }
+            if (result != null) {
+                Log.d("comment list  ", result.comments.toString())
+            }
+
             return result
 
         }
