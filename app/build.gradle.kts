@@ -74,7 +74,7 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.androidx.runtime.livedata)
     implementation(fileTree(mapOf(
-        "dir" to "C:\\zaloPay",
+        "dir" to "E:\\zalodemo",
         "include" to listOf("*.aar", "*.jar"),
         "exclude" to listOf("")
     )))
@@ -84,7 +84,6 @@ dependencies {
     implementation("commons-codec:commons-codec:1.14")
 
     implementation("xmlpull:xmlpull:1.1.3.4d_b4_min")
-
 
     // Testing
     testImplementation(libs.junit)

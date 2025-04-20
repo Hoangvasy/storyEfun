@@ -16,10 +16,13 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -51,12 +54,13 @@ import com.example.storyefun.data.models.Book
 import com.example.storyefun.viewModel.BookViewModel
 import com.example.storyefun.ui.components.BottomBar
 import com.example.storyefun.ui.components.Header
-import com.example.storyefun.ui.screens.SearchBar
 import com.example.storyefun.ui.theme.AppColors
 import com.example.storyefun.ui.theme.AppTheme
 import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.viewModel.ThemeViewModel
+import com.example.storyefun.viewModel.searchBooks
 import kotlinx.coroutines.delay
+import okhttp3.internal.http2.Header
 
 @ExperimentalMaterial3Api
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -67,17 +71,19 @@ fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel ) {
     var books by remember { mutableStateOf<List<Book>>(emptyList())}
     val isDarkMode by themeViewModel.isDarkTheme.collectAsState()
 
+
+
     AppTheme(darkTheme = isDarkMode) {
         val colors = LocalAppColors.current
 
         Scaffold(
             topBar = {
                 Header(
-                    text = text,
-                    active = active,
-                    onQueryChange = { text = it },
-                    onActiveChange = { active = it },
-                    navController = navController,
+////                    text = text,
+////                    active = active,
+////                    onQueryChange = { text = it },
+////                    onActiveChange = { active = it },
+                    navController = navController
                 )
             },
             bottomBar = { BottomBar(navController, "home") }
@@ -108,8 +114,8 @@ fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel ) {
                         .padding(paddingValues),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    item {SearchBar(onSearch = it)}
-                    item { Banner() }
+//                    item {SearchBar(onSearch = it)}
+//                    item { Banner() }
                     item { Channels(navController = navController, theme = colors) }
                     item { BookStory(navController = navController, theme = colors) }
 //                    item { ContinueRead() }
@@ -119,35 +125,6 @@ fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel ) {
     }
 }
 
-@Composable
-fun SearchBar(onSearch: (String, Boolean) -> Unit,  viewModel: BookViewModel = viewModel()) {
-    var searchQuery by remember { mutableStateOf("") }
-    var searchByBookName by remember { mutableStateOf(true) }
-
-    Column {
-        TextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            label = { Text("Nhập tên sách hoặc thể loại") }
-        )
-        Row {
-            Text("Tìm theo:")
-            RadioButton(
-                selected = searchByBookName,
-                onClick = { searchByBookName = true }
-            )
-            Text("Tên sách")
-            RadioButton(
-                selected = !searchByBookName,
-                onClick = { searchByBookName = false }
-            )
-            Text("Thể loại")
-        }
-        Button(onClick = { onSearch(searchQuery, searchByBookName) }) {
-            Text("Tìm kiếm")
-        }
-    }
-}
 @Composable
 fun BookList(books: List<Book>) {
     if (books.isEmpty()) {

@@ -2,52 +2,52 @@ package com.example.storyefun.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.storyefun.data.models.Book
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class SearchViewModel: ViewModel() {
-    private val _searchText = MutableStateFlow("")
-    val searchText = _searchText.asStateFlow()
+    private val firestore = FirebaseFirestore.getInstance()
+    private val _filteredBooks = MutableStateFlow<List<Book>>(emptyList())
+    val filteredBooks: StateFlow<List<Book>> get() = _filteredBooks
 
-    private val _isSearching = MutableStateFlow(false)
-    val isSearching = _isSearching.asStateFlow()
-
-    private val _books = MutableStateFlow(listOf<Book>())
-    val books = searchText
-        .combine(_books) { text, books ->
-            if(text.isBlank()) {
-                books
+    fun searchBooks(query: String) {
+        viewModelScope.launch {
+            if (query.isEmpty()) {
+                fetchAllBooks()
             } else {
-                books.filter {
-                    it.doesMatchSearch(text)
-                }
+                firestore.collection("books")
+                    .whereGreaterThanOrEqualTo("name", query)
+                    .whereLessThanOrEqualTo("name", query + '\uf8ff') // Tìm kiếm theo tên
+                    .get()
+                    .addOnSuccessListener { result ->
+                        val books = result.documents.mapNotNull { it.toObject(Book::class.java) }
+                        _filteredBooks.value = books
+                    }
+                    .addOnFailureListener { exception ->
+                        // Xử lý lỗi
+                        _filteredBooks.value = emptyList()
+                    }
             }
         }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            _books.value
-        )
-
-    fun onSearchTextChange(text: String) {
-        _searchText.value = text
     }
-}
 
-data class Book (
-    val name: String,
-    val category: String
-) {
-    fun doesMatchSearch(query: String): Boolean {
-        val matchingCombinations = listOf(
-            "$name", "$category"
-        )
-
-        return matchingCombinations.any {
-            it.contains(query, ignoreCase = true)
-        }
+    private fun fetchAllBooks() {
+        firestore.collection("books")
+            .get()
+            .addOnSuccessListener { result ->
+                val books = result.documents.mapNotNull { it.toObject(Book::class.java) }
+                _filteredBooks.value = books
+            }
+            .addOnFailureListener { exception ->
+                // Xử lý lỗi
+                _filteredBooks.value = emptyList()
+            }
     }
 }
