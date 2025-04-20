@@ -1,8 +1,10 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 package com.example.storyefun.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,258 +12,274 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Text
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.storyefun.R
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.storyefun.ui.components.BottomBar
-import com.example.storyefun.ui.components.Header
+import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid as LazyVerticalGrid
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryScreen(navController : NavController) {
-    var text by remember { mutableStateOf("") }
-    var active by remember { mutableStateOf(false) }
-    val tabs = listOf(
-        "Popular", "Bestseller", "Newest", "Coming Soon",
-        "Top Rated", "Trending", "Editor Picks", "Free Books", "Daily Deals"
-    )
-    var selectedTab by remember { mutableStateOf(tabs[0]) }
-
-    // Dữ liệu mẫu cho mỗi tab
-    val popularBooks = listOf(
-        R.drawable.poster2, R.drawable.poster3, R.drawable.poster4
-    )
-    val bestsellerBooks = listOf(
-        R.drawable.poster5, R.drawable.poster6, R.drawable.poster3
-    )
-
-    val books = listOf(
-        Book("Things Fall Apart", "Chinua Achebe", 3.5f, "300 pages", R.drawable.poster6),
-        Book("Jane Eyre", "Charlotte Bronte", 4.0f, "280 pages", R.drawable.poster3),
-        Book("Lararium", "Paulo Coelho", 3.8f, "250 pages", R.drawable.poster2)
-    )
-
     Scaffold(
-        topBar = { Header(text, active, onQueryChange = { text = it }, onActiveChange = { active = it }, navController) },
-        bottomBar = { BottomBar(navController, "category") }
-    ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Background image
-            Image(
-                painter = painterResource(R.drawable.background),
-                contentDescription = "background",
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .matchParentSize()
-                    .graphicsLayer(alpha = 0.5f)
-            )
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    Text(
-                        text = "Categories",
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
-
-                // Tabs popular, bestseller,...
-                item {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 100.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(tabs) { tab ->
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = if (tab == selectedTab) MaterialTheme.colorScheme.primary else Color.Gray,
-                                        shape = MaterialTheme.shapes.medium
-                                    )
-                                    .clickable { selectedTab = tab } // Thay đổi selectedTab khi nhấn
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = tab,
-                                    color = Color.White,
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Danh sách poster
-                item {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        val booksToShow = when (selectedTab) {
-                            "Popular" -> popularBooks
-                            "Bestseller" -> bestsellerBooks
-                            else -> listOf() // Dữ liệu giả cho các tab khác
-                        }
-                        items(booksToShow) { bookRes ->
-                            Image(
-                                painter = painterResource(bookRes),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .width(140.dp)
-                                    .height(200.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.surface,
-                                        shape = MaterialTheme.shapes.medium
-                                    )
+        topBar = {
+            Column {
+                TopAppBar(
+                    title = {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Categories",
+                                fontSize = 18.sp,
+                                color = Color(0xFF8B0000),
+                                style = MaterialTheme.typography.titleMedium
                             )
                         }
-                    }
-                }
-
-                // danh sách đề xuất
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        // Tiêu đề cho danh sách
-                        Text(
-                            text = "You might like",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-
-                        // Danh sách các sách
-                        books.forEach { book ->
-                            BookCard(book)
-                            Divider(
-                                color = Color.Gray,
-                                thickness = 1.dp,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { /* Handle menu click */ }) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menu")
                         }
                     }
-                }
+                )
+                Divider(
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    thickness = 1.dp
+                )
             }
+        },
+    ) { innerPadding ->
+        LazyColumn (
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            item {
+                HeroSection()
+            }
+            item {
+                FilterBar(modifier = Modifier, filterViewModel = viewModel())
+            }
+
         }
     }
 }
 
 @Composable
-fun BookCard(book: Book) {
-    Card(
+fun HeroSection() {
+    Box(
         modifier = Modifier
-            .fillMaxWidth(),
-//            .padding(8.dp),
-        shape = MaterialTheme.shapes.medium,
-        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = Color.Transparent)
+            .fillMaxWidth()
+            .padding(3.dp)
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(8.dp)
+        ) {
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = "https://i.pinimg.com/736x/87/1c/59/871c59a95205840c0b884d7a425b7481.jpg"
+                ),
+                contentDescription = "",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
+
+class FilterViewModel : ViewModel() {
+    private val _selectedIndex = mutableStateOf(-1)
+    val selectedIndex: State<Int> = _selectedIndex
+
+    private val _selectedCategory = mutableStateOf("")
+    val selectedCategory: State<String> = _selectedCategory
+
+    fun updateSelectedCategory(index: Int, category: String) {
+        _selectedIndex.value = index
+        _selectedCategory.value = category
+    }
+}
+
+val categories = listOf("Tiểu thuyết", "Truyện ngắn", "Kinh dị", "Hành động", "Lãng mạn", "Hài hước- vui")
+val categoryStories = mapOf(
+    "Tiểu thuyết" to listOf(
+        Story1("Story1", "Author A", "https://link-to-image.com/cover3.jpg"),
+        Story1("Story2", "Author B", "https://i.pinimg.com/736x/87/1c/59/871c59a95205840c0b884d7a425b7481.jpg"),
+        Story1("Story3", "Author C", "https://link-to-image.com/cover3.jpg")
+    ),
+    "Truyện ngắn" to listOf(
+        Story1("Story1 4", "Author D", "https://link-to-image.com/cover4.jpg"),
+        Story1("Story1 5", "Author E", "https://link-to-image.com/cover5.jpg")
+    ),
+    "Kinh dị" to listOf(
+        Story1("Story1 6", "Author F", "https://link-to-image.com/cover6.jpg"),
+        Story1("Story1 7", "Author G", "https://link-to-image.com/cover7.jpg"),
+        Story1("Story1 8", "Author H", "https://link-to-image.com/cover8.jpg")
+    ),
+    "Hành động" to listOf(
+        Story1("Story1 9", "Author I", "https://link-to-image.com/cover9.jpg"),
+        Story1("Story1 10", "Author J", "https://link-to-image.com/cover10.jpg")
+    ),
+    "Lãng mạn" to listOf(
+        Story1("Story1 11", "Author K", "https://link-to-image.com/cover11.jpg"),
+        Story1("Story1 12", "Author L", "https://link-to-image.com/cover12.jpg")
+    ),
+    "Hài hước- vui" to listOf(
+        Story1("Story1 13", "Author M", "https://link-to-image.com/cover13.jpg"),
+        Story1("Story1 14", "Author N", "https://link-to-image.com/cover14.jpg")
+    ),
+)
+
+@Composable
+fun FetchCategories(): List<String> {
+    var categories by remember { mutableStateOf<List<String>>(emptyList()) }
+
+    LaunchedEffect(Unit) {
+        val firestore = FirebaseFirestore.getInstance()
+        try {
+            val snapshot = firestore.collection("categories").get().await()
+            categories = snapshot.documents.mapNotNull { it.getString("name") }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    return categories
+}
+
+@Composable
+fun FilterBar(
+    modifier: Modifier = Modifier,
+    filterViewModel: FilterViewModel = viewModel()
+) {
+    val selectedIndex by filterViewModel.selectedIndex
+    val selectedCategory by filterViewModel.selectedCategory
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Image(
-                painter = painterResource(book.imageRes),
-                contentDescription = book.title,
-                modifier = Modifier.size(60.dp)
-            )
-
-            Column(
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .weight(1f)
-            ) {
-                Text(
-                    text = book.title,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "Author: ${book.author}",
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                Text(
-                    text = "${book.rating} ★ | ${book.pages}",
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+            categories.forEachIndexed { index, label ->
+                TextButton(
+                    onClick = {
+                        filterViewModel.updateSelectedCategory(index, label)
+                    },
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = if (selectedIndex == index) FontWeight.Bold else FontWeight.Normal
+                        ),
+                        color = if (selectedIndex == index) Color.Blue else MaterialTheme.colorScheme.primary
+                    )
+                }
             }
+        }
+    }
 
-            // Icon for adding a book
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        shape = MaterialTheme.shapes.medium
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "+",
-                    color = MaterialTheme.colorScheme.primary,
-                )
+    if (selectedCategory.isNotEmpty()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+//            Text("Danh sách truyện cho $selectedCategory:", style = MaterialTheme.typography.titleMedium)
+            categoryStories[selectedCategory]?.forEach { story ->
+                StoryItem(story)
             }
         }
     }
 }
 
-data class Book(
-    val title: String,
-    val author: String,
-    val rating: Float,
-    val pages: String,
-    val imageRes: Int
-)
-
-@Preview
 @Composable
-fun PreviewCategory() {
-    CategoryScreen(rememberNavController())
+fun StoryItem(story: Story1) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Image(
+                painter = rememberAsyncImagePainter(story.coverImageUrl),
+                contentDescription = story.title,
+                modifier = Modifier
+                    .width(100.dp)
+                    .height(150.dp),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Text(story.title, style = MaterialTheme.typography.headlineSmall)
+                Text(story.author, style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+    }
 }
 
+data class Story1(
+    val title: String,
+    val author: String,
+    val coverImageUrl: String
+)
