@@ -84,6 +84,11 @@ dependencies {
     implementation("commons-codec:commons-codec:1.14")
 
     implementation("xmlpull:xmlpull:1.1.3.4d_b4_min")
+    implementation(fileTree(mapOf(
+        "dir" to "C:\\Users\\ducp4\\Downloads\\dependancy",
+        "include" to listOf("*.aar", "*.jar"),
+
+    )))
 
     // Testing
     testImplementation(libs.junit)
