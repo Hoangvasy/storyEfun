@@ -90,7 +90,7 @@ fun Header(
     var theme = LocalAppColors.current
 
     var searchQuery by remember { mutableStateOf("") }
-    var searchType by remember { mutableStateOf("title") }
+    var searchType by remember { mutableStateOf("name") }
     var searchResults by remember { mutableStateOf<List<Book>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
 
@@ -151,7 +151,7 @@ fun Header(
                             Icon(
                                 Icons.Default.Person,
                                 contentDescription = "person",
-                                tint = Color.White // Đổi màu biểu tượng để nổi bật
+                                tint = Color.White
                             )
                         }
                         IconButton(onClick = { navController.navigate("setting") }) {
