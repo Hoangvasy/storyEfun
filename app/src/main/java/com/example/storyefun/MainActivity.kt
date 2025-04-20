@@ -35,15 +35,6 @@ class MainActivity : ComponentActivity() {
                 AppNavigation(navController, themeViewModel)
             }
         }
-//        val newCategory = Category(name = "Tiểu thuyết", description = "Belinski: \"Tiểu thuyết là sử thi của đời tư\"")
-//        CategoryFirebase(newCategory) {
-//                isSuccess ->
-//            if (isSuccess) {
-//                Log.d("Firestore", "Category added successfully!")
-//            } else {
-//                Log.e("Firestore", "Failed to add category.")
-//            }
-//        }
     }
 }
 

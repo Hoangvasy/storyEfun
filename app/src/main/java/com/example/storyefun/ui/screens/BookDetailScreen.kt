@@ -90,7 +90,7 @@ fun BookDetailScreen(navController: NavController, bookId : String, themeViewMod
                 item {
                     var text by remember { mutableStateOf("") }
                     var active by remember { mutableStateOf(false) }
-                    Header(text, active, onQueryChange = { text = it }, onActiveChange = { active = it }, navController)
+//                    Header(text, active, onQueryChange = { text = it }, onActiveChange = { active = it }, navController)
                 }
 
                 item { MangaInfo(theme, book!!, navController, userViewModel) }  // safe to use !! here after null check
