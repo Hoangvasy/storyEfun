@@ -7,3 +7,10 @@ plugins {
 
 
 }
+
+buildscript {
+    dependencies {
+        // Update AGP version here if needed
+        classpath(libs.gradle) // update to the latest AGP version
+    }
+}

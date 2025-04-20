@@ -6,8 +6,13 @@ import androidx.lifecycle.MutableLiveData
 import com.example.storyefun.data.models.Book
 import com.example.storyefun.data.models.Category
 import com.example.storyefun.data.models.Chapter
+import com.example.storyefun.data.models.Comment
 import com.example.storyefun.data.models.Volume
+import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 
@@ -53,15 +58,24 @@ class BookRepository {
                 val categoryIds = result.categoryIDs ?: emptyList()
                 val categoryList = mutableListOf<Category>()
                 for (categoryId in categoryIds) {
-                    val catSnapshot = db.collection("category").document(categoryId).get().await()
+                    val catSnapshot = db.collection("categories").document(categoryId).get().await()
                     catSnapshot.toObject(Category::class.java)?.let { categoryList.add(it) }
                 }
                 result.category = categoryList // <- Gắn vào một field mới
 
+                // 3. Get comments for the book
+                val commentsSnapshot = bookRef.collection("comments").get().await()
+                val commentList = commentsSnapshot.documents.mapNotNull {
+                    it.toObject(Comment::class.java)
+                }
 
-
+                //result.comments = commentList.toMutableList() // Ensure this is a mutable list
 
             }
+            if (result != null) {
+                Log.d("comment list  ", result.comments.toString())
+            }
+
             return result
 
         }
@@ -143,6 +157,87 @@ class BookRepository {
         }
     }
 
+    suspend fun valueIncrease(type: String, bookId: String) {
+        try {
+            val bookRef = db.collection("books").document(bookId)
+
+            val field = when (type.lowercase()) {
+                "like" -> "likes"
+                "follow" -> "follows"
+                else -> return // invalid type
+            }
+
+            bookRef.update(field, FieldValue.increment(1)).await()
+            Log.d("valueIncrease", "Increased $field for book $bookId")
+        } catch (e: Exception) {
+            Log.e("valueIncrease", "Error increasing value: ${e.message}")
+        }
+    }
+
+    suspend fun valueDecrease(type: String, bookId: String) {
+        try {
+            val bookRef = db.collection("books").document(bookId)
+
+            val field = when (type.lowercase()) {
+                "like" -> "likes"
+                "follow" -> "follows"
+                else -> return // invalid type
+            }
+
+            bookRef.update(field, FieldValue.increment(-1)).await()
+            Log.d("valueDecrease", "Decreased $field for book $bookId")
+        } catch (e: Exception) {
+            Log.e("valueDecrease", "Error decreasing value: ${e.message}")
+        }
+    }
+
+    suspend fun favoriteBooks(): List<Book> {
+        val firestore = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+
+        val userId = auth.currentUser?.uid ?: return emptyList()
+        val userDoc = firestore.collection("users").document(userId).get().await()
+        val likedBookIds = userDoc.get("likedBooks") as? List<String> ?: emptyList()
+
+        if (likedBookIds.isEmpty()) return emptyList()
+
+        val books = mutableListOf<Book>()
+
+        for (bookId in likedBookIds) {
+            val bookSnapshot = firestore.collection("books").document(bookId).get().await()
+            val book = bookSnapshot.toObject(Book::class.java)?.copy(id = bookSnapshot.id)
+
+            if (book != null) {
+                val volumeSnapshots = firestore.collection("books")
+                    .document(bookId)
+                    .collection("volumes")
+                    .get()
+                    .await()
+
+                val volumes = volumeSnapshots.mapNotNull { volumeDoc ->
+                    val volume = volumeDoc.toObject(Volume::class.java)
+                    val chapterSnapshots = volumeDoc.reference
+                        .collection("chapters")
+                        .get()
+                        .await()
+
+                    val chapters = chapterSnapshots.mapNotNull { it.toObject(Chapter::class.java) }
+                    volume?.apply { this.chapters = chapters }
+                }
+
+                book.volume = volumes
+                books.add(book)
+            }
+        }
+
+        return books
+    }
+
+
+
+    private suspend fun <T> List<Task<T>>.awaitAll(): List<T> {
+        return map { it.await() }
+    }
 
 
 }

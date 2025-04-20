@@ -9,6 +9,8 @@ import com.example.storyefun.data.models.Book
 import com.example.storyefun.data.repository.BookRepository
 import com.example.storyefun.data.models.Chapter
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class BookViewModel() : ViewModel()
@@ -19,6 +21,8 @@ class BookViewModel() : ViewModel()
     private val _book = MutableLiveData<Book?>()
     val book: LiveData<Book?> get() = _book
 
+    private val _favoriteBooks = MutableStateFlow<List<Book>>(emptyList())
+    val favoriteBooks: StateFlow<List<Book>> = _favoriteBooks
 
     val _isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
     val isLoading: LiveData<Boolean> get() = _isLoading
@@ -27,8 +31,10 @@ class BookViewModel() : ViewModel()
         viewModelScope.launch {
             setState(true)
             _books.value = bookRepository.getBooks()
-            Log.e("book list got", _books.value.toString())
+            // Load favorite for favorite screen
+            loadFavorites()
             setState(false)
+
         }
 
     }
@@ -36,11 +42,19 @@ class BookViewModel() : ViewModel()
         viewModelScope.launch {
             _isLoading.value = true
             val result = bookRepository.getBook(bookId)
-            _book.value = result
-            Log.e("info of loaded book: ", result.toString())
+
+            // Debugging log to check if result has comments
+            if (result != null) {
+                Log.d("info of loaded book comment : ", result.comments.toString())
+            } else {
+                Log.d("info", "No book found for ID: $bookId")
+            }
+
+            _book.value = result // Set the book after fetching comments
             _isLoading.value = false
         }
     }
+
 
     fun addBook(bookId: String) {
 
@@ -71,14 +85,14 @@ class BookViewModel() : ViewModel()
     }
 
     // Helper function to get chapter content
-    fun getChapterContent(volumeOrder: Int, chapterOrder: Int): Chapter? {
+    fun getChapterContent(volumeOrder: Long, chapterOrder: Long): Chapter? {
         val currentBook = _book.value ?: return null
         val volume = currentBook.volume.find { it.order == volumeOrder }
         return volume?.chapters?.find { it.order == chapterOrder }
     }
 
     // Helper function to get previous chapter
-    fun getPreviousChapter(volumeOrder: Int, chapterOrder: Int): Triple<Boolean, Int?, Int?> {
+    fun getPreviousChapter(volumeOrder: Long, chapterOrder: Long): Triple<Boolean, Long?, Long?> {
         val currentBook = _book.value ?: return Triple(false, null, null)
 
         // Sort volumes by name to ensure consistent order
@@ -113,7 +127,7 @@ class BookViewModel() : ViewModel()
     }
 
     // Helper function to get next chapter
-    fun getNextChapter(volumeOrder: Int, chapterOrder: Int): Triple<Boolean, Int?, Int?> {
+    fun getNextChapter(volumeOrder: Long, chapterOrder: Long): Triple<Boolean, Long?, Long?> {
         val currentBook = _book.value ?: return Triple(false, null, null)
 
         // Sort volumes by name to ensure consistent order
@@ -145,6 +159,11 @@ class BookViewModel() : ViewModel()
         }
 
         return Triple(false, null, null)
+    }
+
+    suspend fun loadFavorites() {
+        // TODO: Load từ Firebase hoặc local
+        _favoriteBooks.value = bookRepository.favoriteBooks() // Replace with real fetch
     }
 
 

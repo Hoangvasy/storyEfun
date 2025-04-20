@@ -12,6 +12,8 @@ import com.example.storyefun.ui.screens.*
 
 import com.example.storyefun.admin.ui.*
 import com.example.storyefun.viewModel.ThemeViewModel
+import com.google.common.base.Objects
+import com.google.firebase.auth.FirebaseAuth
 
 
 sealed class Screen(val route: String) {
@@ -26,7 +28,7 @@ sealed class Screen(val route: String) {
     object Reading : Screen("reading/{bookId}/{volumeOrder}/{chapterOrder}")
     object Register : Screen("register")
     object Profile : Screen("profile")
-    object MyStory : Screen("mystory")
+    object Favourite : Screen("favourite")
     object Setting : Screen("setting")
     object CategoryList : Screen("category")
 
@@ -48,14 +50,24 @@ sealed class Screen(val route: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewModel) {
-
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
+    val start : String
+    if (currentUser != null) {
+        start = Screen.AddCategory.route
+    } else {
+        // Người dùng chưa đăng nhập, yêu cầu đăng nhập
+        start = Screen.Login.route
+    }
     NavHost(
         navController = navController,
-        startDestination = Screen.AdminMenu.route
+        startDestination = Screen.Home.route
 //        startDestination = Screen.AdminMenu.route
 //        startDestination = Screen.Upload.route
 
 
+//        startDestination = start
+//        startDestination = Screen.Upload.route
     ) {
         composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
         composable("bookDetail/{bookId}") { backStackEntry ->
@@ -69,8 +81,8 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             val chapterOrderStr = backStackEntry.arguments?.getString("chapterOrder") ?: "1"
 
             // Parse strings to Int
-            val volumeOrder = volumeOrderStr.toIntOrNull() ?: 1
-            val chapterOrder = chapterOrderStr.toIntOrNull() ?: 1
+            val volumeOrder = volumeOrderStr.toLongOrNull() ?: 1
+            val chapterOrder = chapterOrderStr.toLongOrNull() ?: 1
 
             //Log.d("chapter and voluume ", "chapter $chapterOrder  volume $volumeOrder")
             ReaderScreen(navController, bookId, volumeOrder, chapterOrder, themeViewModel)
@@ -78,7 +90,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.Register.route) { RegisterScreen(navController) }
         composable(Screen.Profile.route) { ProfileScreen(navController, themeViewModel) }
         composable(Screen.Upload.route) { UploadScreen(navController) }
-        composable(Screen.MyStory.route) { MyStoryScreen(navController) }
+        composable(Screen.Favourite.route) { FavouriteScreen(themeViewModel, navController) }
         composable(Screen.Setting.route) { SettingScreen(navController, themeViewModel) }
         composable(Screen.CategoryList.route) { CategoryScreen(navController) }
         composable(Screen.Desposite.route) { DespositeScreen() }
