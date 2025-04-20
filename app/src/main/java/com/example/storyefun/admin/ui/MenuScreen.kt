@@ -46,7 +46,7 @@ fun MenuScreen(navController: NavController) {
         DrawerItem("Manage Users", "manageUsers", Icons.Default.Menu, 3),
         DrawerItem("Manage Books", "ManageBook", Icons.Default.Menu, 12),
         DrawerItem("Upload Book", "uploadBook", Icons.Default.Menu),
-        DrawerItem("Manage Categories", "manageCategories", Icons.Default.Menu),
+        DrawerItem("Manage Categories", "addCategory", Icons.Default.Menu),
         DrawerItem("Statistics", "statistics", Icons.Default.Menu),
         DrawerItem("Settings", "settings", Icons.Default.Settings)
     )
