@@ -58,10 +58,10 @@ import androidx.compose.foundation.lazy.items
 
 fun fetchBooks(query: String, searchType: String, callback: (List<Book>) -> Unit) {
     val db = Firebase.firestore
-    val queryRef = if (searchType == "title") {
-        db.collection("books").whereEqualTo("title", query)
+    val queryRef = if (searchType == "name") {
+        db.collection("books").whereGreaterThanOrEqualTo("name", query)
     } else {
-        db.collection("books").whereArrayContains("categories", query)
+        db.collection("books").whereArrayContains("category", query)
     }
 
     queryRef.get()
