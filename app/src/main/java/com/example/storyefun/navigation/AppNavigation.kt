@@ -20,6 +20,9 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object BookDetail : Screen("bookDetail/{bookId}")
 
+    object ProductOrder : Screen("productOrder")
+
+
     object Login : Screen("login")
     object Upload : Screen("upload")
     object Reading : Screen("reading/{bookId}/{volumeOrder}/{chapterOrder}")
@@ -51,15 +54,19 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
     val currentUser = auth.currentUser
     val start : String
     if (currentUser != null) {
-        start = Screen.Home.route
+        start = Screen.AddCategory.route
     } else {
         // Người dùng chưa đăng nhập, yêu cầu đăng nhập
         start = Screen.Login.route
     }
     NavHost(
         navController = navController,
+        startDestination = Screen.Home.route
+//        startDestination = Screen.AdminMenu.route
+//        startDestination = Screen.Upload.route
 
-        startDestination = start
+
+//        startDestination = start
 //        startDestination = Screen.Upload.route
     ) {
         composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
@@ -86,7 +93,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.Favourite.route) { FavouriteScreen(themeViewModel, navController) }
         composable(Screen.Setting.route) { SettingScreen(navController, themeViewModel) }
         composable(Screen.CategoryList.route) { CategoryScreen(navController) }
-        composable(Screen.Desposite.route) { DespositeScreen(navController) }
+        composable(Screen.Desposite.route) { DespositeScreen() }
         composable(Screen.Coin.route) { CoinScreen(navController) }
 
         composable(Screen.AdminMenu.route) {MenuScreen(navController)}
@@ -117,6 +124,16 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             val volumeId = backStackEntry.arguments?.getString("volumeId") ?: "Unknown"
             AddChapterScreen(navController, bookId, volumeId)
         }
+
+
+        composable(Screen.ProductOrder.route) {
+            ProductOrderScreen()
+        }
+        composable(Screen.Desposite.route) {
+            DespositeScreen()
+        }
+
+
 
 
     }

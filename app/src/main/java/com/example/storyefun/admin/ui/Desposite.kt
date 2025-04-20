@@ -1,6 +1,10 @@
 package com.example.storyefun.admin.ui
 
+import android.content.Intent
+import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,11 +21,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.storyefun.data.AmountOption
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+
+class DespositeActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            DespositeScreen()
+        }
+    }
+}
 
 @Composable
-fun DespositeScreen(navController: NavController) {
+fun DespositeScreen() {
     val context = LocalContext.current
     val options = listOf(
         AmountOption(2000, 20),
@@ -33,13 +47,35 @@ fun DespositeScreen(navController: NavController) {
     )
     var selected by remember { mutableStateOf<AmountOption?>(null) }
 
+    // Lấy UID người dùng từ Firebase
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
+    var coinBalance by remember { mutableStateOf<Int?>(null) }
+    var username by remember { mutableStateOf<String?>(null) }
+
+    // Truy vấn số dư coin của người dùng từ Firestore
+    LaunchedEffect(uid) {
+        if (uid != null) {
+            FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    coinBalance = document.getLong("coin")?.toInt()
+                    username = document.getString("username")
+                }
+                .addOnFailureListener {
+                    coinBalance = 0 // Hoặc hiển thị lỗi nếu không lấy được dữ liệu
+                }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
         Text(
-            text = "Chọn số tiền hợp lệ",
+            text = "Chọn số tiền nạp",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
@@ -60,14 +96,31 @@ fun DespositeScreen(navController: NavController) {
             }
         }
 
+        // Hiển thị số dư coin
+        Text(
+            text = "Số dư hiện tại: ${coinBalance?.toString() ?: "Đang tải..."} xu",
+            fontSize = 14.sp,
+            color = Color.Gray,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+        Text(
+            text = "Tên người dùng: ${username ?: "Đang tải..."}",
+            fontSize = 14.sp,
+            color = Color.Gray,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+
+
         Button(
             onClick = {
                 selected?.let {
-                    Toast.makeText(
-                        context,
-                        "Bạn đã chọn nạp ${it.amount}đ để nhận ${it.coin} Coin",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    val intent = Intent(context, OrderPayment::class.java).apply {
+                        putExtra("amount", it.amount)
+                        putExtra("coin", it.coin)
+                    }
+                    context.startActivity(intent)
+                } ?: run {
+                    Toast.makeText(context, "Vui lòng chọn số tiền", Toast.LENGTH_SHORT).show()
                 }
             },
             enabled = selected != null,

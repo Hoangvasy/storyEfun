@@ -14,4 +14,3 @@ buildscript {
         classpath(libs.gradle) // update to the latest AGP version
     }
 }
-

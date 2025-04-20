@@ -1,7 +1,5 @@
 [versions]
 agp = "8.9.1"
-cloudinaryAndroid = "2.3.1"
-docx4jAndroidVersion = "8.3.3"
 gradle = "8.9.1"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -18,23 +16,14 @@ firebaseAuth = "23.2.0"
 credentials = "1.5.0"
 credentialsPlayServicesAuth = "1.5.0"
 googleid = "1.1.1"
-poi = "5.2.5"
-poiOoxml = "5.2.5"
-poiOoxmlSchemas = "4.1.2"
-poiOoxmlVersion = "5.2.3"
 runtimeLivedata = "1.7.8"
 appcompat = "1.7.0"
 material = "1.12.0"
 activity = "1.10.1"
-xmlbeans = "5.2.0"
-xmlpull = "1.1.3.1"
-
 
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-cloudinary-android = { module = "com.cloudinary:cloudinary-android", version.ref = "cloudinaryAndroid" }
-docx4j-docx4j-android = { module = "org.docx4j:docx4j-android", version.ref = "docx4jAndroidVersion" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -57,12 +46,6 @@ androidx-credentials = { group = "androidx.credentials", name = "credentials", v
 androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
-poi = { module = "org.apache.poi:poi", version.ref = "poi" }
-poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "poiOoxml" }
-poi-ooxml-schemas = { module = "org.apache.poi:poi-ooxml-schemas", version.ref = "poiOoxmlSchemas" }
-poi-ooxml-v523 = { module = "org.apache.poi:poi-ooxml", version.ref = "poiOoxmlVersion" }
-xmlbeans = { module = "org.apache.xmlbeans:xmlbeans", version.ref = "xmlbeans" }
-xmlpull = { module = "org.xmlpull:xmlpull", version.ref = "xmlpull" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

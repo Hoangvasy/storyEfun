@@ -59,8 +59,8 @@ fun RegisterScreen(navController: NavController) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .size(150.dp)
-                                                                                                                                                                                                                                .align(Alignment.TopStart) // Căn giữa trên c                                                                                                                                                                                                                  ùng màn hình
-                                                                                                                                                                                                                                .padding(top = 60.dp, start = 20.dp) // Tạo khoảng cách với mép trên
+                .align(Alignment.TopStart) // Căn giữa trên c                                                                                                                                                                                                                  ùng màn hình
+                .padding(top = 60.dp, start = 20.dp) // Tạo khoảng cách với mép trên
         )
         Text(
             text = "Register",
@@ -166,11 +166,12 @@ fun RegisterScreen(navController: NavController) {
 
                                             it.updateProfile(profileUpdates)
 
-                                            // 2. Save user info to Firestore (excluding password)
+                                            // 2. Save user info to Firestore (including coin)
                                             val userMap = hashMapOf(
                                                 "uid" to it.uid,
                                                 "name" to username,
-                                                "email" to email
+                                                "email" to email,
+                                                "coin" to 100
                                             )
 
                                             FirebaseFirestore.getInstance()
@@ -192,6 +193,7 @@ fun RegisterScreen(navController: NavController) {
                         }
                     }
                 }
+
             ) {
                 Text("Register")
             }

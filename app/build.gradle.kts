@@ -12,6 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.storyefun"
+//        minSdk = 24
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -65,8 +66,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.6.0")
 
     // Cloudinary
-    implementation(libs.cloudinary.android)
-
+    implementation("com.cloudinary:cloudinary-android:2.3.1")
+//    implementation(libs.cloudinary.android)
     implementation(libs.firebase.auth)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
@@ -77,6 +78,10 @@ dependencies {
         "include" to listOf("*.aar", "*.jar"),
         "exclude" to listOf("")
     )))
+
+    // Thêm thư viện OkHttp và Commons Codec (nếu chưa có)
+    implementation("com.squareup.okhttp3:okhttp:4.6.0")
+    implementation("commons-codec:commons-codec:1.14")
 
     implementation("xmlpull:xmlpull:1.1.3.4d_b4_min")
 

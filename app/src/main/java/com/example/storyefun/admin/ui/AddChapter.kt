@@ -188,20 +188,45 @@ fun AddChapterScreen(navController: NavController, bookId: String, volumeId: Str
 
 
 
-fun uploadChapter(bookId: String, volumeId: String, title: String, imageUrls: List<String>, onComplete: () -> Unit) {
+fun uploadChapter(
+    bookId: String,
+    volumeId: String,
+    title: String,
+    imageUrls: List<String>,
+    onComplete: () -> Unit
+) {
     val db = FirebaseFirestore.getInstance()
+    val chaptersRef = db.collection("books").document(bookId)
+        .collection("volumes").document(volumeId).collection("chapters")
+
     val chapterData = hashMapOf(
         "title" to title,
         "content" to imageUrls,
         "order" to System.currentTimeMillis(),
-        "createdAt" to System.currentTimeMillis()
+        "createdAt" to System.currentTimeMillis(),
+        "locked" to false // default: không khóa
     )
 
-    db.collection("books").document(bookId).collection("volumes").document(volumeId).collection("chapters")
-        .add(chapterData)
-        .addOnSuccessListener { onComplete() }
-        .addOnFailureListener { e -> println("Error: ${e.message}") }
+    // Thêm chương mới
+    chaptersRef.add(chapterData)
+        .addOnSuccessListener {
+            // Sau khi thêm thành công, lấy lại toàn bộ chương để kiểm tra số lượng
+            chaptersRef.orderBy("order").get().addOnSuccessListener { snapshot ->
+                val chapterDocs = snapshot.documents
+                if (chapterDocs.size > 2) {
+                    // Khóa các chương từ chương 3 trở đi
+                    chapterDocs.drop(2).forEach { doc ->
+                        chaptersRef.document(doc.id).update("locked", true)
+                    }
+                }
+                onComplete()
+            }
+        }
+        .addOnFailureListener { e ->
+            println("Error: ${e.message}")
+        }
 }
+
 
 
 

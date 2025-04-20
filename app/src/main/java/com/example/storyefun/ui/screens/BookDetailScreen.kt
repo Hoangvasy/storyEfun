@@ -1,8 +1,8 @@
 package com.example.storyefun.ui.screens
 
-
 import com.example.storyefun.ui.components.CommentSection
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,7 +35,12 @@ import com.example.storyefun.ui.theme.AppColors
 import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.viewModel.ThemeViewModel
 import coil.compose.AsyncImage
+import com.example.storyefun.data.models.Chapter
 import com.example.storyefun.viewModel.UserViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -49,11 +54,17 @@ fun BookDetailScreen(navController: NavController, bookId : String, themeViewMod
     val isDarkMode by themeViewModel.isDarkTheme.collectAsState()
     val book by viewModel.book.observeAsState()
 
+
+
+
     LaunchedEffect(bookId) {
         viewModel.fetchBook(bookId)
         Log.e("info of lauched book: ", book.toString())
-
     }
+
+
+
+
 
     Box(
         modifier = Modifier
@@ -413,6 +424,29 @@ fun StatItem(
 
 @Composable
 fun ChapterListSection(theme: AppColors, book: Book, navController: NavController) {
+    var showUnlockDialog by remember { mutableStateOf(false) }
+    var selectedChapter: Chapter? by remember { mutableStateOf(null) }
+    var selectedVolumeOrder by remember { mutableStateOf(0) }
+    var coinBalance by remember { mutableStateOf<Int?>(null) }
+
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
+    val context = LocalContext.current // Lấy context để sử dụng Toast
+
+    LaunchedEffect(uid) {
+        if (uid != null) {
+            FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    coinBalance = document.getLong("coin")?.toInt() ?: 0
+                }
+                .addOnFailureListener {
+                    coinBalance = 0
+                }
+        }
+    }
+
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
             text = "Volumes (${book.volume.size})",
@@ -448,26 +482,45 @@ fun ChapterListSection(theme: AppColors, book: Book, navController: NavControlle
                     Spacer(modifier = Modifier.height(8.dp))
 
                     volume.chapters.forEach { chapter ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
+                        val isLocked = chapter.locked == true
+                        val chapterModifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                if (!isLocked) {
+                                    // Hiển thị Toast với volumeId và chapterId
+                                    Toast.makeText(
+                                        context,
+                                        "Volume ID: ${volume.id}, Chapter ID: ${chapter.id}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+
+                                    // Chuyển đến trang đọc chapter
                                     navController.navigate("reading/${book.id}/${volume.order}/${chapter.order}")
+                                } else {
+                                    selectedChapter = chapter
+                                    selectedVolumeOrder = volume.order.toInt()
+                                    showUnlockDialog = true
                                 }
-                                .padding(vertical = 6.dp),
+                            }
+                            .padding(vertical = 6.dp)
+
+                        Row(
+                            modifier = chapterModifier,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_chapter), // Thay bằng icon chương bạn có
+                                painter = painterResource(
+                                    id = if (isLocked) R.drawable.add else R.drawable.ic_chapter
+                                ),
                                 contentDescription = null,
-                                tint = theme.textSecondary,
+                                tint = if (isLocked) Color.Gray else theme.textSecondary,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Chương ${chapter.title}",
                                 fontSize = 14.sp,
-                                color = theme.textSecondary,
+                                color = if (isLocked) Color.Gray else theme.textSecondary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -476,14 +529,106 @@ fun ChapterListSection(theme: AppColors, book: Book, navController: NavControlle
                 }
             }
         }
+
+        // Mở khóa chương
+        if (showUnlockDialog && selectedChapter != null && uid != null) {
+            AlertDialog(
+                onDismissRequest = { showUnlockDialog = false },
+                title = { Text("Chương bị khóa") },
+                text = {
+                    Text("Bạn đang có $coinBalance coin. Mở khóa chương này với 20 coin?")
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val chapter = selectedChapter ?: return@TextButton
+                        val userDocRef = FirebaseFirestore.getInstance()
+                            .collection("users")
+                            .document(uid)
+
+                        if (coinBalance != null && coinBalance!! >= 20) {
+                            val newCoin = coinBalance!! - 20
+
+                            // Trừ coin người dùng
+                            userDocRef.update("coin", newCoin)
+                                .addOnSuccessListener {
+                                    coinBalance = newCoin
+
+                                    // Truy vấn Firestore để mở khóa chương
+                                    FirebaseFirestore.getInstance()
+                                        .collection("books")
+                                        .document(book.id)
+                                        .collection("volumes")
+                                        .whereEqualTo("order", selectedVolumeOrder)
+                                        .get()
+                                        .addOnSuccessListener { volumeQuery ->
+                                            if (!volumeQuery.isEmpty) {
+                                                val volumeDoc = volumeQuery.documents.first()
+
+                                                volumeDoc.reference
+                                                    .collection("chapters")
+                                                    .whereEqualTo("order", chapter.order)
+                                                    .get()
+                                                    .addOnSuccessListener { chapterQuery ->
+                                                        if (!chapterQuery.isEmpty) {
+                                                            val chapterDoc = chapterQuery.documents.first()
+
+                                                            chapterDoc.reference.update("locked", false)
+                                                                .addOnSuccessListener {
+                                                                    // Hiển thị Toast khi mở khóa thành công
+                                                                    Toast.makeText(
+                                                                        context,
+                                                                        "Chương đã được mở khóa",
+                                                                        Toast.LENGTH_LONG
+                                                                    ).show()
+
+                                                                    // Sau khi mở khóa thành công, chuyển đến trang đọc chapter
+                                                                    navController.navigate("reading/${book.id}/${selectedVolumeOrder}/${chapter.order}")
+                                                                    showUnlockDialog = false
+                                                                }
+                                                                .addOnFailureListener { e ->
+                                                                    // Thông báo lỗi nếu không cập nhật được
+                                                                    Log.e("Firestore", "Lỗi khi mở khóa chương: ${e.message}")
+                                                                    Toast.makeText(
+                                                                        context,
+                                                                        "Không thể mở khóa chương",
+                                                                        Toast.LENGTH_LONG
+                                                                    ).show()
+                                                                }
+                                                        } else {
+                                                            Toast.makeText(
+                                                                context,
+                                                                "Không tìm thấy chương",
+                                                                Toast.LENGTH_LONG
+                                                            ).show()
+                                                        }
+                                                    }
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Không tìm thấy tập",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        }
+                                }
+                        } else {
+                            // Thiếu coin
+                            showUnlockDialog = false
+                            navController.navigate("desposite")
+                        }
+                    }) {
+                        Text("Mở khóa")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showUnlockDialog = false }) {
+                        Text("Hủy")
+                    }
+                }
+            )
+        }
     }
 }
 
 
 
-@Preview(showBackground = true)
-@Composable
-fun MangaDetailScreenPreview() {
-    // stop preview when add parameter to class
-//     BookDetailScreen()
-}

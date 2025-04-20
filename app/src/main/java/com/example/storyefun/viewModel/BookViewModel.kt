@@ -1,8 +1,6 @@
 package com.example.storyefun.viewModel
 
 import android.util.Log
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -28,14 +26,6 @@ class BookViewModel() : ViewModel()
 
     val _isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
     val isLoading: LiveData<Boolean> get() = _isLoading
-
-    private val _fontSize = mutableStateOf(16f)
-    val fontSize: State<Float> = _fontSize
-
-    private val _lineSpacing = mutableStateOf(1f)
-    val lineSpacing: State<Float> = _lineSpacing
-
-
 
     init {
         viewModelScope.launch {
@@ -94,12 +84,6 @@ class BookViewModel() : ViewModel()
         _isLoading.value = state
     }
 
-    fun setFontSize(size: Float) {
-        _fontSize.value = size
-    }
-    fun setLineSpacing(size: Float) {
-        _lineSpacing.value = size
-    }
     // Helper function to get chapter content
     fun getChapterContent(volumeOrder: Long, chapterOrder: Long): Chapter? {
         val currentBook = _book.value ?: return null
