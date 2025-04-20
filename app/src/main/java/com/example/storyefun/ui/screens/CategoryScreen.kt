@@ -72,7 +72,7 @@ fun CategoryScreen(navController : NavController) {
 
     Scaffold(
         topBar = { Header(text, active, onQueryChange = { text = it }, onActiveChange = { active = it }, navController) },
-        bottomBar = { BottomBar(navController) }
+        bottomBar = { BottomBar(navController, "category") }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             // Background image

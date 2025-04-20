@@ -71,7 +71,7 @@ fun FavouriteScreen(
                 )
             },
             bottomBar = {
-                BottomBar(navController)
+                BottomBar(navController, "favourite")
             }
         ) { paddingValues ->
             Box(modifier = Modifier.fillMaxSize()) {

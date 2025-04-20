@@ -34,19 +34,19 @@ data class Item(
 
 
 @Composable
-fun BottomBar(navController: NavController) {
+fun BottomBar(navController: NavController, currentRoute: String) {
     val configuration = LocalConfiguration.current
     val items = remember {
         mutableStateListOf(
             Item(
                 icon = Icons.Rounded.Home,
                 color = Color(0xFF433E3F),
-                route = "Home"
+                route = "home"
             ),
             Item(
                 icon = Icons.Rounded.AccountBox,
                 color = Color(0xFF433E3F),
-                route = "mystory",
+                route = "category",
             ),
             Item(
                 icon = Icons.Rounded.AddCircle,
@@ -66,9 +66,12 @@ fun BottomBar(navController: NavController) {
         )
     }
     val indicatorWidth = (configuration.screenWidthDp/items.count())/2
-    val selectedIndex = remember{
-        mutableStateOf(0)
+    val selectedIndex = remember(currentRoute) {
+        mutableStateOf(
+            items.indexOfFirst { it.route == currentRoute }.coerceAtLeast(0)
+        )
     }
+
     val indicatorOffset by animateIntOffsetAsState(targetValue = IntOffset(
         items[selectedIndex.value].offset.x.toInt()+(items[selectedIndex.value].size.width/4)-(items.count()*2)-2,
         15
@@ -113,6 +116,10 @@ fun BottomBar(navController: NavController) {
                 .padding(vertical =20.dp),
             verticalAlignment = Alignment.CenterVertically){
             items.forEachIndexed { index, item ->
+                if (item.route == currentRoute)
+                {
+                    selectedIndex.value = index
+                }
                 Box(modifier = Modifier.onGloballyPositioned {
                     val offset = it.positionInParent()
                     items[index] = items[index].copy(

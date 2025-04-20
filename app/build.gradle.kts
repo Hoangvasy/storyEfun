@@ -12,11 +12,11 @@ android {
 
     defaultConfig {
         applicationId = "com.example.storyefun"
-        minSdk = 24
+//        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -67,7 +67,7 @@ dependencies {
 
     // Cloudinary
     implementation("com.cloudinary:cloudinary-android:2.3.1")
-
+//    implementation(libs.cloudinary.android)
     implementation(libs.firebase.auth)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
@@ -82,6 +82,9 @@ dependencies {
     // Thêm thư viện OkHttp và Commons Codec (nếu chưa có)
     implementation("com.squareup.okhttp3:okhttp:4.6.0")
     implementation("commons-codec:commons-codec:1.14")
+
+    implementation("xmlpull:xmlpull:1.1.3.4d_b4_min")
+
 
     // Testing
     testImplementation(libs.junit)

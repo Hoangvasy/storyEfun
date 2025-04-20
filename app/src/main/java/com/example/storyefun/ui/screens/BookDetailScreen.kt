@@ -632,11 +632,3 @@ fun ChapterListSection(theme: AppColors, book: Book, navController: NavControlle
 
 
 
-
-
-@Preview(showBackground = true)
-@Composable
-fun MangaDetailScreenPreview() {
-    // stop preview when add parameter to class
-//     BookDetailScreen()
-}
