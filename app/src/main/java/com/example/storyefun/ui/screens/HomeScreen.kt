@@ -16,12 +16,16 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -43,9 +47,11 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.storyefun.R
+import com.example.storyefun.data.models.Book
 import com.example.storyefun.viewModel.BookViewModel
 import com.example.storyefun.ui.components.BottomBar
 import com.example.storyefun.ui.components.Header
+import com.example.storyefun.ui.screens.SearchBar
 import com.example.storyefun.ui.theme.AppColors
 import com.example.storyefun.ui.theme.AppTheme
 import com.example.storyefun.ui.theme.LocalAppColors
@@ -58,6 +64,7 @@ import kotlinx.coroutines.delay
 fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel ) {
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
+    var books by remember { mutableStateOf<List<Book>>(emptyList())}
     val isDarkMode by themeViewModel.isDarkTheme.collectAsState()
 
     AppTheme(darkTheme = isDarkMode) {
@@ -101,10 +108,59 @@ fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel ) {
                         .padding(paddingValues),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    item {SearchBar(onSearch = it)}
                     item { Banner() }
                     item { Channels(navController = navController, theme = colors) }
                     item { BookStory(navController = navController, theme = colors) }
 //                    item { ContinueRead() }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SearchBar(onSearch: (String, Boolean) -> Unit,  viewModel: BookViewModel = viewModel()) {
+    var searchQuery by remember { mutableStateOf("") }
+    var searchByBookName by remember { mutableStateOf(true) }
+
+    Column {
+        TextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            label = { Text("Nhập tên sách hoặc thể loại") }
+        )
+        Row {
+            Text("Tìm theo:")
+            RadioButton(
+                selected = searchByBookName,
+                onClick = { searchByBookName = true }
+            )
+            Text("Tên sách")
+            RadioButton(
+                selected = !searchByBookName,
+                onClick = { searchByBookName = false }
+            )
+            Text("Thể loại")
+        }
+        Button(onClick = { onSearch(searchQuery, searchByBookName) }) {
+            Text("Tìm kiếm")
+        }
+    }
+}
+@Composable
+fun BookList(books: List<Book>) {
+    if (books.isEmpty()) {
+        Text("Không tìm thấy sách nào!")
+    } else {
+        LazyColumn {
+            itemsIndexed(books) { index, book ->
+                Card(modifier = Modifier.padding(8.dp)) {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text("Tên: ${book.name}")
+                        Text("Tác giả: ${book.author}")
+                        Text("Mô tả: ${book.description}")
+                    }
                 }
             }
         }

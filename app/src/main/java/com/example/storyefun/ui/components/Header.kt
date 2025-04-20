@@ -84,34 +84,34 @@ fun Header(
         Divider(modifier = Modifier.padding(horizontal = 20.dp))
 
         // SearchBar
-        SearchBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            query = text,
-            onQueryChange = onQueryChange,
-            onSearch = { onActiveChange(false) },
-            active = active,
-            onActiveChange = onActiveChange,
-            placeholder = { Text(text = "Search here...") },
-            leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon") },
-            shape = RoundedCornerShape(4.dp),
-            colors = SearchBarDefaults.colors(containerColor = Color.White),
-            trailingIcon = {
-                if (active) {
-                    Icon(
-                        modifier = Modifier.clickable {
-                            if (text.isNotEmpty()) {
-                                onQueryChange("")
-                            } else {
-                                onActiveChange(false)
-                            }
-                        },
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close icon"
-                    )
-                }
-            }
-        ) {}
+//        SearchBar(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(8.dp),
+//            query = text,
+//            onQueryChange = onQueryChange,
+//            onSearch = { onActiveChange(false) },
+//            active = active,
+//            onActiveChange = onActiveChange,
+//            placeholder = { Text(text = "Search here...") },
+//            leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon") },
+//            shape = RoundedCornerShape(4.dp),
+//            colors = SearchBarDefaults.colors(containerColor = Color.White),
+//            trailingIcon = {
+//                if (active) {
+//                    Icon(
+//                        modifier = Modifier.clickable {
+//                            if (text.isNotEmpty()) {
+//                                onQueryChange("")
+//                            } else {
+//                                onActiveChange(false)
+//                            }
+//                        },
+//                        imageVector = Icons.Default.Close,
+//                        contentDescription = "Close icon"
+//                    )
+//                }
+//            }
+//        ) {}
     }
 }

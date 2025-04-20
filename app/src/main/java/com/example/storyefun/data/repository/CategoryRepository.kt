@@ -1,6 +1,5 @@
 package com.example.storyefun.data.repository
 
-import android.util.Log
 import com.example.storyefun.data.models.Category
 import com.google.firebase.firestore.FirebaseFirestore
 
