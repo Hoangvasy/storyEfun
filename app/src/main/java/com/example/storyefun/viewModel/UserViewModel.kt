@@ -4,12 +4,15 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.storyefun.data.repository.BookRepository
 import com.example.storyefun.data.repository.CloudnaryRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -158,4 +161,17 @@ class UserViewModel() : ViewModel() {
     {
 
     }
+
+
+    fun getBalance(): Long {
+        val userId = auth.uid ?: return 0L
+
+        return try {
+            val snapshot = Firebase.firestore.collection("users").document(userId).get().result
+            snapshot.getLong("coin") ?: 0L
+        } catch (e: Exception) {
+            0L // hoặc xử lý lỗi theo cách bạn muốn
+        }
+    }
+
 }

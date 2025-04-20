@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.storyefun.viewModel.UserViewModel
 import com.example.storyefun.zaloPay.Api.CreateOrder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -56,14 +57,14 @@ class OrderPayment : ComponentActivity() {
 }
 
 @Composable
-fun OrderPaymentScreen(amount: Int, coin: Int) {
+fun OrderPaymentScreen(amount: Int, coin: Int, userViewModel: UserViewModel = UserViewModel()) {
     val context = LocalContext.current
     val amountFormatted = String.format("%.0f", amount.toDouble())  // Chuyển số tiền sang định dạng chuỗi
     var paymentStatus by remember { mutableStateOf<String?>(null) }
 
     // Dữ liệu người dùng
-    var userName by remember { mutableStateOf<String?>(null) }
-    var coinBalance by remember { mutableStateOf<Int?>(null) }
+    var userName = FirebaseAuth.getInstance().currentUser?.displayName
+    var coinBalance = userViewModel.getBalance()
     val uid = FirebaseAuth.getInstance().currentUser?.uid
 
     // Chạy effect để lấy thông tin người dùng từ Firebase
@@ -75,7 +76,7 @@ fun OrderPaymentScreen(amount: Int, coin: Int) {
                 .get()
                 .addOnSuccessListener { document ->
                     userName = document.getString("username") ?: "Người dùng không xác định"
-                    coinBalance = document.getLong("coin")?.toInt()
+                    coinBalance = document.getLong("coin")!!
                 }
                 .addOnFailureListener {
                     userName = "Không thể lấy thông tin người dùng"
