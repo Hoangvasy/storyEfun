@@ -54,6 +54,10 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation ("androidx.compose.foundation:foundation:1.6.0")
 
+
+    implementation("androidx.compose.material3:material3:1.2.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+
     // Firebase (using BoM)
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     implementation("com.google.firebase:firebase-firestore-ktx")
@@ -88,6 +92,11 @@ dependencies {
         "dir" to "C:\\Users\\ducp4\\Downloads\\dependancy",
         "include" to listOf("*.aar", "*.jar"),
 
+    )))
+    implementation(fileTree(mapOf(
+        "dir" to "C:\\zaloPay",
+        "include" to listOf("*.aar", "*.jar"),
+        "exclude" to listOf("")
     )))
 
     // Testing
