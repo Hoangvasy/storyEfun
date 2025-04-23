@@ -1,6 +1,7 @@
 package com.example.storyefun.admin.ui
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,12 +9,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -22,39 +23,51 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.storyefun.data.models.Volume
 import com.example.storyefun.ui.theme.LocalAppColors
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FieldValue
-import java.util.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.storyefun.viewModel.VolumeViewModel
 
 @Composable
 fun AddVolumeScreen(navController: NavController, bookId: String) {
     val theme = LocalAppColors.current
     val context = LocalContext.current
-    var volumeTitle by remember { mutableStateOf(TextFieldValue("")) }
-    var volumeNumber by remember { mutableStateOf(1) }
-    var volumeOrder by remember { mutableStateOf(1) }
-    var volumes by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
 
-    val db = FirebaseFirestore.getInstance()
+    val volumeViewModel: VolumeViewModel = viewModel()
 
-    // Load existing volumes
+
+    // Load danh sách volumes
     LaunchedEffect(bookId) {
-        db.collection("books").document(bookId).collection("volumes")
-            .orderBy("order")
-            .addSnapshotListener { snapshot, _ ->
-                if (snapshot != null) {
-                    val count = snapshot.documents.size
-                    volumeNumber = count + 1
-                    volumeTitle = TextFieldValue("Volume $volumeNumber: ")
-                    volumes = snapshot.documents.map { document ->
-                        document.data?.plus("id" to document.id) ?: emptyMap()
-                    }
-                    volumeOrder = snapshot.size() + 1
-                }
-            }
+        volumeViewModel.loadVolumes(bookId)
     }
 
+    val volumesState by volumeViewModel.volumes.collectAsState()
+    val isLoading by volumeViewModel.isLoading.collectAsState()
+    val toastMessage by volumeViewModel.toastMessage.collectAsState()
+
+    // Hiển thị toast nếu có message
+    LaunchedEffect(toastMessage) {
+        toastMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            volumeViewModel.setToastMessage("") // Reset toast message
+        }
+    }
+
+    // State để giữ order tiếp theo
+    var nextOrder by remember { mutableStateOf(1L) }
+
+    // State cho tiêu đề volume
+    var volumeTitle by remember { mutableStateOf(TextFieldValue("")) }
+
+    // Lấy order tiếp theo và set giá trị mặc định cho title
+    LaunchedEffect(bookId) {
+        volumeViewModel.fetchNextVolumeOrder(bookId) { fetchedOrder ->
+            nextOrder = fetchedOrder
+            volumeTitle = TextFieldValue("Volume $fetchedOrder") // Gán giá trị vào TextField luôn
+        }
+    }
+
+    // UI layout
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -81,29 +94,36 @@ fun AddVolumeScreen(navController: NavController, bookId: String) {
             )
         }
 
-        // Volume Title Input
+        // Input tiêu đề volume
         OutlinedTextField(
             value = volumeTitle,
             onValueChange = { volumeTitle = it },
             label = { Text("Volume Title") },
-            isError = volumeTitle.text.isBlank(),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(12.dp),
         )
 
-        // Add Button
+        // Button thêm volume
         Button(
             onClick = {
-                if (volumeTitle.text.isNotBlank()) {
-                    addVolumeToFirestore(bookId, volumeTitle.text, volumeOrder, db, context, navController)
+                val title = if (volumeTitle.text.isNotBlank()) {
+                    volumeTitle.text
                 } else {
-                    Toast.makeText(context, "Please provide a title", Toast.LENGTH_SHORT).show()
+                    "Volume $nextOrder"
+                }
+
+                val newVolume = Volume(title = title, order = nextOrder)
+                volumeViewModel.addVolume(bookId, newVolume) { volumeId ->
+                    navController.navigate("addChapter/$bookId/$volumeId")
                 }
             },
-            modifier = Modifier.fillMaxWidth().height(50.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
             colors = ButtonDefaults.buttonColors(containerColor = theme.buttonOrange),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(12.dp),
+            enabled = !isLoading
         ) {
             Text("Add Volume", color = Color.Black)
         }
@@ -116,20 +136,20 @@ fun AddVolumeScreen(navController: NavController, bookId: String) {
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(volumes) { volume ->
-                val volumeId = volume["id"] as String
+            items(volumesState) { volume ->
                 Card(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            navController.navigate("addChapter/$bookId/$volumeId")
+                            Log.d("Navigate", "Navigating to addChapter/$bookId/${volume.id}")
+                            navController.navigate("addChapter/$bookId/${volume.id}")
                         }
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = volume["title"] as String,
+                            text = volume.title,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
                             color = theme.textPrimary
@@ -138,41 +158,9 @@ fun AddVolumeScreen(navController: NavController, bookId: String) {
                 }
             }
         }
+
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        }
     }
-}
-
-
-// Thêm Volume vào Firestore và điều hướng sau khi thêm thành công
-fun addVolumeToFirestore(
-    bookId: String,
-    title: String,
-    order: Int,
-    db: FirebaseFirestore,
-    context: Context,
-    navController: NavController
-) {
-    // Tạo volume ID
-    val volumeId = UUID.randomUUID().toString()
-
-    // Dữ liệu Volume
-    val volumeData = hashMapOf(
-        "title" to title,
-        "order" to order,
-        "createdAt" to FieldValue.serverTimestamp() // Timestamp khi tạo volume
-    )
-
-    // Thêm volume vào Firestore
-    db.collection("books")
-        .document(bookId)
-        .collection("volumes")
-        .document(volumeId)
-        .set(volumeData)
-        .addOnSuccessListener {
-            Toast.makeText(context, "Volume added successfully", Toast.LENGTH_SHORT).show()
-            // Điều hướng đến màn hình quản lý volume hoặc màn hình AddChapter
-            navController.navigate("addChapter/$bookId/$volumeId")
-        }
-        .addOnFailureListener { e ->
-            Toast.makeText(context, "Failed to add volume: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
 }

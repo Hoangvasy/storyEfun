@@ -1,23 +1,34 @@
 package com.example.storyefun.data.repository
 
+import com.example.storyefun.data.models.User
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
-// Interact with user data here
 class UserRepository {
-    suspend fun getUsers()
-    {
+private val auth = FirebaseAuth.getInstance()
+private val firestore = FirebaseFirestore.getInstance()
 
-    }
+suspend fun getCurrentUser(): User? {
+    val user = auth.currentUser ?: return null
 
-    suspend fun getUser(id: String)
-    {
+    // Lấy thông tin cơ bản từ Auth
+    val uid = user.uid
+    val email = user.email ?: ""
+    val username = user.displayName ?: ""
 
-    }
-    suspend fun updateUser(id: String, fieldUpdate: String, newData: String)
-    {
+    // Lấy thêm coin từ Firestore
+    val userDoc = firestore.collection("users").document(uid).get().await()
 
-    }
+    val coin = userDoc.getLong("coin")?.toInt() ?: 0
 
-    // and other function
+    return User(
+        uid = uid,
+        email = email,
+        name = username,
+        coin = coin
+    )
+}
 
 
 }

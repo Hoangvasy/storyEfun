@@ -4,12 +4,18 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.storyefun.data.models.User
 import com.example.storyefun.data.repository.BookRepository
 import com.example.storyefun.data.repository.CloudnaryRepository
+import com.example.storyefun.data.repository.UserRepository
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -158,4 +164,50 @@ class UserViewModel() : ViewModel() {
     {
 
     }
+    private val _usersList = MutableStateFlow<List<User>>(emptyList())
+    val usersList: StateFlow<List<User>> = _usersList
+
+    // StateFlow để thông báo trạng thái xóa
+    private val _deleteStatus = MutableStateFlow<DeleteStatus>(DeleteStatus.Idle)
+    val deleteStatus: StateFlow<DeleteStatus> = _deleteStatus
+
+    // Sealed class để biểu thị trạng thái xóa
+    sealed class DeleteStatus {
+        object Idle : DeleteStatus()
+        data class Success(val message: String) : DeleteStatus()
+        data class Error(val message: String) : DeleteStatus()
+    }
+
+    fun getAllUsers() {
+        Firebase.firestore.collection("users").get()
+            .addOnSuccessListener { result ->
+                val users = result.map { it.toObject(User::class.java).copy(uid = it.id) }
+                _usersList.value = users
+            }
+            .addOnFailureListener { exception ->
+                // Có thể thêm thông báo lỗi khi lấy danh sách
+                println("Error fetching users: $exception")
+            }
+    }
+
+    fun deleteUser(uid: String) {
+        _deleteStatus.value = DeleteStatus.Idle // Reset trạng thái
+        Firebase.firestore.collection("users").document(uid).delete()
+            .addOnSuccessListener {
+                // Xóa thành công
+                _usersList.value = _usersList.value.filter { it.uid != uid }
+                _deleteStatus.value = DeleteStatus.Success("Xóa người dùng thành công")
+            }
+            .addOnFailureListener { exception ->
+                // Xóa thất bại
+                _deleteStatus.value = DeleteStatus.Error("Lỗi khi xóa người dùng: ${exception.message}")
+            }
+    }
+
+    // Reset trạng thái thông báo sau khi UI đã xử lý
+    fun resetDeleteStatus() {
+        _deleteStatus.value = DeleteStatus.Idle
+    }
+
+
 }
