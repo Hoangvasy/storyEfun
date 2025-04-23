@@ -1,89 +1,46 @@
 package com.example.storyefun.viewModel
 
-import com.example.storyefun.data.models.Book
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-//suspend fun searchBooks(nameQuery: String): List<Book> {
-//    val firestore = FirebaseFirestore.getInstance()
-//    val result = mutableListOf<Book>()
-//
-//    try {
-//        val snapshot = firestore.collection("books")
-//            .whereGreaterThanOrEqualTo("name", nameQuery)
-//            .whereLessThanOrEqualTo("name", nameQuery + "\uf8ff")
-//            .get()
-//            .await()
-//
-//        for (document in snapshot.documents) {
-//            document.toObject(Book::class.java)?.let { result.add(it) }
-//        }
-//    } catch (e: Exception) {
-//        e.printStackTrace()
-//    }
-//
-//    return result
-//}
-//
-//suspend fun searchCategory(categoryName: String): List<Book> {
-//    val firestore = FirebaseFirestore.getInstance()
-//    val result = mutableListOf<Book>()
-//
-//    try {
-//        val categorySnapshot = firestore.collection("categories")
-//            .whereEqualTo("name", categoryName)
-//            .get()
-//            .await()
-//
-//        val categoryId = categorySnapshot.documents.firstOrNull()?.id
-//
-//        if (categoryId != null) {
-//            val bookSnapshot = firestore.collection("books")
-//                .whereEqualTo("categoryId", categoryId)
-//                .get()
-//                .await()
-//
-//            for (document in bookSnapshot.documents) {
-//                document.toObject(Book::class.java)?.let { result.add(it) }
-//            }
-//        }
-//    } catch (e: Exception) {
-//        e.printStackTrace()
-//    }
-//
-//    return result
-//}
-import com.google.firebase.firestore.Query
+// Data class đại diện cho dữ liệu từ Firebase
+data class Item(val id: String = "", val name: String = "", val description: String = "")
 
-fun searchBooks(query: String, searchType: String, onResult: (List<Book>) -> Unit) {
-    val firestore = FirebaseFirestore.getInstance()
-    val booksRef = firestore.collection("books")
+// ViewModel quản lý logic dữ liệu và tìm kiếm
+class Search {
+    private val firestore = FirebaseFirestore.getInstance()
+    private val _items = MutableStateFlow<List<Item>>(emptyList()) // Toàn bộ dữ liệu từ Firebase
+    val items = _items.asStateFlow()
 
-    // Đảm bảo rằng query không rỗng
-    if (query.isNotEmpty()) {
-        var queryRef: Query = booksRef
+    private val _filteredItems = MutableStateFlow<List<Item>>(emptyList()) // Dữ liệu sau khi lọc
+    val filteredItems = _filteredItems.asStateFlow()
 
-        // Nếu tìm kiếm theo thể loại
-        if (searchType == "category") {
-            queryRef = queryRef.whereArrayContains("categories", query)
-        }
-
-        // Nếu tìm kiếm theo tiêu đề
-        if (searchType == "title") {
-            queryRef.get().addOnSuccessListener { snapshot ->
-                val books = mutableListOf<Book>()
-
-                // Lọc qua tất cả các sách và kiểm tra nếu tiêu đề chứa từ khóa tìm kiếm
-                for (doc in snapshot) {
-                    val book = doc.toObject(Book::class.java)
-                    if (book.name.contains(query, ignoreCase = true)) {  // Kiểm tra chuỗi con trong title
-                        books.add(book)
-                    }
+    // Tải dữ liệu từ Firebase
+    fun loadData() {
+        firestore.collection("items")
+            .get()
+            .addOnSuccessListener { result ->
+                val fetchedItems = result.map { document ->
+                    Item(
+                        id = document.id,
+                        name = document.getString("name") ?: "",
+                        description = document.getString("description") ?: ""
+                    )
                 }
-                onResult(books) // Trả về danh sách sách phù hợp
-            }.addOnFailureListener {
-                // Xử lý lỗi nếu có
-                onResult(emptyList())
+                _items.value = fetchedItems
+                _filteredItems.value = fetchedItems // Hiển thị toàn bộ dữ liệu ban đầu
+            }
+    }
+
+    // Lọc dữ liệu dựa trên từ khóa
+    fun search(query: String) {
+        _filteredItems.value = if (query.isBlank()) {
+            _items.value
+        } else {
+            _items.value.filter { item ->
+                item.name.contains(query, ignoreCase = true) ||
+                        item.description.contains(query, ignoreCase = true)
             }
         }
     }

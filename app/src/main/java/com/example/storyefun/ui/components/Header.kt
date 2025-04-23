@@ -49,7 +49,6 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.storyefun.data.models.Book
 import com.example.storyefun.ui.theme.LocalAppColors
-import com.example.storyefun.viewModel.searchBooks
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import androidx.compose.foundation.lazy.LazyColumn
@@ -112,7 +111,8 @@ fun Header(
                 painter = rememberAsyncImagePainter("https://i.pinimg.com/736x/6b/e9/17/6be91716ac90da6cdbac6421d78c7534.jpg"),
                 contentDescription = "Background Image",
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .height(200.dp)
             )
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -125,14 +125,17 @@ fun Header(
                     // Left
                     Column(
                         modifier = Modifier
-                            .background(Color.Black.copy(alpha = 0.5f), shape = RoundedCornerShape(8.dp))
-                            .padding(5.dp) // Padding trong vùng nền
+                            .background(
+                                Color.Black.copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(5.dp)
                     ) {
                         Text(
                             text = "ストリエフン",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color.White, // Đổi màu chữ để tương phản
+                            color = Color.White,
                             modifier = Modifier.clickable { navController.navigate("home") }
                         )
                         Text(
@@ -202,12 +205,10 @@ fun Header(
                             }
                         }
                     } else {
-//                        Column(
-//                            modifier = Modifier.fillMaxWidth(),
-//                            horizontalAlignment = Alignment.CenterHorizontally
-//                        ) {
-//                            Text(text = "Không tìm thấy kết quả")
-//                        }
+//                        Text(
+//                            text = "Không tìm thấy kết quả",
+//                            modifier = Modifier.align(Alignment.CenterHorizontally)
+//                        )
                     }
                 }
 
@@ -235,10 +236,10 @@ fun Header(
                     }
                 }
             } else {
-                Text(
-                    text = "Không tìm thấy kết quả",
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+//                Text(
+//                    text = "Không tìm thấy kết quả",
+//                    modifier = Modifier.align(Alignment.CenterHorizontally)
+//                )
             }
         }
         Divider(modifier = Modifier.padding(horizontal = 20.dp))
@@ -254,7 +255,10 @@ fun SearchBar(onSearch: (String) -> Unit) {
         modifier = Modifier
             .width(350.dp)
             .height(70.dp)
-            .background(color = Color(0xFFFFF9C4).copy(alpha = 0.9f), shape = RoundedCornerShape(20.dp))
+            .background(
+                color = Color(0xFFFFF9C4).copy(alpha = 0.9f),
+                shape = RoundedCornerShape(20.dp)
+            )
             .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
         TextField(
