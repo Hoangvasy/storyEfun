@@ -77,7 +77,6 @@ fun SettingScreen(navController: NavController? = null, themeViewModel: ThemeVie
                 "Chặn đoán mạng",
                 "Quản lý thông báo",
                 "Độ phân giải của ảnh",
-                "Thiết lập tự động mua"
             )
 
             Column {
@@ -94,6 +93,15 @@ fun SettingScreen(navController: NavController? = null, themeViewModel: ThemeVie
                     subtitle = "Tiếng Việt",
                     textColor = theme.textPrimary,
                     onClick = { /* Handle language change */ }
+                )
+                SettingsItem(
+                    title = "Mua coin",
+                    textColor = theme.textPrimary,
+                    onClick = {
+                        if (navController != null) {
+                            navController.navigate("Desposite")
+                        }
+                    }
                 )
             }
 
