@@ -100,7 +100,7 @@ fun SearchScreen(navController: NavController) {
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 8.dp) // Thêm khoảng cách giữa text và ảnh
+                        .padding(end = 8.dp)
                 ) {
                     Text(text = "Book Name: ${book.id}", style = MaterialTheme.typography.bodyLarge)
                     Spacer(modifier = Modifier.height(8.dp))
@@ -112,12 +112,12 @@ fun SearchScreen(navController: NavController) {
                     )
                 }
                 AsyncImage(
-                    model = book.description, // Thay thành book.imageUrl nếu đó là URL ảnh
+                    model = book.description,
                     contentDescription = "Book Cover",
                     modifier = Modifier
                         .weight(1f)
-                        .height(150.dp), // Đảm bảo chiều cao cố định
-                    contentScale = ContentScale.Crop // Cắt ảnh nếu không vừa
+                        .height(150.dp),
+                    contentScale = ContentScale.Crop
                 )
             }
         }
