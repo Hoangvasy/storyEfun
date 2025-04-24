@@ -1,19 +1,10 @@
 package com.example.storyefun.viewModel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.storyefun.data.models.Book
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.asStateFlow
 
-class SearchViewModel {
+class SearchViewModel1 {
     private val _books = MutableStateFlow<List<Book>>(emptyList()) // Dữ liệu gốc
     val books = _books.asStateFlow()
 

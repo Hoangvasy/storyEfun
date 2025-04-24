@@ -35,6 +35,8 @@ sealed class Screen(val route: String) {
     object Favourite : Screen("favourite")
     object Setting : Screen("setting")
     object CategoryList : Screen("category")
+    object Search : Screen("search")
+
 
     object AdminMenu : Screen("menuScreen")
     object AdminUpload : Screen("uploadBook")
@@ -58,16 +60,16 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
     val start : String
-    if (currentUser != null) {
-        start = Screen.AdminMenu.route
-    } else {
-        // Người dùng chưa đăng nhập, yêu cầu đăng nhập
-        start = Screen.Login.route
-    }
+//    if (currentUser != null) {
+//        start = Screen.AdminMenu.route
+//    } else {
+//        // Người dùng chưa đăng nhập, yêu cầu đăng nhập
+//        start = Screen.Login.route
+//    }
     NavHost(
         navController = navController,
-       // startDestination = Screen.Home.route
-        startDestination = start
+        startDestination = Screen.Home.route
+//        startDestination = start
 //        startDestination = Screen.Upload.route
     ) {
         composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
@@ -96,13 +98,14 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.CategoryList.route) { CategoryScreen(navController) }
         composable(Screen.Desposite.route) { DespositeScreen() }
         composable(Screen.Coin.route) { CoinScreen(navController) }
+        composable(Screen.Search.route) { SearchScreen(navController) }
+
 
         composable(Screen.ManageUser.route) { UserManageScreen(navController) }
         composable(Screen.AdminMenu.route) {MenuScreen(navController)}
         composable(Screen.AdminUpload.route) {AdminUploadScreen(navController)}
         composable(Screen.ManageBook.route) { ManageBooksScreen(navController) }
         composable(Screen.AddCategory.route) { AddCategory(navController, onCategoryAdded = {
-            // Xử lý khi category được thêm, ví dụ:
             navController.navigate(Screen.Home.route) {
                 popUpTo(Screen.AddCategory.route) { inclusive = true }
             }

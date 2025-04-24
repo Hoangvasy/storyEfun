@@ -35,7 +35,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -53,6 +52,9 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.SearchBar
+import androidx.compose.ui.Alignment
+import com.example.storyefun.ui.screens.SearchScreen
 
 
 fun fetchBooks(query: String, searchType: String, callback: (List<Book>) -> Unit) {
@@ -150,6 +152,13 @@ fun Header(
 
                     // Right
                     Row {
+                        IconButton(onClick = { navController.navigate("search") }) {
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = "search",
+                                tint = Color.White
+                            )
+                        }
                         IconButton(onClick = { navController.navigate("profile") }) {
                             Icon(
                                 Icons.Default.Person,
@@ -168,127 +177,128 @@ fun Header(
                 }
 
             }
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-            ) {
+//            Box(
+//                modifier = Modifier
+//                    .align(Alignment.BottomCenter)
+//            ) {
+//                SearchScreen()
 
-                SearchBar(
-                    onSearch = { query ->
-                        searchQuery = query
-                        performSearch(query)
-                    }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if (isLoading) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                } else {
-                    if (searchResults.isNotEmpty()) {
-                        LazyColumn {
-                            items(searchResults) { book ->
-                                Card(
-                                    modifier = Modifier
-                                        .padding(8.dp)
-                                        .fillMaxWidth()
-                                ) {
-                                    Column(modifier = Modifier.padding(8.dp)) {
-                                        Text(text = "Tên: ${book.name}")
-                                        Text(text = "Thể loại: ${book.category.joinToString(", ")}")
-                                    }
-                                }
-                            }
-                        }
-                    } else {
+//                SearchBar(
+//                    onSearch = { query ->
+//                        searchQuery = query
+//                        performSearch(query)
+//                    }
+//                )
+//                Spacer(modifier = Modifier.height(16.dp))
+//
+//                if (isLoading) {
+//                    Box(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        CircularProgressIndicator()
+//                    }
+//                } else {
+//                    if (searchResults.isNotEmpty()) {
+//                        LazyColumn {
+//                            items(searchResults) { book ->
+//                                Card(
+//                                    modifier = Modifier
+//                                        .padding(8.dp)
+//                                        .fillMaxWidth()
+//                                ) {
+//                                    Column(modifier = Modifier.padding(8.dp)) {
+//                                        Text(text = "Tên: ${book.name}")
+//                                        Text(text = "Thể loại: ${book.category.joinToString(", ")}")
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    } else {
 //                        Text(
 //                            text = "Không tìm thấy kết quả",
 //                            modifier = Modifier.align(Alignment.CenterHorizontally)
 //                        )
-                    }
-                }
+//                    }
+//                }
 
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-        } else {
-            if (searchResults.isNotEmpty()) {
-                LazyColumn {
-                    items(searchResults) { book ->
-                        Card(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth()
-                        ) {
-                            Column(modifier = Modifier.padding(8.dp)) {
-                                Text(text = "Tên: ${book.name}")
-                                Text(text = "Thể loại: ${book.category.joinToString(", ")}")
-                            }
-                        }
-                    }
-                }
-            } else {
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        if (isLoading) {
+//            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+//        } else {
+//            if (searchResults.isNotEmpty()) {
+//                LazyColumn {
+//                    items(searchResults) { book ->
+//                        Card(
+//                            modifier = Modifier
+//                                .padding(8.dp)
+//                                .fillMaxWidth()
+//                        ) {
+//                            Column(modifier = Modifier.padding(8.dp)) {
+//                                Text(text = "Tên: ${book.name}")
+//                                Text(text = "Thể loại: ${book.category.joinToString(", ")}")
+//                            }
+//                        }
+//                    }
+//                }
+//            } else {
 //                Text(
 //                    text = "Không tìm thấy kết quả",
 //                    modifier = Modifier.align(Alignment.CenterHorizontally)
 //                )
-            }
-        }
-        Divider(modifier = Modifier.padding(horizontal = 20.dp))
-    }
+//            }
+//        }
+//        Divider(modifier = Modifier.padding(horizontal = 20.dp))
+//    }
 }
 
-@Composable
-fun SearchBar(onSearch: (String) -> Unit) {
-    var query by remember { mutableStateOf("") }
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .width(350.dp)
-            .height(70.dp)
-            .background(
-                color = Color(0xFFFFF9C4).copy(alpha = 0.9f),
-                shape = RoundedCornerShape(20.dp)
-            )
-            .padding(horizontal = 10.dp, vertical = 4.dp)
-    ) {
-        TextField(
-            value = query,
-            onValueChange = { query = it },
-            placeholder = {
-                Text(
-                    text = "Search...",
-                    style = androidx.compose.ui.text.TextStyle(fontSize = 13.sp)
-                )
-            },
-            colors = androidx.compose.material3.TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.Transparent,
-                focusedContainerColor = Color.Transparent,
-                cursorColor = Color.Gray,
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black
-            ),
-            modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 2.dp)
-        )
-
-        IconButton(onClick = { onSearch(query) }) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search Icon",
-                tint = Color(0xFF616161),
-                modifier = Modifier.size(20.dp)
-            )
-        }
-    }
-}
+//@Composable
+//fun SearchBar(onSearch: (String) -> Unit) {
+//    var query by remember { mutableStateOf("") }
+//
+//    Row(
+//        verticalAlignment = Alignment.CenterVertically,
+//        modifier = Modifier
+//            .width(350.dp)
+//            .height(70.dp)
+//            .background(
+//                color = Color(0xFFFFF9C4).copy(alpha = 0.9f),
+//                shape = RoundedCornerShape(20.dp)
+//            )
+//            .padding(horizontal = 10.dp, vertical = 4.dp)
+//    ) {
+//        TextField(
+//            value = query,
+//            onValueChange = { query = it },
+//            placeholder = {
+//                Text(
+//                    text = "Search...",
+//                    style = androidx.compose.ui.text.TextStyle(fontSize = 13.sp)
+//                )
+//            },
+//            colors = androidx.compose.material3.TextFieldDefaults.colors(
+//                unfocusedContainerColor = Color.Transparent,
+//                focusedContainerColor = Color.Transparent,
+//                cursorColor = Color.Gray,
+//                focusedTextColor = Color.Black,
+//                unfocusedTextColor = Color.Black
+//            ),
+//            modifier = Modifier
+//                .weight(1f)
+//                .padding(vertical = 2.dp)
+//        )
+//
+//        IconButton(onClick = { onSearch(query) }) {
+//            Icon(
+//                imageVector = Icons.Default.Search,
+//                contentDescription = "Search Icon",
+//                tint = Color(0xFF616161),
+//                modifier = Modifier.size(20.dp)
+//            )
+//        }
+//    }
+//}

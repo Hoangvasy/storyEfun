@@ -95,6 +95,15 @@ fun SettingScreen(navController: NavController? = null, themeViewModel: ThemeVie
                     textColor = theme.textPrimary,
                     onClick = { /* Handle language change */ }
                 )
+                SettingsItem(
+                    title = "Mua coin",
+                    textColor = theme.textPrimary,
+                    onClick = {
+                        if (navController != null) {
+                            navController.navigate("Desposite")
+                        }
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))
