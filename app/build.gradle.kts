@@ -17,6 +17,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -54,6 +55,10 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation ("androidx.compose.foundation:foundation:1.6.0")
 
+    implementation("io.coil-kt:coil-compose:2.2.2")
+    implementation("androidx.compose.material3:material3:1.2.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+
     // Firebase (using BoM)
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     implementation("com.google.firebase:firebase-firestore-ktx")
@@ -61,6 +66,11 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-analytics")
     implementation ("com.google.firebase:firebase-database-ktx")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4")
+    implementation ("com.google.dagger:hilt-android:2.44")
+//    kapt ("com.google.dagger:hilt-compiler:2.44")
+    implementation ("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
+//    kapt ("androidx.hilt:hilt-compiler:1.0.0")
 
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.6.0")
@@ -88,6 +98,11 @@ dependencies {
         "dir" to "C:\\Users\\ducp4\\Downloads\\dependancy",
         "include" to listOf("*.aar", "*.jar"),
 
+    )))
+    implementation(fileTree(mapOf(
+        "dir" to "C:\\zaloPay",
+        "include" to listOf("*.aar", "*.jar"),
+        "exclude" to listOf("")
     )))
 
     // Testing

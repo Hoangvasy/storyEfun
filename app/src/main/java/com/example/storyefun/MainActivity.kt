@@ -1,7 +1,6 @@
 package com.example.storyefun
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.collectAsState
@@ -9,8 +8,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.getValue
 
 import androidx.navigation.compose.*
-import com.example.storyefun.data.models.Category
-import com.example.storyefun.data.repository.CategoryFirebase
 import com.example.storyefun.navigation.AppNavigation
 import com.example.storyefun.ui.theme.AppTheme
 import com.example.storyefun.viewModel.ThemeViewModel

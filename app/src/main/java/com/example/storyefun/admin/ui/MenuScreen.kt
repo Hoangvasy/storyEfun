@@ -43,7 +43,7 @@ fun MenuScreen(navController: NavController) {
     val selectedItem = remember { mutableStateOf("manageUsers") }
 
     val drawerItems = listOf(
-        DrawerItem("Manage Users", "manageUsers", Icons.Default.Menu, 3),
+        DrawerItem("Manage Users", "ManageUser", Icons.Default.Menu, 3),
         DrawerItem("Manage Books", "ManageBook", Icons.Default.Menu, 12),
         DrawerItem("Upload Book", "uploadBook", Icons.Default.Menu),
         DrawerItem("Manage Categories", "addCategory", Icons.Default.Menu),

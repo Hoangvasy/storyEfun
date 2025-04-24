@@ -51,14 +51,15 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.storyefun.R
 import com.example.storyefun.data.models.Book
+import com.example.storyefun.data.models.Category
 import com.example.storyefun.viewModel.BookViewModel
 import com.example.storyefun.ui.components.BottomBar
 import com.example.storyefun.ui.components.Header
 import com.example.storyefun.ui.theme.AppColors
 import com.example.storyefun.ui.theme.AppTheme
 import com.example.storyefun.ui.theme.LocalAppColors
+import com.example.storyefun.viewModel.CategoryViewModel
 import com.example.storyefun.viewModel.ThemeViewModel
-import com.example.storyefun.viewModel.searchBooks
 import kotlinx.coroutines.delay
 import okhttp3.internal.http2.Header
 
@@ -79,10 +80,10 @@ fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel ) {
         Scaffold(
             topBar = {
                 Header(
-////                    text = text,
-////                    active = active,
-////                    onQueryChange = { text = it },
-////                    onActiveChange = { active = it },
+//                    text = text,
+//                    active = active,
+//                    onQueryChange = { text = it },
+//                    onActiveChange = { active = it },
                     navController = navController
                 )
             },
@@ -137,6 +138,23 @@ fun BookList(books: List<Book>) {
                         Text("Tên: ${book.name}")
                         Text("Tác giả: ${book.author}")
                         Text("Mô tả: ${book.description}")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoryList(category: List<Category>) {
+    if (category.isEmpty()) {
+        Text("Không tìm thấy theer loai nào!")
+    } else {
+        LazyColumn {
+            itemsIndexed(category) { index, category ->
+                Card(modifier = Modifier.padding(8.dp)) {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text("Tên: ${category.name}")
                     }
                 }
             }
@@ -232,9 +250,11 @@ fun BookStory(
 ) {
     val books = viewModel.books.observeAsState(emptyList())
 
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 5.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 5.dp)
+    ) {
 
         HeaderRow(navController, title, theme)
 
@@ -243,8 +263,7 @@ fun BookStory(
                 Box(modifier = Modifier.width(150.dp).height(250.dp)) {
                     Card(
                         modifier = Modifier.wrapContentSize().padding(5.dp)
-                            .clickable { navController.navigate("bookDetail/${book.id}") }
-                        ,
+                            .clickable { navController.navigate("bookDetail/${book.id}") },
                         elevation = CardDefaults.cardElevation(5.dp)
                     ) {
                         Column {
@@ -282,7 +301,6 @@ fun BookStory(
         }
     }
 }
-
 
 @Composable
 fun HeaderRow(navController: NavController, title: String, theme: AppColors) {
@@ -482,12 +500,4 @@ fun Stories(navController: NavController) {
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
-@Composable
-fun PreviewHome() {
-    // For preview purposes, you can create a dummy ThemeViewModel and NavController if needed.
-    HomeScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel())
 }

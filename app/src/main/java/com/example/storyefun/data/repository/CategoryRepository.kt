@@ -1,9 +1,10 @@
 package com.example.storyefun.data.repository
 
 import com.example.storyefun.data.models.Category
+import com.example.storyefun.ui.screens.categories
 import com.google.firebase.firestore.FirebaseFirestore
 
-//class CategoryRepository {
+
     fun CategoryFirebase (category: Category, callback: (Boolean) -> Unit) {
         val database = FirebaseFirestore.getInstance()
         val categoryRef = database.collection("categories")
@@ -23,4 +24,18 @@ import com.google.firebase.firestore.FirebaseFirestore
                 callback(false)
             }
     }
-//}
+class CategoryRepository {
+    fun getCategories(callback: (List<Category>) -> Unit) {
+        val database = FirebaseFirestore.getInstance()
+        val categoryRef = database.collection("categories")
+        categoryRef.get()
+            .addOnSuccessListener { result ->
+                val categories = result.documents.mapNotNull {
+                    it.toObject(Category::class.java)
+                }
+                callback(categories)
+            }.addOnFailureListener{
+                callback(emptyList())
+            }
+    }
+}
