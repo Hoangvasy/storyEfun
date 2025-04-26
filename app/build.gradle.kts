@@ -71,6 +71,9 @@ dependencies {
 //    kapt ("com.google.dagger:hilt-compiler:2.44")
     implementation ("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
 //    kapt ("androidx.hilt:hilt-compiler:1.0.0")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
+
 
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.6.0")
