@@ -74,7 +74,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 //    }
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.AdminMenu.route
 //        startDestination = start
 //        startDestination = Screen.Upload.route
     ) {

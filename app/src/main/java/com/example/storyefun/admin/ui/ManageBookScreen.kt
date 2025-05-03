@@ -43,81 +43,100 @@ fun ManageBooksScreen(navController: NavController, viewModel: BookViewModel = v
     var sortOption by remember { mutableStateOf("Newest") }
     val isLoading by viewModel.isLoading.observeAsState(false)
     val books by viewModel.books.observeAsState(emptyList())
+    val selectedItem = remember { mutableStateOf("manageBooks")}
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            // 🔍 Search & Sort Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+    AdminDrawer(
+        navController = navController,
+        drawerState = rememberDrawerState(DrawerValue.Closed),
+        selectedItem = selectedItem
+
+    ) {
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) }
+        ) { innerPadding ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding) // Xử lý PaddingValues từ Scaffold
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    // 🔍 Search & Sort Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        }
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier.weight(1f),
+                            placeholder = { Text("Search books...") },
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        DropdownMenuButton(sortOption) { selected -> sortOption = selected }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    val filteredBooks =
+                        books.filter { it.name.contains(searchQuery, ignoreCase = true) }
+                    val sortedBooks = when (sortOption) {
+                        "Most Viewed" -> filteredBooks.sortedByDescending { it.views }
+                        "Most Liked" -> filteredBooks.sortedByDescending { it.likes }
+                        else -> filteredBooks
+                    }
+
+                    // Scrollable list of books
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(sortedBooks) { book ->
+                            BookAdminItem(book, navController, viewModel)
+                        }
+                    }
                 }
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("Search books...") },
-                    shape = RoundedCornerShape(12.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                DropdownMenuButton(sortOption) { selected -> sortOption = selected }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            val filteredBooks = books.filter { it.name.contains(searchQuery, ignoreCase = true) }
-            val sortedBooks = when (sortOption) {
-                "Most Viewed" -> filteredBooks.sortedByDescending { it.views }
-                "Most Liked" -> filteredBooks.sortedByDescending { it.likes }
-                else -> filteredBooks
-            }
-
-            // Scrollable list of books
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(sortedBooks) { book ->
-                    BookAdminItem(book, navController, viewModel)
+                // Floating action button
+                FloatingActionButton(
+                    onClick = { navController.navigate("uploadBook") },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(20.dp),
+                    containerColor = theme.buttonOrange,
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "Add Book",
+                        tint = theme.textPrimary
+                    )
                 }
-            }
-        }
 
-        // Floating action button
-        FloatingActionButton(
-            onClick = { navController.navigate("uploadBook") },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(20.dp),
-            containerColor = theme.buttonOrange,
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Add Book", tint = theme.textPrimary)
-        }
-
-        // Loading overlay
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.3f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 4.dp
-                )
+                // Loading overlay
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.3f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 4.dp
+                        )
+                    }
+                }
             }
         }
     }
