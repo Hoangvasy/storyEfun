@@ -1,8 +1,8 @@
 package com.example.storyefun.admin.ui
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -13,12 +13,15 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -29,9 +32,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.storyefun.R
-import com.example.storyefun.viewModel.BookViewModel
 import com.example.storyefun.data.models.Book
 import com.example.storyefun.ui.theme.LocalAppColors
+import com.example.storyefun.viewModel.BookViewModel
 
 @Composable
 fun ManageBooksScreen(navController: NavController, viewModel: BookViewModel = viewModel()) {
@@ -81,7 +84,7 @@ fun ManageBooksScreen(navController: NavController, viewModel: BookViewModel = v
                 columns = GridCells.Fixed(2),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f), // Ensure this takes up available space
+                    .weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -120,13 +123,13 @@ fun ManageBooksScreen(navController: NavController, viewModel: BookViewModel = v
     }
 }
 
-
 @Composable
 fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewModel) {
+    val theme = LocalAppColors.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp), // Giảm aspectRatio để card cao hơn, tạo không gian cho ảnh lớn hơn
+            .height(340.dp), // Tăng chiều cao để ảnh lớn hơn
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -141,9 +144,18 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(3f) // Tăng weight để ảnh to hơn, chiếm nhiều không gian hơn
+                    .weight(4f) // Tăng weight để ảnh chiếm nhiều không gian hơn
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color.LightGray) // Nền xám nhạt để thấy khung ảnh (có thể đổi thành Color.Transparent)
+                    .shadow(4.dp, RoundedCornerShape(8.dp)) // Thêm bóng
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFFFF7043).copy(alpha = 0.1f),
+                                Color(0xFFFFA726).copy(alpha = 0.1f)
+                            )
+                        )
+                    ) // Gradient nền nhẹ
+                    .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(8.dp)) // Viền trắng nhẹ
             ) {
                 Image(
                     painter = rememberAsyncImagePainter(
@@ -152,7 +164,7 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
                         error = painterResource(R.drawable.error)
                     ),
                     contentDescription = "Book Cover",
-                    contentScale = ContentScale.Fit, // Hiển thị toàn bộ ảnh, không cắt
+                    contentScale = ContentScale.Crop, // Ảnh lấp đầy khung
                     modifier = Modifier
                         .fillMaxSize()
                         .align(Alignment.Center)
@@ -160,7 +172,7 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
             }
 
             // Thông tin sách
-            Column(modifier = Modifier.padding(top = 8.dp)) {
+            Column(modifier = Modifier.padding(top = 12.dp)) {
                 Text(
                     text = book.name,
                     style = MaterialTheme.typography.titleSmall.copy(fontSize = 16.sp),
@@ -175,7 +187,7 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -197,7 +209,7 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
             // Nút hành động
             Row(
                 modifier = Modifier
-                    .padding(top = 8.dp)
+                    .padding(top = 12.dp)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -205,8 +217,7 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
                     onClick = { navController.navigate("addVolume/${book.id}") },
                     modifier = Modifier
                         .width(40.dp)
-                        .height(26.dp) // to ra
-                    ,
+                        .height(28.dp),
                     contentPadding = PaddingValues(0.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -214,16 +225,14 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
                     )
                 ) {
                     Icon(
-                        Icons.Default.Add, contentDescription = null
+                        Icons.Default.Add, contentDescription = null, tint = theme.textPrimary
                     )
                 }
                 Button(
                     onClick = { navController.navigate("editBook/${book.id}") },
                     modifier = Modifier
                         .width(40.dp)
-                        .height(26.dp) // to ra
-
-                    ,
+                        .height(28.dp),
                     contentPadding = PaddingValues(0.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -231,15 +240,14 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
                     )
                 ) {
                     Icon(
-                        Icons.Default.Edit, contentDescription = null
+                        Icons.Default.Edit, contentDescription = null, tint = theme.textPrimary
                     )
                 }
                 Button(
                     onClick = { viewModel.deleteBook(book.id) },
                     modifier = Modifier
                         .width(40.dp)
-                        .height(26.dp) // to ra
-                    ,
+                        .height(28.dp),
                     contentPadding = PaddingValues(0.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -247,7 +255,7 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
                     )
                 ) {
                     Icon(
-                        Icons.Default.Delete, contentDescription = null
+                        Icons.Default.Delete, contentDescription = null, tint = theme.textPrimary
                     )
                 }
             }
@@ -255,17 +263,14 @@ fun BookAdminItem(book: Book, navController: NavController, viewModel: BookViewM
     }
 }
 
-
-
-// 🔽 Sorting Dropdown
 @Composable
 fun DropdownMenuButton(currentSort: String, onSortSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val options = listOf("Newest", "Most Viewed", "Most Liked")
 
     Box {
-        OutlinedButton(onClick = { expanded = true }) {
-            Text(currentSort)
+        IconButton(onClick = { expanded = true }) {
+            Icon(Icons.Default.MoreVert, contentDescription = "Sort Options")
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { option ->
@@ -280,9 +285,6 @@ fun DropdownMenuButton(currentSort: String, onSortSelected: (String) -> Unit) {
         }
     }
 }
-
-
-
 
 @Composable
 fun BookItem(book: Book) {
@@ -304,14 +306,13 @@ fun BookItem(book: Book) {
                 Image(
                     painter = rememberAsyncImagePainter(
                         model = book.imageUrl,
-                        placeholder = painterResource(R.drawable.placeholder), // Placeholder image
-                        error = painterResource(R.drawable.error), // Error image
+                        placeholder = painterResource(R.drawable.placeholder),
+                        error = painterResource(R.drawable.error),
                         onError = { result ->
-                            // Access the throwable using result.throwable
-                            println("Image loading failed: ${result.result.throwable}") // Log the error
+                            println("Image loading failed: ${result.result.throwable}")
                         },
                         onSuccess = {
-                            println("Image loaded successfully") // Log success
+                            println("Image loaded successfully")
                         }
                     ),
                     contentDescription = "Book Cover",
@@ -344,7 +345,7 @@ fun BookItem(book: Book) {
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            // Display Metadata (Type, Follows, Likes, Views)
+            // Display Metadata
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -371,5 +372,6 @@ fun BookItem(book: Book) {
                 )
             }
         }
+
+        }
     }
-}
