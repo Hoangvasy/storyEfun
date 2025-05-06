@@ -3,7 +3,7 @@ package com.example.storyefun.ui.screens
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -58,8 +58,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -135,11 +133,23 @@ fun BookTabScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
         when (selectedTabIndex) {
-            0 ->NewBookScreen()
-//            1 -> AudioBooksContent(navController)
-//            2 -> ComicsContent(navController)
+            0 -> {
+                NewBookScreen(navController)
+                Spacer(modifier = Modifier.height(16.dp))
+                RecommendedBookScreen(navController)
+                Spacer(modifier = Modifier.height(16.dp))
+                PopularBookScreen(navController)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            1 -> AudioBooksContent(navController)
+            2 -> ComicsContent(navController)
         }
     }
+}
+
+@Composable
+fun ComicsContent(x0: NavController) {
+
 }
 
 @Composable
