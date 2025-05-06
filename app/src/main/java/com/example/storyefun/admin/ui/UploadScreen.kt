@@ -60,120 +60,141 @@ fun AdminUploadScreen(
     val posterPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
         uploadViewModel.posterUri = it
     }
+    val selectedItem = remember { mutableStateOf("uploadBook") } // Đặt đúng là "uploadBook"
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+    AdminDrawer(
+        navController = navController,
+        drawerState = rememberDrawerState(DrawerValue.Closed),
+        selectedItem = selectedItem
     ) {
-        // Header
-        Box(modifier = Modifier.fillMaxWidth()) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-            }
-            Text(
-                text = "Upload Book",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) }
+        ) { innerPadding ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        // Header
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                            }
+                            Text(
+                                text = "Upload Book",
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = uploadViewModel.bookName,
-            onValueChange = { uploadViewModel.bookName = it },
-            label = { Text("\uD83D\uDCDA Book Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
+                        OutlinedTextField(
+                            value = uploadViewModel.bookName,
+                            onValueChange = { uploadViewModel.bookName = it },
+                            label = { Text("\uD83D\uDCDA Book Name") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
-        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
-        OutlinedTextField(
-            value = uploadViewModel.authorName,
-            onValueChange = { uploadViewModel.authorName = it },
-            label = { Text("👤 Author Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
+                        OutlinedTextField(
+                            value = uploadViewModel.authorName,
+                            onValueChange = { uploadViewModel.authorName = it },
+                            label = { Text("👤 Author Name") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
-        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
-        OutlinedTextField(
-            value = uploadViewModel.description,
-            onValueChange = { uploadViewModel.description = it },
-            label = { Text("📝 Description") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            maxLines = 5
-        )
+                        OutlinedTextField(
+                            value = uploadViewModel.description,
+                            onValueChange = { uploadViewModel.description = it },
+                            label = { Text("📝 Description") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp),
+                            maxLines = 5
+                        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-        // Hiển thị danh sách categories
-        Text(
-            text = "📚 Select Categories",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        if (isLoadingCategories) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-        } else {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(categories) { category ->
-                    FilterChip(
-                        selected = selectedCategories.contains(category.id),
-                        onClick = { categoryViewModel.toggleCategorySelection(category.id) },
-                        label = { Text(category.name) },
-                        modifier = Modifier.padding(4.dp)
-                    )
+                        // Hiển thị danh sách categories
+                        Text(
+                            text = "📚 Select Categories",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        if (isLoadingCategories) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                        } else {
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(categories) { category ->
+                                    FilterChip(
+                                        selected = selectedCategories.contains(category.id),
+                                        onClick = { categoryViewModel.toggleCategorySelection(category.id) },
+                                        label = { Text(category.name) },
+                                        modifier = Modifier.padding(4.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        // Hiển thị số category được chọn
+                        Text(
+                            text = "Selected ${selectedCategories.size} categories",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            ImagePickerBox(uploadViewModel.imageUri, "Book Image") {
+                                imagePicker.launch("image/*")
+                            }
+                            ImagePickerBox(uploadViewModel.posterUri, "Poster Image") {
+                                posterPicker.launch("image/*")
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Button(
+                            onClick = { uploadViewModel.uploadBook(context, navController) },
+                            enabled = !uploadViewModel.isUploading &&
+                                    uploadViewModel.bookName.isNotBlank() &&
+                                    uploadViewModel.authorName.isNotBlank() &&
+                                    uploadViewModel.description.isNotBlank() &&
+                                    uploadViewModel.imageUri != null &&
+                                    uploadViewModel.posterUri != null &&
+                                    selectedCategories.isNotEmpty(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = RoundedCornerShape(5.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = theme.buttonOrange)
+                        ) {
+                            Text("☁️ Upload Book", color = theme.textPrimary)
+                        }
+                    }
                 }
             }
-        }
-
-        // Hiển thị số category được chọn
-        Text(
-            text = "Selected ${selectedCategories.size} categories",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 8.dp)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            ImagePickerBox(uploadViewModel.imageUri, "Book Image") {
-                imagePicker.launch("image/*")
-            }
-            ImagePickerBox(uploadViewModel.posterUri, "Poster Image") {
-                posterPicker.launch("image/*")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = { uploadViewModel.uploadBook(context, navController) },
-            enabled = !uploadViewModel.isUploading &&
-                    uploadViewModel.bookName.isNotBlank() &&
-                    uploadViewModel.authorName.isNotBlank() &&
-                    uploadViewModel.description.isNotBlank() &&
-                    uploadViewModel.imageUri != null &&
-                    uploadViewModel.posterUri != null &&
-                    selectedCategories.isNotEmpty(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(5.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = theme.buttonOrange)
-        ) {
-            Text("☁️ Upload Book", color = theme.textPrimary)
         }
     }
 }
