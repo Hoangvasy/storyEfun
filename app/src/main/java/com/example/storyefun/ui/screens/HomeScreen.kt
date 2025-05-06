@@ -263,31 +263,13 @@ fun IndicatorDots(isSelected: Boolean, modifier: Modifier) {
     )
 }
 
-//@Composable
-//fun NewArrivalsSection() {
-//    Column(modifier = Modifier.padding(8.dp)) {
-//        Row(
-//            horizontalArrangement = Arrangement.SpaceBetween,
-//            modifier = Modifier.fillMaxWidth()
-//        ) {
-//            Text("New arrivals", style = MaterialTheme.typography.bodyMedium)
-//            Text("More", color = Color.Blue)
-//        }
-//        LazyRow {
-//            items(5) { // Giả định có 5 sách mới
-//                BookCard(title = "Tess of the Road", author = "Rachel Hartman", price = "$10.99")
-//            }
-//        }
-//    }
-//}
-
 @Composable
 fun BookCardHorizontal(
-    imageUrl: String, // Đường dẫn ảnh
-    title: String, // Tên truyện
-    author: String, // Tác giả
-    rating: Float, // Đánh giá sao
-    price: String // Giá tiền
+    imageUrl: String,
+    title: String,
+    author: String,
+    rating: Float,
+    price: String
 ) {
     Card(
         modifier = Modifier
