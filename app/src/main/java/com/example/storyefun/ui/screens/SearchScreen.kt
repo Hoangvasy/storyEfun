@@ -142,7 +142,6 @@ fun searchAndFetchBooks(
         }
 }
 
-
 fun performSearch(db: FirebaseFirestore, query: String, onResult: (List<Pair<String, String>>) -> Unit) {
     db.collection("books")
         .whereGreaterThanOrEqualTo("name", query)
