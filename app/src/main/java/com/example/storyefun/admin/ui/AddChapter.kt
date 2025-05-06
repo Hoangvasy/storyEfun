@@ -27,10 +27,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.storyefun.data.repository.ChapterRepository
+import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.viewModel.ChapterViewModel
 
 @Composable
 fun AddChapterScreen(navController: NavController, bookId: String, volumeId: String) {
+    val theme = LocalAppColors.current
     val context = LocalContext.current
     val repository = remember { ChapterRepository() }
     val viewModel: ChapterViewModel = viewModel(
@@ -64,10 +66,10 @@ fun AddChapterScreen(navController: NavController, bookId: String, volumeId: Str
                 .fillMaxWidth()
                 .background(
                     brush = Brush.linearGradient(
-                        colors = listOf(Color(0xFF6B48FF), Color(0xFFA855F7))
+                        colors = listOf(Color(0xFFFF7043), Color(0xFFFFA726))
                     )
                 )
-                .padding(32.dp)
+                .padding(10.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -85,13 +87,6 @@ fun AddChapterScreen(navController: NavController, bookId: String, volumeId: Str
                     )
                 }
 
-                Text(
-                    text = "Add Chapter",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                )
 
                 // Spacer để cân bằng bố cục
                 Spacer(modifier = Modifier.size(48.dp))
@@ -181,7 +176,7 @@ fun AddChapterScreen(navController: NavController, bookId: String, volumeId: Str
                         .fillMaxSize()
                         .background(
                             brush = Brush.linearGradient(
-                                colors = listOf(Color(0xFF6B48FF), Color(0xFFA855F7))
+                                colors = listOf(theme.backOrange, theme.buttonOrange)
                             )
                         ),
                     contentAlignment = Alignment.Center
@@ -236,7 +231,7 @@ fun AddChapterScreen(navController: NavController, bookId: String, volumeId: Str
                         .fillMaxSize()
                         .background(
                             brush = Brush.linearGradient(
-                                colors = listOf(Color(0xFF6B48FF), Color(0xFFA855F7))
+                                colors = listOf(Color(0xFFFF7043), Color(0xFFFFA726))
                             )
                         ),
                     contentAlignment = Alignment.Center

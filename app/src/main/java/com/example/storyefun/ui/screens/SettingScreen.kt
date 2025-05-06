@@ -77,7 +77,6 @@ fun SettingScreen(navController: NavController? = null, themeViewModel: ThemeVie
                 "Chặn đoán mạng",
                 "Quản lý thông báo",
                 "Độ phân giải của ảnh",
-                "Thiết lập tự động mua"
             )
 
             Column {

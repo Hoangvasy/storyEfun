@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.storyefun.admin.ui.AdminDrawer
 import com.example.storyefun.data.models.User
 import com.example.storyefun.viewModel.UserViewModel
 
@@ -38,8 +39,24 @@ fun UserManageScreen(navController: NavController) {
 
     // Snackbar host state
     val snackbarHostState = remember { SnackbarHostState() }
-
+    val selectedItem = remember { mutableStateOf("manageBooks")}
     // Xử lý trạng thái xóa
+    AdminDrawer(
+        navController = navController,
+        drawerState = rememberDrawerState(DrawerValue.Closed),
+        selectedItem = selectedItem
+
+    ) {
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) }
+        ) { innerPadding ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding) // Xử lý PaddingValues từ Scaffold
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
     LaunchedEffect(deleteStatus) {
         when (deleteStatus) {
             is UserViewModel.DeleteStatus.Success -> {
@@ -141,7 +158,7 @@ fun UserManageScreen(navController: NavController) {
                 }
             }
         }
-    }
+    }}}}}
 }
 
 @Composable

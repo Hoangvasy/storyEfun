@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -116,10 +117,10 @@ fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel ) {
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
 //                    item {SearchBar(onSearch = it)}
-//                    item { Banner() }
+                    item { Banner() }
                     item { Channels(navController = navController, theme = colors) }
                     item { BookStory(navController = navController, theme = colors) }
-//                    item { ContinueRead() }
+                    item { ContinueRead() }
                 }
             }
         }
@@ -204,7 +205,7 @@ fun Banner() {
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(250.dp),
+                            .height(200.dp),
                         contentScale = ContentScale.Crop
                     )
                 }
@@ -233,13 +234,20 @@ fun PageIndicator(pageCount: Int, currentPage: Int, modifier: Modifier.Companion
 }
 // Dots
 @Composable
-fun IndicatorDots(isSelected: Boolean, modifier:Modifier) {
-    val size = animateDpAsState(targetValue = if(isSelected) 12.dp else 10.dp, label = "")
-    Box(modifier = Modifier.padding(2.dp)
-        .size(size.value)
-        .clip(CircleShape)
-        .background(if(isSelected) Color(0xFF780000) else Color(0xFFD3D3D3)))
+fun IndicatorDots(isSelected: Boolean, modifier: Modifier) {
+    val width = animateDpAsState(targetValue = if (isSelected) 50.dp else 40.dp, label = "")
+    val height = animateDpAsState(targetValue = if (isSelected) 5.dp else 3.dp, label = "")
+
+    Box(
+        modifier = Modifier
+            .padding(2.dp)
+            .width(width.value)
+            .height(height.value)
+            .clip(RectangleShape)
+            .background(if (isSelected) Color(0xFF780000) else Color(0xFFD3D3D3))
+    )
 }
+
 
 @Composable
 fun BookStory(
