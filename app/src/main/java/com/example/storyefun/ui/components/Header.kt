@@ -105,72 +105,65 @@ fun Header(
         }
     }
 
-//    Column(modifier = Modifier.fillMaxWidth()) {
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .background(Color.White)
-//        ) {
-//            Image(
-//                painter = rememberAsyncImagePainter("https://i.pinimg.com/736x/6b/e9/17/6be91716ac90da6cdbac6421d78c7534.jpg"),
-//                contentDescription = "Background Image",
-//                contentScale = ContentScale.Crop,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(200.dp)
-//            )
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Color(0xFFFFFFFF)) // Nền xám sáng
+            .padding(top = 5.dp, bottom = 5.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Left: Logo and Name
+            Column(
+                modifier = Modifier
+                    .padding(5.dp)
+                    .clickable { navController.navigate("home")},
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "ストリエフン",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    // Left
-                    Column(
-                        modifier = Modifier
-                            .padding(5.dp)
-                    ) {
-                        Text(
-                            text = "ストリエフン",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.clickable { navController.navigate("home") }
-                        )
-                        Text(
-                            text = "STORYEFUN",
-                            fontSize = 10.sp,
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .clickable { navController.navigate("home") }
-                        )
-                    }
+                        .padding(bottom = 2.dp)
+                )
+                Text(
+                    text = "STORYEFUN",
+                    fontSize = 15.sp,
+                    color = Color.Black.copy(alpha = 0.7f),
+                    modifier = Modifier
+                )
+            }
 
-                    // Right
-                    Row {
-                        IconButton(onClick = { navController.navigate("search") }) {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = "search",
-                            )
-                        }
-                        IconButton(onClick = { navController.navigate("profile") }) {
-                            Icon(
-                                Icons.Default.Person,
-                                contentDescription = "person",
-                            )
-                        }
-                        IconButton(onClick = { navController.navigate("setting") }) {
-                            Icon(
-                                Icons.Default.Settings,
-                                contentDescription = "settings"
-//
-                            )
-                        }
-                    }
+            // Right: Icons for navigation
+            Row {
+                IconButton(onClick = { navController.navigate("search") }) {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = "search",
+                        tint = Color.Black
+                    )
                 }
-
+                IconButton(onClick = { navController.navigate("profile") }) {
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = "profile",
+                        tint = Color.Black
+                    )
+                }
+                IconButton(onClick = { navController.navigate("settings") }) {
+                    Icon(
+                        Icons.Default.Settings,
+                        contentDescription = "settings",
+                        tint = Color.Black
+                    )
+                }
             }
-
-            }
+        }
+    }
+}
