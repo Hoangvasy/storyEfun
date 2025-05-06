@@ -51,7 +51,7 @@ sealed class Screen(val route: String) {
     object Desposite : Screen("desposite")
     object Coin : Screen("coin")
     object ManageUser : Screen("manageUser")
-
+    object PaymentNotification : Screen("paymentNotification")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +60,12 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
     val start : String
+    if (currentUser != null) {
+        start = Screen.AdminMenu.route
+    } else {
+        // Người dùng chưa đăng nhập, yêu cầu đăng nhập
+        start = Screen.Login.route
+    }
 //    if (currentUser != null) {
 //        start = Screen.AdminMenu.route
 //    } else {
@@ -68,7 +74,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 //    }
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.AdminMenu.route
 //        startDestination = start
 //        startDestination = Screen.Upload.route
     ) {
