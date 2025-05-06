@@ -108,7 +108,7 @@ fun BottomBar(navController: NavController, currentRoute: String) {
         .clip(
             RoundedCornerShape(0.dp)
         )
-        .background(Color(0xFFC69C72))
+        .background(Color(0xF7FDDAC6))
     ){
         Row(
             modifier = Modifier

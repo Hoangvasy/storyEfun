@@ -72,7 +72,8 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         //startDestination = Screen.AdminMenu.route
         startDestination = start
     ) {
-        composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
+//        composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
+        composable(Screen.Home.route) { HomeBookScreen(navController) }
         composable("bookDetail/{bookId}") { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
             BookDetailScreen(navController, bookId, themeViewModel)

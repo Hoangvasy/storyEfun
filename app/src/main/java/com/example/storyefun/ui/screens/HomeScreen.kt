@@ -17,17 +17,22 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -42,6 +47,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -67,7 +73,10 @@ import okhttp3.internal.http2.Header
 @ExperimentalMaterial3Api
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel ) {
+fun HomeScreen(
+    navController: NavController,
+    themeViewModel: ThemeViewModel
+) {
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     var books by remember { mutableStateOf<List<Book>>(emptyList())}
@@ -90,9 +99,15 @@ fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel ) {
             },
             bottomBar = { BottomBar(navController, "home") }
         ) { paddingValues ->
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize()
+            ) {
                 // In light mode, use a background image; in dark mode, use theme background color
                 if (!isDarkMode) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(colors.background)
+                    )
 //                    Image(
 //                        painter = colors.background(),
 //                        contentDescription = "background",
@@ -118,9 +133,9 @@ fun HomeScreen(navController: NavController, themeViewModel: ThemeViewModel ) {
                 ) {
 //                    item {SearchBar(onSearch = it)}
                     item { Banner() }
-                    item { Channels(navController = navController, theme = colors) }
+//                    item { Channels(navController = navController, theme = colors) }
                     item { BookStory(navController = navController, theme = colors) }
-                    item { ContinueRead() }
+                    item { BookList() }
                 }
             }
         }
@@ -149,7 +164,7 @@ fun BookList(books: List<Book>) {
 @Composable
 fun CategoryList(category: List<Category>) {
     if (category.isEmpty()) {
-        Text("Không tìm thấy theer loai nào!")
+        Text("Không tìm thấy the loai nào!")
     } else {
         LazyColumn {
             itemsIndexed(category) { index, category ->
@@ -248,9 +263,301 @@ fun IndicatorDots(isSelected: Boolean, modifier: Modifier) {
     )
 }
 
+//@Composable
+//fun NewArrivalsSection() {
+//    Column(modifier = Modifier.padding(8.dp)) {
+//        Row(
+//            horizontalArrangement = Arrangement.SpaceBetween,
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            Text("New arrivals", style = MaterialTheme.typography.bodyMedium)
+//            Text("More", color = Color.Blue)
+//        }
+//        LazyRow {
+//            items(5) { // Giả định có 5 sách mới
+//                BookCard(title = "Tess of the Road", author = "Rachel Hartman", price = "$10.99")
+//            }
+//        }
+//    }
+//}
+
+@Composable
+fun BookCardHorizontal(
+    imageUrl: String, // Đường dẫn ảnh
+    title: String, // Tên truyện
+    author: String, // Tác giả
+    rating: Float, // Đánh giá sao
+    price: String // Giá tiền
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .height(150.dp),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            // Phần ảnh bìa sách
+            Image(
+                painter = painterResource(id = R.drawable.placeholder), // Thay thế bằng ảnh từ URL nếu cần
+                contentDescription = "Book Image",
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.LightGray),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(modifier = Modifier.width(8.dp)) // Khoảng cách giữa ảnh và thông tin
+
+            // Phần thông tin sách
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Tên sách và tác giả
+                Column {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = author,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+
+                // Đánh giá sao
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Rating Star",
+                        tint = Color(0xFFFFD700),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = "$rating",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+                }
+
+                // Giá tiền
+                Text(
+                    text = price,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BookList() {
+    Column(modifier = Modifier.padding(8.dp)) {
+        BookCardHorizontal(
+            imageUrl = "https://i.pinimg.com/736x/3a/10/c3/3a10c350b0252b758ca73c430c497c2e.jpg", // Thay URL ảnh phù hợp
+            title = "Tess of the Road",
+            author = "Rachel Hartman",
+            rating = 4.7f,
+            price = "$10.99"
+        )
+        BookCardHorizontal(
+            imageUrl = "https://i.pinimg.com/736x/3a/10/c3/3a10c350b0252b758ca73c430c497c2e.jpg",
+            title = "1984",
+            author = "George Orwell",
+            rating = 4.8f,
+            price = "$9.99"
+        )
+    }
+}
 
 @Composable
 fun BookStory(
+    navController: NavController,
+    theme: AppColors,
+    title: String = "Books",
+    viewModel: BookViewModel = viewModel()
+) {
+    val books = viewModel.books.observeAsState(emptyList())
+    val limitedBooks = books.value.take(5) // Lấy tối đa 5 cuốn sách đầu tiên
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(theme.backgroundColor)
+            .padding(16.dp)
+    ) {
+        // Header Row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = TextStyle(
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+//                    color = theme.primaryColor
+                )
+            )
+//            TextButton(onClick = { navController.navigate("allBooks") }) {
+            TextButton(onClick = {  }) {
+
+            Text(
+                    text = "Xem tất cả",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+//                        color = theme.primaryColor,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+            }
+        }
+
+        // Book Carousel (Limited to 5 books)
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            itemsIndexed(limitedBooks) { _, book ->
+                BookCard(book = book, navController = navController)
+            }
+        }
+    }
+}
+
+@Composable
+fun AllBooksScreen(
+    navController: NavController,
+    theme: AppColors,
+    viewModel: BookViewModel = viewModel()
+) {
+    val books = viewModel.books.observeAsState(emptyList())
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(theme.backgroundColor)
+            .padding(16.dp)
+    ) {
+        // Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Tất cả sách",
+                style = TextStyle(
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+//                    color = theme.primaryColor
+                )
+            )
+//            IconButton(onClick = { navController.popBackStack() }) {
+//                Icon(
+//                    imageVector = Icons.Default.ArrowBack,
+//                    contentDescription = "Back",
+////                    tint = theme.primaryColor
+//                )
+//            }
+        }
+
+        // Full Book List
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            itemsIndexed(books.value) { _, book ->
+                BookCard(book = book, navController = navController)
+            }
+        }
+    }
+}
+
+@Composable
+fun BookCard(
+    book: Book,
+    navController: NavController
+) {
+    Card(
+        modifier = Modifier
+            .width(160.dp)
+            .height(240.dp)
+            .clickable { navController.navigate("bookDetail/${book.id}") },
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.Gray),
+                contentAlignment = Alignment.Center
+            ) {
+                if (!book.imageUrl.isNullOrEmpty()) {
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(book.imageUrl)
+                                .crossfade(true)
+                                .build()
+                        ),
+                        contentDescription = "Book Cover",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Text(
+                        text = "No Image",
+                        color = Color.White,
+                        style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = book.name,
+                style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 14.sp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = book.author ?: "Unknown Author",
+                style = TextStyle(fontSize = 12.sp, color = Color.Gray),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+
+@Composable
+fun BookStory1(
     navController: NavController,
     theme: AppColors,
     title: String = "Books",
