@@ -69,8 +69,9 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 
     NavHost(
         navController = navController,
-        //startDestination = Screen.AdminMenu.route
-        startDestination = start
+        startDestination = Screen.AdminMenu.route
+        //startDestination = start
+
     ) {
 //        composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
         composable(Screen.Home.route) { HomeBookScreen(navController) }
