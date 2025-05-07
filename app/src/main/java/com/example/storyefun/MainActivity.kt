@@ -16,7 +16,34 @@ import com.google.firebase.FirebaseApp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FirebaseApp.initializeApp(this) //  Add this line
+        FirebaseApp.initializeApp(this)
+//        setContent {
+//            val navController = rememberNavController()
+//            val themeViewModel: ThemeViewModel = viewModel()
+//            val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
+//            val isAdmin = themeViewModel.isAdmin.collectAsState(initial = false).value
+//            val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+//
+//            AppTheme(darkTheme = isDarkTheme) {
+//                Scaffold(
+//                    modifier = Modifier.fillMaxSize(),
+//                    bottomBar = {
+//                        if (!isAdmin) {
+//                            BottomBar(
+//                                navController = navController,
+//                                currentRoute = currentRoute ?: ""
+//                            )
+//                        }
+//                    }
+//                ) { innerPadding ->
+//                    if (isAdmin) {
+//                        AppNavigationAdmin(navController = navController, themeViewModel)
+//                    } else {
+//                        AppNavigationUser(navController = navController, themeViewModel)
+//                    }
+//                }
+//            }
+//        }
         setContent {
 
             val navController = rememberNavController()
