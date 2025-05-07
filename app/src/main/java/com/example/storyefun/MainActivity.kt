@@ -15,6 +15,7 @@ import com.example.storyefun.ui.theme.AppTheme
 import com.example.storyefun.viewModel.ThemeViewModel
 import com.google.firebase.FirebaseApp
 import androidx.compose.material3.Scaffold
+import com.example.storyefun.navigation.AppNavigation
 import com.example.storyefun.navigation.AppNavigationAdmin
 import com.example.storyefun.navigation.AppNavigationUser
 
@@ -23,31 +24,46 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
+//        setContent {
+//            val navController = rememberNavController()
+//            val themeViewModel: ThemeViewModel = viewModel()
+//            val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
+//            val isAdmin = themeViewModel.isAdmin.collectAsState(initial = false).value
+//            val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+//
+//            AppTheme(darkTheme = isDarkTheme) {
+//                Scaffold(
+//                    modifier = Modifier.fillMaxSize(),
+//                    bottomBar = {
+//                        if (!isAdmin) {
+//                            BottomBar(
+//                                navController = navController,
+//                                currentRoute = currentRoute ?: ""
+//                            )
+//                        }
+//                    }
+//                ) { innerPadding ->
+//                    if (isAdmin) {
+//                        AppNavigationAdmin(navController = navController, themeViewModel)
+//                    } else {
+//                        AppNavigationUser(navController = navController, themeViewModel)
+//                    }
+//                }
+//            }
+//        }
         setContent {
-            val navController = rememberNavController()
-            val themeViewModel: ThemeViewModel = viewModel()
-            val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
-            val isAdmin = themeViewModel.isAdmin.collectAsState(initial = false).value
-            val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
+            val navController = rememberNavController()
+            val themeViewModel: ThemeViewModel = viewModel()  // Tạo ViewModel
+
+            // Apply the theme dynamically based on the collected state
+
+            // Observe the isDarkTheme state
+            val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
+
+            // Wrap the entire app in AppTheme with the latest isDarkTheme
             AppTheme(darkTheme = isDarkTheme) {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    bottomBar = {
-                        if (!isAdmin) {
-                            BottomBar(
-                                navController = navController,
-                                currentRoute = currentRoute ?: ""
-                            )
-                        }
-                    }
-                ) { innerPadding ->
-                    if (isAdmin) {
-                        AppNavigationAdmin(navController = navController, themeViewModel)
-                    } else {
-                        AppNavigationUser(navController = navController, themeViewModel)
-                    }
-                }
+                AppNavigation(navController, themeViewModel)
             }
         }
     }
