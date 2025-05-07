@@ -168,6 +168,7 @@ fun AdminUploadScreen(
                             ImagePickerBox(uploadViewModel.imageUri, "Book Image") {
                                 imagePicker.launch("image/*")
                             }
+                            Spacer(modifier = Modifier.width(4.dp))
                             ImagePickerBox(uploadViewModel.posterUri, "Poster Image") {
                                 posterPicker.launch("image/*")
                             }

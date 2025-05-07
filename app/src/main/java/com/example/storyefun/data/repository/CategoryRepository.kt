@@ -1,7 +1,7 @@
 package com.example.storyefun.data.repository
 
 import com.example.storyefun.data.models.Category
-import com.example.storyefun.ui.screens.CategoryScreen
+import com.example.storyefun.ui.screens.categories
 import com.google.firebase.firestore.FirebaseFirestore
 
 

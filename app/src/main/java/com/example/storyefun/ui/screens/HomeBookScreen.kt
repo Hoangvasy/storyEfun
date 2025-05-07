@@ -3,7 +3,7 @@ package com.example.storyefun.ui.screens
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -58,8 +58,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -106,7 +104,7 @@ fun HomeBookScreen(
 @Composable
 fun BookTabScreen(navController: NavController) {
     var selectedTabIndex by remember { mutableStateOf(0) }
-    val tabTitles = listOf("Books", "Audio books", "Comics")
+    val tabTitles = listOf("Books", "Audio books")
 
     Column(modifier = Modifier) {
         TabRow(
@@ -135,9 +133,15 @@ fun BookTabScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
         when (selectedTabIndex) {
-            0 ->NewBookScreen()
-//            1 -> AudioBooksContent(navController)
-//            2 -> ComicsContent(navController)
+            0 -> {
+                NewBookScreen(navController)
+                Spacer(modifier = Modifier.height(16.dp))
+                RecommendedBookScreen(navController)
+                Spacer(modifier = Modifier.height(16.dp))
+                PopularBookScreen(navController)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            1 -> AudioBooksContent(navController)
         }
     }
 }
@@ -147,10 +151,10 @@ fun AudioBooksContent(x0: NavController) {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
-@Composable
-fun HomePreview() {
-    val navController = rememberNavController()
-    HomeBookScreen(navController = navController)
-}
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Preview(showBackground = true)
+//@Composable
+//fun HomePreview() {
+//    val navController = rememberNavController()
+//    HomeBookScreen(navController = navController)
+//}

@@ -3,7 +3,7 @@ package com.example.storyefun.ui.screens
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+//import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -55,13 +55,14 @@ import androidx.compose.material3.Card
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 import com.example.storyefun.data.models.Book
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 
 @Composable
-fun NewBookScreen() {
+fun NewBookScreen(navController: NavController) {
     val firestore = Firebase.firestore
     val books = remember { mutableStateListOf<Book>() }
     val context = LocalContext.current
@@ -110,7 +111,10 @@ fun NewBookScreen() {
                         modifier = Modifier
                             .width(300.dp)
                             .wrapContentHeight()
-                            .clip(RoundedCornerShape(8.dp)),
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                navController.navigate("bookDetail/${book.id}")
+                            },
                         shape = RoundedCornerShape(12.dp),
                     ) {
                         Row(modifier = Modifier.background(Color(0xFFFFFFFF))) {

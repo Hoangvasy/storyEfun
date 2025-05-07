@@ -61,36 +61,15 @@ fun AddChapterScreen(navController: NavController, bookId: String, volumeId: Str
             .background(Color.White)
     ) {
         // Header với gradient tím
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(Color(0xFFFF7043), Color(0xFFFFA726))
-                    )
-                )
-                .padding(10.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(
-                    onClick = { navController.popBackStack() },
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-
-
-                // Spacer để cân bằng bố cục
-                Spacer(modifier = Modifier.size(48.dp))
+        Box(modifier = Modifier.fillMaxWidth()) {
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
             }
+            Text(
+                text = "Add chapter",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
 
         // Danh sách chương đã có
@@ -166,28 +145,15 @@ fun AddChapterScreen(navController: NavController, bookId: String, volumeId: Str
                     .height(56.dp)
                     .shadow(5.dp, RoundedCornerShape(12.dp)),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent
-                ),
+                colors = ButtonDefaults.buttonColors(containerColor = theme.buttonOrange),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(theme.backOrange, theme.buttonOrange)
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Chọn ảnh minh họa",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    "Chọn ảnh minh họa",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -222,27 +188,17 @@ fun AddChapterScreen(navController: NavController, bookId: String, volumeId: Str
                     .shadow(5.dp, RoundedCornerShape(12.dp)),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent
+                    containerColor = theme.buttonOrange,
+                    disabledContainerColor = Color(0xFFD3D3D3) // Xám nhạt khi disabled
                 ),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(Color(0xFFFF7043), Color(0xFFFFA726))
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        if (isUploading) "Đang tải lên..." else "⬆️ Tải lên chương mới",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    if (isUploading) "Đang tải lên..." else "⬆️ Tải lên chương mới",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

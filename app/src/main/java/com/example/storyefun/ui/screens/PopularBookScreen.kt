@@ -29,21 +29,21 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 
 @Composable
-fun RecommendedBookScreen(navController: NavController) {
+fun PopularBookScreen(navController: NavController) {
     val firestore = Firebase.firestore
     val books = remember { mutableStateListOf<Book>() }
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         firestore.collection("books")
-            .orderBy("views", Query.Direction.DESCENDING)
+            .orderBy("likes", Query.Direction.DESCENDING)
             .limit(5)
             .get()
             .addOnSuccessListener { result ->
                 books.clear()
                 for (document in result) {
                     val book = document.toObject(Book::class.java)
-                    if (book.views >= 100) {
+                    if (book.likes >= 100) {
                         books.add(book)
                     }
                 }
@@ -60,7 +60,7 @@ fun RecommendedBookScreen(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Recommended", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text("Popular books", fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Text("Select all", color = Color.Gray, fontSize = 14.sp)
         }
 
@@ -73,7 +73,7 @@ fun RecommendedBookScreen(navController: NavController) {
         ) {
             items(books.size) { index ->
                 val book = books[index]
-                BookCard(
+                PopularCard(
                     title = book.name,
                     author = book.author,
                     imageUrl = book.imageUrl ?: "",
@@ -87,7 +87,7 @@ fun RecommendedBookScreen(navController: NavController) {
 }
 
 @Composable
-fun BookCard(title: String, author: String, imageUrl: String, onClick: () -> Unit) {
+fun PopularCard(title: String, author: String, imageUrl: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .width(120.dp)
@@ -112,15 +112,12 @@ fun BookCard(title: String, author: String, imageUrl: String, onClick: () -> Uni
                 text = title,
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
-                maxLines = 1,
-//                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+                maxLines = 1,)
             Text(
                 text = author,
                 color = Color.Gray,
                 fontSize = 13.sp,
                 maxLines = 1,
-//                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
             )
         }
     }

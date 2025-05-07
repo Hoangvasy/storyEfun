@@ -63,6 +63,8 @@ fun AdminDrawer(
         colors = listOf(
             Color(0xFFFF7043),  // Cam đậm
             Color(0xFFFFA726)   // Cam nhạt
+//                    Color(0xFFFFA500),  // Cam sáng (orange)
+//            Color(0xFFFFD700)   // Vàng nhạt (gold)
         )
     )
 
