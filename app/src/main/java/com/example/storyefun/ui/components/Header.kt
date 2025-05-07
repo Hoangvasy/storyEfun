@@ -2,6 +2,7 @@ package com.example.storyefun.ui.components
 
 import android.util.Log
 import androidx.compose.foundation.Image
+//import androidx.compose.foundation.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -54,6 +55,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.SearchBar
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.painterResource
 import com.example.storyefun.ui.screens.SearchScreen
 
 
@@ -103,202 +105,65 @@ fun Header(
         }
     }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Box(
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Color(0xFFFFFFFF)) // Nền xám sáng
+            .padding(top = 5.dp, bottom = 5.dp)
+    ) {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.White)
+                .padding(horizontal = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Image(
-                painter = rememberAsyncImagePainter("https://i.pinimg.com/736x/6b/e9/17/6be91716ac90da6cdbac6421d78c7534.jpg"),
-                contentDescription = "Background Image",
-                contentScale = ContentScale.Crop,
+            // Left: Logo and Name
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-            )
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
+                    .padding(5.dp)
+                    .clickable { navController.navigate("home")},
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "ストリエフン",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    // Left
-                    Column(
-                        modifier = Modifier
-                            .background(
-                                Color.Black.copy(alpha = 0.5f),
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            .padding(5.dp)
-                    ) {
-                        Text(
-                            text = "ストリエフン",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White,
-                            modifier = Modifier.clickable { navController.navigate("home") }
-                        )
-                        Text(
-                            text = "STORYEFUN",
-                            fontSize = 10.sp,
-                            color = Color.White,
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .clickable { navController.navigate("home") }
-                        )
-                    }
-
-                    // Right
-                    Row {
-                        IconButton(onClick = { navController.navigate("search") }) {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = "search",
-                                tint = Color.White
-                            )
-                        }
-                        IconButton(onClick = { navController.navigate("profile") }) {
-                            Icon(
-                                Icons.Default.Person,
-                                contentDescription = "person",
-                                tint = Color.White
-                            )
-                        }
-                        IconButton(onClick = { navController.navigate("setting") }) {
-                            Icon(
-                                Icons.Default.Settings,
-                                contentDescription = "settings",
-                                tint = Color.White
-                            )
-                        }
-                    }
-                }
-
+                        .padding(bottom = 2.dp)
+                )
+                Text(
+                    text = "STORYEFUN",
+                    fontSize = 15.sp,
+                    color = Color.Black.copy(alpha = 0.7f),
+                    modifier = Modifier
+                )
             }
-//            Box(
-//                modifier = Modifier
-//                    .align(Alignment.BottomCenter)
-//            ) {
-//                SearchScreen()
 
-//                SearchBar(
-//                    onSearch = { query ->
-//                        searchQuery = query
-//                        performSearch(query)
-//                    }
-//                )
-//                Spacer(modifier = Modifier.height(16.dp))
-//
-//                if (isLoading) {
-//                    Box(
-//                        modifier = Modifier.fillMaxWidth(),
-//                        contentAlignment = Alignment.Center
-//                    ) {
-//                        CircularProgressIndicator()
-//                    }
-//                } else {
-//                    if (searchResults.isNotEmpty()) {
-//                        LazyColumn {
-//                            items(searchResults) { book ->
-//                                Card(
-//                                    modifier = Modifier
-//                                        .padding(8.dp)
-//                                        .fillMaxWidth()
-//                                ) {
-//                                    Column(modifier = Modifier.padding(8.dp)) {
-//                                        Text(text = "Tên: ${book.name}")
-//                                        Text(text = "Thể loại: ${book.category.joinToString(", ")}")
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    } else {
-//                        Text(
-//                            text = "Không tìm thấy kết quả",
-//                            modifier = Modifier.align(Alignment.CenterHorizontally)
-//                        )
-//                    }
-//                }
-
+            // Right: Icons for navigation
+            Row {
+                IconButton(onClick = { navController.navigate("search") }) {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = "search",
+                        tint = Color.Black
+                    )
+                }
+                IconButton(onClick = { navController.navigate("profile") }) {
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = "profile",
+                        tint = Color.Black
+                    )
+                }
+                IconButton(onClick = { navController.navigate("settings") }) {
+                    Icon(
+                        Icons.Default.Settings,
+                        contentDescription = "settings",
+                        tint = Color.Black
+                    )
+                }
             }
         }
-
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-//        if (isLoading) {
-//            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-//        } else {
-//            if (searchResults.isNotEmpty()) {
-//                LazyColumn {
-//                    items(searchResults) { book ->
-//                        Card(
-//                            modifier = Modifier
-//                                .padding(8.dp)
-//                                .fillMaxWidth()
-//                        ) {
-//                            Column(modifier = Modifier.padding(8.dp)) {
-//                                Text(text = "Tên: ${book.name}")
-//                                Text(text = "Thể loại: ${book.category.joinToString(", ")}")
-//                            }
-//                        }
-//                    }
-//                }
-//            } else {
-//                Text(
-//                    text = "Không tìm thấy kết quả",
-//                    modifier = Modifier.align(Alignment.CenterHorizontally)
-//                )
-//            }
-//        }
-//        Divider(modifier = Modifier.padding(horizontal = 20.dp))
-//    }
+    }
 }
-
-//@Composable
-//fun SearchBar(onSearch: (String) -> Unit) {
-//    var query by remember { mutableStateOf("") }
-//
-//    Row(
-//        verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier
-//            .width(350.dp)
-//            .height(70.dp)
-//            .background(
-//                color = Color(0xFFFFF9C4).copy(alpha = 0.9f),
-//                shape = RoundedCornerShape(20.dp)
-//            )
-//            .padding(horizontal = 10.dp, vertical = 4.dp)
-//    ) {
-//        TextField(
-//            value = query,
-//            onValueChange = { query = it },
-//            placeholder = {
-//                Text(
-//                    text = "Search...",
-//                    style = androidx.compose.ui.text.TextStyle(fontSize = 13.sp)
-//                )
-//            },
-//            colors = androidx.compose.material3.TextFieldDefaults.colors(
-//                unfocusedContainerColor = Color.Transparent,
-//                focusedContainerColor = Color.Transparent,
-//                cursorColor = Color.Gray,
-//                focusedTextColor = Color.Black,
-//                unfocusedTextColor = Color.Black
-//            ),
-//            modifier = Modifier
-//                .weight(1f)
-//                .padding(vertical = 2.dp)
-//        )
-//
-//        IconButton(onClick = { onSearch(query) }) {
-//            Icon(
-//                imageVector = Icons.Default.Search,
-//                contentDescription = "Search Icon",
-//                tint = Color(0xFF616161),
-//                modifier = Modifier.size(20.dp)
-//            )
-//        }
-//    }
-//}

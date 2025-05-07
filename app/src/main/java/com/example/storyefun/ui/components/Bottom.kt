@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.*
 import kotlinx.coroutines.delay
 import androidx.navigation.NavController
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
@@ -40,27 +41,27 @@ fun BottomBar(navController: NavController, currentRoute: String) {
         mutableStateListOf(
             Item(
                 icon = Icons.Rounded.Home,
-                color = Color(0xFF433E3F),
+                color = Color(0xFF660F24),
                 route = "home"
             ),
             Item(
                 icon = Icons.Rounded.AccountBox,
-                color = Color(0xFF433E3F),
+                color = Color(0xFF660F24),
                 route = "category",
             ),
             Item(
                 icon = Icons.Rounded.AddCircle,
-                color = Color(0xFF433E3F),
+                color = Color(0xFF660F24),
                 route = "upload"
             ),
             Item(
                 icon = Icons.Rounded.FavoriteBorder,
-                color = Color(0xFF433E3F),
+                color = Color(0xFF660F24),
                 route = "favourite"
             ),
             Item(
                 icon = Icons.Rounded.Settings,
-                color = Color(0xFF433E3F),
+                color = Color(0xFF660F24),
                 route = "setting"
             )
         )
@@ -108,45 +109,51 @@ fun BottomBar(navController: NavController, currentRoute: String) {
         .clip(
             RoundedCornerShape(0.dp)
         )
-        .background(Color(0xFFC69C72))
+        .background(Color(0xF7FFFFFF))
     ){
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical =20.dp),
-            verticalAlignment = Alignment.CenterVertically){
+                .padding(vertical = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             items.forEachIndexed { index, item ->
-                if (item.route == currentRoute)
-                {
+                if (item.route == currentRoute) {
                     selectedIndex.value = index
                 }
-                Box(modifier = Modifier.onGloballyPositioned {
-                    val offset = it.positionInParent()
-                    items[index] = items[index].copy(
-                        offset = offset,
-                        size = it.size
-                    )
-                }.weight((1.0/items.count()).toFloat())
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember {
-                            MutableInteractionSource()
-                        },
-                        onClick = {
-                            switching.value = true
-                            selectedIndex.value = index
-                            navController.navigate(item.route)
+                val isSelected = selectedIndex.value == index
+                val iconTintColor = if (isSelected) Color(0xFF660F24) else Color.Gray
+
+                Box(
+                    modifier = Modifier
+                        .onGloballyPositioned {
+                            val offset = it.positionInParent()
+                            items[index] = items[index].copy(
+                                offset = offset,
+                                size = it.size
+                            )
                         }
-                    ), contentAlignment = Alignment.Center
-                ){
+                        .weight((1.0 / items.count()).toFloat())
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {
+                                switching.value = true
+                                selectedIndex.value = index
+                                navController.navigate(item.route)
+                            }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
                     Icon(
                         imageVector = item.icon,
                         contentDescription = null,
-                        tint = Color.Black
+                        tint = iconTintColor
                     )
                 }
             }
         }
+
         Column(
             modifier = Modifier.offset{
                 indicatorOffset
@@ -174,8 +181,8 @@ fun BottomBar(navController: NavController, currentRoute: String) {
                         .drawBehind {
                             val path = Path()
                             path.moveTo(100f, 0f)
-                            path.lineTo(38f, 0f)
-                            path.lineTo(-3f, 135f)
+                            path.lineTo(48f, 0f)
+                            path.lineTo(-4f, 135f)
                             path.lineTo(135f, 135f)
                             path.close()
                             drawPath(
