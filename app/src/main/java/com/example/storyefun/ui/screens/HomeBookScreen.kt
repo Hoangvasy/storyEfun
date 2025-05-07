@@ -104,7 +104,7 @@ fun HomeBookScreen(
 @Composable
 fun BookTabScreen(navController: NavController) {
     var selectedTabIndex by remember { mutableStateOf(0) }
-    val tabTitles = listOf("Books", "Audio books", "Comics")
+    val tabTitles = listOf("Books", "Audio books")
 
     Column(modifier = Modifier) {
         TabRow(
@@ -142,14 +142,8 @@ fun BookTabScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
             }
             1 -> AudioBooksContent(navController)
-            2 -> ComicsContent(navController)
         }
     }
-}
-
-@Composable
-fun ComicsContent(x0: NavController) {
-
 }
 
 @Composable
@@ -157,10 +151,10 @@ fun AudioBooksContent(x0: NavController) {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
-@Composable
-fun HomePreview() {
-    val navController = rememberNavController()
-    HomeBookScreen(navController = navController)
-}
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Preview(showBackground = true)
+//@Composable
+//fun HomePreview() {
+//    val navController = rememberNavController()
+//    HomeBookScreen(navController = navController)
+//}

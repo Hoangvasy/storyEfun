@@ -17,6 +17,9 @@
         android:theme="@style/Theme.StoryEfun"
         tools:targetApi="31">
         <activity
+            android:name=".ui.screens.CategoriesScreen"
+            android:exported="false" />
+        <activity
             android:name=".ui.screens.AuthorProfileScreen"
             android:exported="false" />
         <activity
