@@ -52,6 +52,7 @@ sealed class Screen(val route: String) {
     object Coin : Screen("coin")
     object ManageUser : Screen("manageUser")
     object PaymentNotification : Screen("paymentNotification")
+    object HistoricalTransaction : Screen("historicalTransaction")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,6 +102,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.Desposite.route) { DespositeScreen() }
         composable(Screen.Coin.route) { CoinScreen(navController) }
         composable(Screen.Search.route) { SearchScreen(navController) }
+        composable(Screen.HistoricalTransaction.route) { HistoricalTransaction(navController) }
 
 
         composable(Screen.ManageUser.route) { UserManageScreen(navController) }

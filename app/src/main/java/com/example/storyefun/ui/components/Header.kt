@@ -53,9 +53,12 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.SearchBar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.painterResource
+import com.example.storyefun.R
 import com.example.storyefun.ui.screens.SearchScreen
 
 
@@ -142,6 +145,8 @@ fun Header(
 
             // Right: Icons for navigation
             Row {
+
+
                 IconButton(onClick = { navController.navigate("search") }) {
                     Icon(
                         Icons.Default.Search,
@@ -154,6 +159,13 @@ fun Header(
                         Icons.Default.Person,
                         contentDescription = "profile",
                         tint = Color.Black
+                    )
+                }
+                IconButton(onClick = { navController.navigate("historicalTransaction") }) {
+                    Image(
+                        painter = painterResource(id = R.drawable.coin), // tên icon bạn import
+                        contentDescription = "historicalTransaction",
+                        modifier = Modifier.size(24.dp),
                     )
                 }
                 IconButton(onClick = { navController.navigate("settings") }) {
