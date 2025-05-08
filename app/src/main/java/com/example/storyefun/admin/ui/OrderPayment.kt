@@ -8,9 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -25,8 +23,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.storyefun.navigation.Screen
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.storyefun.data.repository.TransactionRepository
 import com.example.storyefun.ui.theme.LocalAppColors
+import com.example.storyefun.viewModel.TransactionViewModel
 import com.example.storyefun.zaloPay.Api.CreateOrder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -41,20 +42,23 @@ class OrderPayment : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Cho phép gọi mạng trên main thread (chỉ dùng khi test)
         StrictMode.setThreadPolicy(
             StrictMode.ThreadPolicy.Builder().permitAll().build()
         )
 
+        // Khởi tạo ZaloPay SDK
         ZaloPaySDK.init(2553, Environment.SANDBOX)
 
-        val amount = intent.getIntExtra("amount", 0)
-        val coin = intent.getIntExtra("coin", 0)
+        val amount = intent.getIntExtra("amount", 0)  // Lấy số tiền từ Intent
+        val coin = intent.getIntExtra("coin", 0)      // Lấy số coin từ Intent
 
         setContent {
-            OrderPaymentScreen(amount, coin)
+            OrderPaymentScreen(amount, coin)  // Truyền dữ liệu vào màn hình
         }
     }
 
+    // Sử dụng phương thức onNewIntent từ Activity thay vì ComponentActivity
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         intent?.let {
@@ -67,13 +71,26 @@ class OrderPayment : ComponentActivity() {
 fun OrderPaymentScreen(amount: Int, coin: Int) {
     val theme = LocalAppColors.current
     val context = LocalContext.current
-    val amountFormatted = String.format("%.0f", amount.toDouble())
+    val amountFormatted = String.format("%.0f", amount.toDouble())  // Chuyển số tiền sang định dạng chuỗi
     var paymentStatus by remember { mutableStateOf<String?>(null) }
 
+    // Dữ liệu người dùng
     var userName by remember { mutableStateOf<String?>(null) }
     var coinBalance by remember { mutableStateOf<Int?>(null) }
     val uid = FirebaseAuth.getInstance().currentUser?.uid
 
+    val viewModel: TransactionViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return TransactionViewModel(TransactionRepository(), uid ?: "") as T
+            }
+        }
+    )
+    val transactionStatus by viewModel.transactionStatus.collectAsState()
+    val db = FirebaseFirestore.getInstance()
+    val amountFommated = String.format("%.0f", amount.toDouble())
+
+    // Chạy effect để lấy thông tin người dùng từ Firebase
     LaunchedEffect(uid) {
         if (uid != null) {
             FirebaseFirestore.getInstance()
@@ -86,19 +103,21 @@ fun OrderPaymentScreen(amount: Int, coin: Int) {
                 }
                 .addOnFailureListener {
                     userName = "Không thể lấy thông tin người dùng"
-                    coinBalance = 0
+                    coinBalance = 0 // hoặc hiển thị lỗi nếu không thể lấy thông tin người dùng
                 }
         }
     }
 
+    // Đợi cho đến khi `userName` có giá trị không null
     if (userName == null) {
+        // Hiển thị loading spinner trong khi đang tải thông tin
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFFF5F5F5)),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(color = Color(0xFF6B48FF))
+            CircularProgressIndicator(color = Color(0xFFFFB300)) // Màu cam cho spinner
         }
     } else {
         Column(
@@ -143,206 +162,191 @@ fun OrderPaymentScreen(amount: Int, coin: Int) {
                 }
             }
 
-            // Nội dung chính
+            // Nội dung còn lại
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(bottom = 16.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .padding(bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Thông tin nạp tiền trong Card
-                Card(
+                // Số dư hiện tại
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .shadow(2.dp, RoundedCornerShape(12.dp)),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFF0F0F0)
-                    )
+                        .padding(horizontal = 24.dp, vertical = 24.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFF0F0F0))
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(20.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                "Số tiền nạp:",
-                                fontSize = 20.sp,
-                                color = Color(0xFF333333)
-                            )
-                            Text(
-                                "$amountFormatted VNĐ",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF333333)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                "Số coin:",
-                                fontSize = 20.sp,
-                                color = Color(0xFF333333)
-                            )
-                            Text(
-                                "$coin Coin",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF333333)
-                            )
-                        }
-                    }
+                    Text(
+                        "Số dư hiện tại:",
+                        fontSize = 20.sp,
+                        color = Color(0xFF333333)
+                    )
+                    Text(
+                        "$coinBalance Coin",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFF5722)
+                    )
                 }
 
-                // Số dư hiện tại trong Card
-                Card(
+                // Thông tin nạp tiền
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .shadow(2.dp, RoundedCornerShape(12.dp)),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFF0F0F0)
-                    )
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White)
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "Số dư hiện tại:",
-                            fontSize = 20.sp,
-                            color = Color(0xFF333333)
-                        )
-                        Text(
-                            "$coinBalance Coin",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFFF5722)
-                        )
-                    }
+                    Text(
+                        "Số tiền nạp: $amountFormatted VNĐ",
+                        fontSize = 20.sp,
+                        color = Color(0xFF333333)
+                    )
+                    Text(
+                        "Số coin: $coin Coin",
+                        fontSize = 20.sp,
+                        color = Color(0xFF333333)
+                    )
+                    Text(
+                        "Coin: $coin",
+                        fontSize = 20.sp,
+                        color = Color(0xFF333333)
+                    )
                 }
 
+                // Trạng thái thanh toán (nếu có)
                 paymentStatus?.let {
                     Text(
                         text = it,
-                        color = Color(0xFF6B48FF),
+                        color = Color(0xFFFFB300), // Màu cam cho trạng thái
                         fontSize = 16.sp,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
+                            .padding(horizontal = 24.dp, vertical = 16.dp)
                     )
                 }
-            }
 
-            // Nút thanh toán được đẩy lên trên
-            Button(
-                onClick = {
-                    val orderApi = CreateOrder()
-                    try {
-                        val data: JSONObject = orderApi.createOrder(amountFormatted)
-                        if (data.getString("return_code") == "1") {
-                            val token = data.getString("zp_trans_token")
-                            ZaloPaySDK.getInstance().payOrder(
-                                context as ComponentActivity,
-                                token,
-                                "demozpdk://app",
-                                object : PayOrderListener {
-                                    override fun onPaymentSucceeded(s: String?, s1: String?, s2: String?) {
-                                        paymentStatus = "Thanh toán thành công"
-                                        val uid = FirebaseAuth.getInstance().currentUser?.uid
-                                        if (uid != null && coinBalance != null) {
-                                            val newCoin = coinBalance!! + coin
-                                            FirebaseFirestore.getInstance()
-                                                .collection("users")
-                                                .document(uid)
-                                                .update("coin", newCoin)
-                                                .addOnSuccessListener {
-                                                    Log.d("OrderPayment", "Cập nhật coin thành công: $newCoin")
-                                                    context.startActivity(Intent(context, Screen.PaymentNotification::class.java).apply {
-                                                        putExtra("result", "Giao dịch thành công")
-                                                    })
-                                                }
-                                                .addOnFailureListener {
-                                                    context.startActivity(Intent(context, Screen.PaymentNotification::class.java).apply {
-                                                        putExtra("result", "Cập nhật coin thất bại")
-                                                    })
-                                                }
-                                        } else {
-                                            paymentStatus = "Lỗi khi lấy thông tin người dùng"
-                                            context.startActivity(Intent(context, Screen.PaymentNotification::class.java).apply {
-                                                putExtra("result", "Lỗi khi lấy thông tin người dùng")
+                transactionStatus?.let {
+                    Text(
+                        text = it,
+                        color = Color(0xFFFFB300),
+                        fontSize = 16.sp,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp)
+                    )
+                }
+
+                // Nút thanh toán
+                Button(
+                    onClick = {
+                        val orderApi = CreateOrder()
+                        try {
+                            val data: JSONObject = orderApi.createOrder(amountFormatted)  // Gửi số tiền đã chọn
+                            if (data.getString("return_code") == "1") {
+                                val token = data.getString("zp_trans_token")
+                                ZaloPaySDK.getInstance().payOrder(
+                                    context as ComponentActivity,
+                                    token,
+                                    "demozpdk://app",  // URL callback
+                                    object : PayOrderListener {
+
+                                        override fun onPaymentSucceeded(s: String?, s1: String?, s2: String?) {
+                                            paymentStatus = "Thanh toán thành công"
+
+                                            // Cập nhật số dư coin vào Firestore
+                                            val uid = FirebaseAuth.getInstance().currentUser?.uid
+                                            if (uid != null && coinBalance != null) {
+                                                val newCoin = coinBalance!! + coin
+                                                // này là thêm cái coin vào giao dịch bên collection
+                                                viewModel.addTransaction(coin, amount.toDouble())
+
+                                                // Cập nhật Firestore
+                                                FirebaseFirestore.getInstance()
+                                                    .collection("users")
+                                                    .document(uid)
+                                                    .update("coin", newCoin)
+                                                    .addOnSuccessListener {
+                                                        Log.d("OrderPayment", "Cập nhật coin thành công: $newCoin")
+                                                        // Sau khi cập nhật Firestore thành công, chuyển đến màn hình thông báo
+                                                        context.startActivity(Intent(context, PaymentNotification::class.java).apply {
+                                                            putExtra("result", "Thanh toán thành công")
+                                                        })
+                                                    }
+                                                    .addOnFailureListener {
+                                                        // Nếu có lỗi trong việc cập nhật Firestore, hiển thị thông báo lỗi
+                                                        context.startActivity(Intent(context, PaymentNotification::class.java).apply {
+                                                            putExtra("result", "Cập nhật coin thất bại")
+                                                        })
+                                                    }
+                                            } else {
+                                                // Trường hợp không lấy được uid hoặc coinBalance
+                                                paymentStatus = "Lỗi khi lấy thông tin người dùng"
+                                                context.startActivity(Intent(context, PaymentNotification::class.java).apply {
+                                                    putExtra("result", "Lỗi khi lấy thông tin người dùng")
+                                                })
+                                            }
+                                        }
+
+                                        override fun onPaymentCanceled(s: String?, s1: String?) {
+                                            paymentStatus = "Hủy thanh toán"
+                                            context.startActivity(Intent(context, PaymentNotification::class.java).apply {
+                                                putExtra("result", "Hủy thanh toán")
+                                            })
+                                        }
+
+                                        override fun onPaymentError(zaloPayError: ZaloPayError?, s: String?, s1: String?) {
+                                            paymentStatus = "Lỗi thanh toán"
+                                            context.startActivity(Intent(context, PaymentNotification::class.java).apply {
+                                                putExtra("result", "Lỗi thanh toán")
                                             })
                                         }
                                     }
-
-                                    override fun onPaymentCanceled(s: String?, s1: String?) {
-                                        paymentStatus = "Thanh toán thất bại. Vui lòng thử lại."
-                                        context.startActivity(Intent(context, Screen.PaymentNotification::class.java).apply {
-                                            putExtra("result", "Thanh toán thất bại.")
-                                        })
-                                    }
-
-                                    override fun onPaymentError(zaloPayError: ZaloPayError?, s: String?, s1: String?) {
-                                        paymentStatus = "Lỗi thanh toán"
-                                        context.startActivity(Intent(context, Screen.PaymentNotification::class.java).apply {
-                                            putExtra("result", "Lỗi thanh toán")
-                                        })
-                                    }
-                                }
-                            )
+                                )
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            paymentStatus = "Lỗi tạo đơn hàng"
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        paymentStatus = "Lỗi tạo đơn hàng"
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp) // Giảm padding vertical để đẩy lên
-                    .height(64.dp)
-                    .shadow(5.dp, RoundedCornerShape(12.dp)),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent
-                ),
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Box(
+                    },
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(Color(0xFFFFB300), Color(0xFFFFA000))
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                        .height(64.dp)
+                        .shadow(5.dp, RoundedCornerShape(12.dp)),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+                    ),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text(
-                        "Thanh toán bằng Zalo Pay",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(
+                                        Color(0xFFFFB300),
+                                        Color(0xFFFFA000)
+                                    ) // Gradient cam
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Thanh toán bằng Zalo Pay",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.height(50.dp))
             }
         }
     }
