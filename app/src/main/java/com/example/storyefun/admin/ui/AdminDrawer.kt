@@ -54,7 +54,7 @@ fun AdminDrawer(
         DrawerItem("Manage Books", "ManageBook", bookIcon, 12),
         DrawerItem("Upload Book", "uploadBook", uploadBook),
         DrawerItem("Manage Categories", "manageCategories", categoryIcon),
-        DrawerItem("Statistics", "statistics", Icons.Default.Menu),
+        DrawerItem("Statistics", "revenueStatistics", Icons.Default.List),
         DrawerItem("Settings", "settings", Icons.Default.Settings)
     )
 

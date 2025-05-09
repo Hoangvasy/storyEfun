@@ -53,6 +53,7 @@ sealed class Screen(val route: String) {
     object ManageUser : Screen("manageUser")
     object PaymentNotification : Screen("paymentNotification")
     object HistoricalTransaction : Screen("historicalTransaction")
+    object RevenueStatistics : Screen("revenueStatistics")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,7 +76,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 //    }
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.AdminMenu.route
 //        startDestination = start
 //        startDestination = Screen.Upload.route
     ) {
@@ -146,6 +147,10 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.Desposite.route) {
             DespositeScreen()
         }
+        composable(Screen.RevenueStatistics.route) {
+            RevenueStatisticsScreen(navController)
+        }
+
 
     }
 }
