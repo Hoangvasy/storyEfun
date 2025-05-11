@@ -62,13 +62,9 @@ fun FavouriteScreen(
     AppTheme(darkTheme = isDarkMode) {
         Scaffold(
             topBar = {
-//                Header(
-//                    text = searchText,
-//                    active = active,
-//                    onQueryChange = { searchText = it },
-//                    onActiveChange = { active = it },
-//                    navController = navController
-//                )
+                Header(
+                    navController = navController
+                )
             },
             bottomBar = {
                 BottomBar(navController, "favourite")
