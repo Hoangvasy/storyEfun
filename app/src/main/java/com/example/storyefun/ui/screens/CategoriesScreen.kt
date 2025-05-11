@@ -66,6 +66,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import coil.compose.rememberImagePainter
+import com.example.storyefun.ui.components.BottomBar
+import com.example.storyefun.ui.components.Header
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -112,43 +114,29 @@ fun CategoriesScreen(navController: NavController) {
 
     Scaffold(
         topBar = {
-            Column {
-                TopAppBar(
-                    title = {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Categories",
-                                fontSize = 18.sp,
-                                color = Color(0xFF8B0000),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                    },
-                )
+            Header(navController = navController)
                 Divider(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    thickness = 1.dp
-                )
-            }
+                    thickness = 1.dp)
         },
+        bottomBar = { BottomBar(navController, "home") }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            OutlinedTextField(
-                value = "",
-                onValueChange = {},
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Search...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Divider(
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                thickness = 1.dp)
+//            OutlinedTextField(
+//                value = "",
+//                onValueChange = {},
+//                modifier = Modifier.fillMaxWidth(),
+//                placeholder = { Text("Search...") },
+//                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") }
+//            )
+//
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
@@ -249,10 +237,10 @@ fun BookList1(navController: NavController, books: List<Book>) {
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
-@Composable
-fun HomePreview() {
-    val navController = rememberNavController()
-    CategoriesScreen(navController = navController)
-}
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Preview(showBackground = true)
+//@Composable
+//fun HomePreview() {
+//    val navController = rememberNavController()
+//    CategoriesScreen(navController = navController)
+//}

@@ -58,6 +58,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("androidx.compose.material3:material3:1.2.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation ("androidx.activity:activity-ktx:1.8.0")
 
     // Firebase (using BoM)
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
@@ -74,6 +75,11 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
 
+    // retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
+    implementation("com.google.code.gson:gson:2.8.8")
 
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.6.0")
