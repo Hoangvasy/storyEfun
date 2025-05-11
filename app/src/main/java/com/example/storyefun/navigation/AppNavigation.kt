@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.material3.*
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
-import com.example.storyefun.ui.screens.CategoryScreen
 import com.example.profileui.ProfileScreen
 import com.example.storyefun.ui.screens.*
 
@@ -76,7 +75,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 //    }
     NavHost(
         navController = navController,
-        startDestination = Screen.AdminMenu.route
+        startDestination = Screen.Home.route
 //        startDestination = start
 //        startDestination = Screen.Upload.route
     ) {
@@ -104,7 +103,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.Upload.route) { UploadScreen(navController) }
         composable(Screen.Favourite.route) { FavouriteScreen(themeViewModel, navController) }
         composable(Screen.Setting.route) { SettingScreen(navController, themeViewModel) }
-        composable(Screen.CategoryList.route) { CategoryScreen(navController) }
+        composable(Screen.CategoryList.route) { CategoriesScreen(navController) }
         composable(Screen.Desposite.route) { DespositeScreen() }
         composable(Screen.Coin.route) { CoinScreen(navController) }
         composable(Screen.Search.route) { SearchScreen(navController) }

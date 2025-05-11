@@ -1,6 +1,10 @@
 package com.example.storyefun.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -8,8 +12,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -36,7 +46,20 @@ import com.example.storyefun.data.models.Book
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
-
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,12 +70,15 @@ fun SearchScreen(navController: NavController) {
     var active by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val db = FirebaseFirestore.getInstance()
+    var searchMode by remember { mutableStateOf(true) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(modifier = Modifier.fillMaxSize()) {
-        SearchBar(
+        SearchTextField(
             query = query,
             onQueryChange = { newQuery ->
                 query = newQuery
+                searchMode = true
                 if (newQuery.isNotEmpty()) {
                     performSearch(db, newQuery) { results ->
                         searchResults = results.sortedBy { it.first }
@@ -62,55 +88,49 @@ fun SearchScreen(navController: NavController) {
                 }
             },
             onSearch = {
-                active = false
                 if (query.isNotEmpty()) {
                     scope.launch {
+                        searchMode = false
                         searchAndFetchBooks(db, query) { books ->
                             selectedBooks = books
                         }
                     }
+                    keyboardController?.hide()
                 }
             },
             active = active,
-            onActiveChange = { active = it },
-            placeholder = { Text("Search for books...") },
-            leadingIcon = {
-                Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
-            },
-            trailingIcon = if (active) {
-                {
-                    IconButton(onClick = { if (query.isNotEmpty()) query = "" else active = false }) {
-                        Icon(imageVector = Icons.Filled.Close, contentDescription = "Close")
+            onActiveChange = { newActive -> active = newActive
+                if (!newActive && query.isNotEmpty()) {
+                    performSearch(db, query) { results ->
+                        searchResults = results.sortedBy { it.first }
                     }
+                } else if (query.isEmpty()) {
+                    searchResults = emptyList()
                 }
-            } else null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            searchResults.forEach { (name, id) ->
-                ListItem(
-                    modifier = Modifier.clickable {
-                        scope.launch {
-                            searchAndFetchBooks(db, query) { books ->
-                                selectedBooks = books
-                            }
-                        }
-                        navController.navigate("bookDetail/$id")
-                    },
-                    headlineContent = {
-                        Text(text = name)
-                    },
-                )
-            }
-        }
-
-        BookList(
-            books = selectedBooks,
-            onBookClick = { book ->
-                navController.navigate("bookDetail/${book.id}")
             }
         )
+
+        if (!searchMode && selectedBooks.isNotEmpty()) {
+            BookList(
+                books = selectedBooks,
+                onBookClick = { book ->
+                    navController.navigate("bookDetail/${book.id}")
+                }
+            )
+        } else if (searchMode && searchResults.isNotEmpty()) {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(searchResults) { (name, id) ->
+                    ListItem(
+                        modifier = Modifier.clickable {
+                            navController.navigate("bookDetail/$id")
+                        },
+                        headlineContent = {
+                            Text(text = name)
+                        },
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -165,55 +185,126 @@ fun performSearch(db: FirebaseFirestore, query: String, onResult: (List<Pair<Str
             onResult(emptyList())
         }
 }
+@Composable
+fun SearchHistoryChip(keyword: String, onClick: (String) -> Unit) {
+    Card(
+        modifier = Modifier.padding(end = 8.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Gray.copy(alpha = 0.1f)),
+        elevation = CardDefaults.cardElevation(4.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable { onClick(keyword) }
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = keyword, style = MaterialTheme.typography.headlineSmall)
+        }
+    }
+}
 
 @Composable
 fun BookList(
     books: List<Book>,
     onBookClick: (Book) -> Unit = {}
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth(),
-        contentPadding = PaddingValues(16.dp)
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(8.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        items(books) { book ->
+        items(books.size) { book ->
+            val book = books[book]
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-                    .clickable { onBookClick(book) }
+                    .padding(8.dp)
+                    .clickable { onBookClick(book) },
+                shape = RoundedCornerShape(8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
             ) {
-                Row(modifier = Modifier.padding(10.dp)) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 8.dp)
-                    ) {
-                        Text(
-                            text = "Book Name: ${book.name}",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Author: ${book.author}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Description: ${book.description}",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
+                Column(modifier = Modifier.fillMaxSize()) {
                     AsyncImage(
                         model = book.imageUrl,
                         contentDescription = "Book Cover",
                         modifier = Modifier
-                            .weight(1f)
-                            .height(150.dp),
-                        contentScale = ContentScale.Crop
+                            .height(180.dp)
+                            .fillMaxWidth()
+                            .border(1.dp, Color.Gray),
+                        contentScale = ContentScale.Crop,
+                    )
+
+                    Spacer(modifier = Modifier.height(5.dp))
+
+                    Text(
+                        text = book.name,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Text(
+                        text = book.author,
+                        color = Color.Gray,
+                        fontSize = 13.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
         }
     }
 }
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchTextField(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onSearch: () -> Unit,
+    active: Boolean,
+    onActiveChange: (Boolean) -> Unit
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = { newQuery ->
+            onQueryChange(newQuery.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() })
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .background(Color.White, shape = RoundedCornerShape(8.dp)),
+        placeholder = { Text("Search for books...") },
+        leadingIcon = {
+            Icon(imageVector = Icons.Filled.Search, contentDescription = "Search Icon", tint = Color.Gray)
+        },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(imageVector = Icons.Filled.Close, contentDescription = "Clear Search", tint = Color.Gray)
+                }
+            }
+        },
+
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color(0xFF660F24),
+            unfocusedBorderColor = Color.Gray,
+            focusedLabelColor = Color(0xFF660F24),
+            unfocusedLabelColor = Color.Gray
+        ),
+
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                onActiveChange(false)
+                onSearch()
+            }
+        )
+    )
+}
+
+
