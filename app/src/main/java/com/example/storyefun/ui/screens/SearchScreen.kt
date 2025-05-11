@@ -53,7 +53,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,13 +70,15 @@ fun SearchScreen(navController: NavController) {
     var active by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val db = FirebaseFirestore.getInstance()
-    var searchHistory by remember { mutableStateOf<List<String>>(emptyList()) }
+    var searchMode by remember { mutableStateOf(true) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(modifier = Modifier.fillMaxSize()) {
         SearchTextField(
             query = query,
             onQueryChange = { newQuery ->
                 query = newQuery
+                searchMode = true
                 if (newQuery.isNotEmpty()) {
                     performSearch(db, newQuery) { results ->
                         searchResults = results.sortedBy { it.first }
@@ -86,24 +90,34 @@ fun SearchScreen(navController: NavController) {
             onSearch = {
                 if (query.isNotEmpty()) {
                     scope.launch {
+                        searchMode = false
                         searchAndFetchBooks(db, query) { books ->
                             selectedBooks = books
                         }
                     }
+                    keyboardController?.hide()
                 }
             },
             active = active,
-            onActiveChange = { newActive -> active = newActive }
+            onActiveChange = { newActive -> active = newActive
+                if (!newActive && query.isNotEmpty()) {
+                    performSearch(db, query) { results ->
+                        searchResults = results.sortedBy { it.first }
+                    }
+                } else if (query.isEmpty()) {
+                    searchResults = emptyList()
+                }
+            }
         )
 
-        if (selectedBooks.isNotEmpty()) {
+        if (!searchMode && selectedBooks.isNotEmpty()) {
             BookList(
                 books = selectedBooks,
                 onBookClick = { book ->
                     navController.navigate("bookDetail/${book.id}")
                 }
             )
-        } else if (searchResults.isNotEmpty()) {
+        } else if (searchMode && searchResults.isNotEmpty()) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(searchResults) { (name, id) ->
                     ListItem(
@@ -171,6 +185,24 @@ fun performSearch(db: FirebaseFirestore, query: String, onResult: (List<Pair<Str
             onResult(emptyList())
         }
 }
+@Composable
+fun SearchHistoryChip(keyword: String, onClick: (String) -> Unit) {
+    Card(
+        modifier = Modifier.padding(end = 8.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Gray.copy(alpha = 0.1f)),
+        elevation = CardDefaults.cardElevation(4.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable { onClick(keyword) }
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = keyword, style = MaterialTheme.typography.headlineSmall)
+        }
+    }
+}
 
 @Composable
 fun BookList(
@@ -192,7 +224,6 @@ fun BookList(
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent),
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    // Hình ảnh bìa sách
                     AsyncImage(
                         model = book.imageUrl,
                         contentDescription = "Book Cover",
@@ -238,7 +269,9 @@ fun SearchTextField(
 ) {
     OutlinedTextField(
         value = query,
-        onValueChange = onQueryChange,
+        onValueChange = { newQuery ->
+            onQueryChange(newQuery.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() })
+        },
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)

@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.material3.*
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
-import com.example.storyefun.ui.screens.CategoryScreen
 import com.example.profileui.ProfileScreen
 import com.example.storyefun.ui.screens.*
 

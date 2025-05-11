@@ -119,7 +119,7 @@ fun CategoriesScreen(navController: NavController) {
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     thickness = 1.dp)
         },
-        bottomBar = { BottomBar(navController, "home") }
+        bottomBar = { BottomBar(navController, "category") }
     ) { innerPadding ->
         Column(
             modifier = Modifier
