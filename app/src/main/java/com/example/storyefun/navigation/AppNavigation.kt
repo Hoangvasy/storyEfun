@@ -35,6 +35,7 @@ sealed class Screen(val route: String) {
     object Setting : Screen("setting")
     object CategoryList : Screen("category")
     object Search : Screen("search")
+    object AllBook : Screen("allbook")
 
 
     object AdminMenu : Screen("menuScreen")
@@ -107,6 +108,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.Desposite.route) { DespositeScreen() }
         composable(Screen.Coin.route) { CoinScreen(navController) }
         composable(Screen.Search.route) { SearchScreen(navController) }
+        composable(Screen.AllBook.route) { AllBookScreen(navController) }
         composable(Screen.HistoricalTransaction.route) { HistoricalTransaction(navController) }
 
 
