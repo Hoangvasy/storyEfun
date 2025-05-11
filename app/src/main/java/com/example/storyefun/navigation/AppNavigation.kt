@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.material3.*
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
-import com.example.storyefun.ui.screens.CategoryScreen
 import com.example.profileui.ProfileScreen
 import com.example.storyefun.ui.screens.*
 
@@ -36,6 +35,7 @@ sealed class Screen(val route: String) {
     object Setting : Screen("setting")
     object CategoryList : Screen("category")
     object Search : Screen("search")
+    object AllBook : Screen("allbook")
 
 
     object AdminMenu : Screen("menuScreen")
@@ -53,6 +53,7 @@ sealed class Screen(val route: String) {
     object ManageUser : Screen("manageUser")
     object PaymentNotification : Screen("paymentNotification")
     object HistoricalTransaction : Screen("historicalTransaction")
+    object RevenueStatistics : Screen("revenueStatistics")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,6 +103,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.Desposite.route) { DespositeScreen() }
         composable(Screen.Coin.route) { CoinScreen(navController) }
         composable(Screen.Search.route) { SearchScreen(navController) }
+        composable(Screen.AllBook.route) { AllBookScreen(navController) }
         composable(Screen.HistoricalTransaction.route) { HistoricalTransaction(navController) }
 
 
@@ -141,6 +143,10 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.Desposite.route) {
             DespositeScreen()
         }
+        composable(Screen.RevenueStatistics.route) {
+            RevenueStatisticsScreen(navController)
+        }
+
 
     }
 }

@@ -61,7 +61,6 @@ fun PopularBookScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Popular books", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text("Select all", color = Color.Gray, fontSize = 14.sp)
         }
 
         Spacer(modifier = Modifier.height(16.dp))

@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -98,7 +100,9 @@ fun NewBookScreen(navController: NavController) {
                     "Select all",
                     color = Color(0xFF00897B),
                     fontSize = 14.sp,
-                    modifier = Modifier.clickable { }
+                    modifier = Modifier.clickable {
+                        navController.navigate("allbook")
+                    }
                 )
             }
             LazyRow(
@@ -122,7 +126,6 @@ fun NewBookScreen(navController: NavController) {
                                 painter = rememberImagePainter(book.imageUrl),
                                 contentDescription = book.name,
                                 modifier = Modifier
-                                    .padding(5.dp)
                                     .height(150.dp)
                                     .size(120.dp)
                                     .clip(RoundedCornerShape(8.dp)),
