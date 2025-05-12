@@ -215,11 +215,7 @@ fun OrderPaymentScreen(amount: Int, coin: Int) {
                         fontSize = 20.sp,
                         color = Color(0xFF333333)
                     )
-                    Text(
-                        "Coin: $coin",
-                        fontSize = 20.sp,
-                        color = Color(0xFF333333)
-                    )
+
                 }
 
                 // Trạng thái thanh toán (nếu có)
