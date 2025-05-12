@@ -15,7 +15,6 @@ import com.example.storyefun.ui.UserManageScreen
 
 //import com.example.storyefun.ui.AddChapterScreen
 import com.example.storyefun.viewModel.ThemeViewModel
-import com.google.common.base.Objects
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -63,7 +62,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
     val currentUser = auth.currentUser
     val start : String
     if (currentUser != null) {
-        start = Screen.AdminMenu.route
+        start = Screen.Home.route
     } else {
         // Người dùng chưa đăng nhập, yêu cầu đăng nhập
         start = Screen.Login.route
@@ -76,7 +75,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 
     ) {
 //        composable(Screen.Home.route) { HomeScreen(navController, themeViewModel) }
-        composable(Screen.Home.route) { HomeBookScreen(navController) }
+        composable(Screen.Home.route) { HomeBookScreen(navController, themeViewModel) }
         composable("bookDetail/{bookId}") { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId") ?: "Unknown"
             BookDetailScreen(navController, bookId, themeViewModel)
@@ -99,11 +98,11 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.Upload.route) { UploadScreen(navController) }
         composable(Screen.Favourite.route) { FavouriteScreen(themeViewModel, navController) }
         composable(Screen.Setting.route) { SettingScreen(navController, themeViewModel) }
-        composable(Screen.CategoryList.route) { CategoriesScreen(navController) }
+        composable(Screen.CategoryList.route) { CategoriesScreen(navController, themeViewModel) }
         composable(Screen.Desposite.route) { DespositeScreen() }
         composable(Screen.Coin.route) { CoinScreen(navController) }
         composable(Screen.Search.route) { SearchScreen(navController) }
-        composable(Screen.AllBook.route) { AllBookScreen(navController) }
+        composable(Screen.AllBook.route) { AllBookScreen(navController, themeViewModel) }
         composable(Screen.HistoricalTransaction.route) { HistoricalTransaction(navController) }
 
 

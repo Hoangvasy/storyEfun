@@ -1,4 +1,4 @@
-package com.example.storyefun.admin.ui
+package com.example.storyefun.ui.screens
 
 import android.content.Intent
 import android.os.Bundle
@@ -20,7 +20,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color

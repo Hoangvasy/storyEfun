@@ -63,11 +63,12 @@ fun FavouriteScreen(
         Scaffold(
             topBar = {
                 Header(
-                    navController = navController
+                    navController = navController,
+                    themeViewModel = themeViewModel
                 )
             },
             bottomBar = {
-                BottomBar(navController, "favourite")
+                BottomBar(navController, "favourite",themeViewModel = themeViewModel)
             }
         ) { paddingValues ->
             Box(modifier = Modifier.fillMaxSize()) {

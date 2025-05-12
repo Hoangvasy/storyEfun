@@ -14,56 +14,33 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.storyefun.R
+import com.example.storyefun.ui.theme.LocalAppColors
+import com.example.storyefun.viewModel.ThemeViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-data class Book(
-    val name: String = "",
-    val category: List<String> = emptyList()
-)
-
-fun fetchBooks(query: String, searchType: String, callback: (List<Book>) -> Unit) {
-    val db = FirebaseFirestore.getInstance()
-    val queryRef = if (searchType == "name") {
-        db.collection("books").whereGreaterThanOrEqualTo("name", query)
-    } else {
-        db.collection("books").whereArrayContains("category", query)
-    }
-
-    queryRef.get()
-        .addOnSuccessListener { documents ->
-            val books = documents.map { document ->
-                document.toObject(Book::class.java)
-            }
-            callback(books)
-        }
-        .addOnFailureListener { exception ->
-            callback(emptyList())
-            Log.e("Search", "Error fetching books", exception)
-        }
-}
-
 @Composable
 fun Header(
     modifier: Modifier = Modifier,
     navController: NavController,
+    themeViewModel: ThemeViewModel
 ) {
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
     var coinBalance by remember { mutableStateOf(0) }
     var isLoading by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val theme = LocalAppColors.current // Access theme colors
 
     // Fetch user's coin balance
     LaunchedEffect(auth.currentUser?.uid) {
@@ -87,77 +64,80 @@ fun Header(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFFFFFFFF))
-            .padding(top = 5.dp, bottom = 5.dp)
+            .background(theme.header.copy(0.8f)) // Use updated theme.header
+            .padding(top = 3.dp, bottom = 3.dp) // Reduced padding
+
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp),
+                .padding(horizontal = 4.dp), // Reduced horizontal padding
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Left: Logo and Name
             Column(
                 modifier = Modifier
-                    .padding(5.dp)
+                    .padding(4.dp) // Slightly reduced padding
                     .clickable { navController.navigate("home") },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = "ストリエフン",
-                    fontSize = 18.sp,
+                    fontSize = 16.sp, // Reduced font size
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier.padding(bottom = 2.dp)
+                    color = theme.textPrimary,
+                    modifier = Modifier.padding(bottom = 1.dp) // Reduced bottom padding
                 )
                 Text(
                     text = "STORYEFUN",
-                    fontSize = 15.sp,
-                    color = Color.Black.copy(alpha = 0.7f)
+                    fontSize = 13.sp, // Reduced font size
+                    color = theme.textSecondary
                 )
             }
 
             // Right: Icons and Coin Balance
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp) // Reduced spacing
             ) {
                 IconButton(onClick = { navController.navigate("search") }) {
                     Icon(
                         Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = Color.Black
+                        tint = theme.textPrimary,
+                        modifier = Modifier.size(20.dp) // Smaller icon
                     )
                 }
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(3.dp) // Reduced spacing
                 ) {
                     Text(
                         text = if (isLoading) "..." else coinBalance.toString(),
-                        fontSize = 20.sp,
+                        fontSize = 18.sp, // Reduced font size
                         fontWeight = FontWeight.Medium,
-                        color = Color.Black
+                        color = theme.textPrimary
                     )
                     Icon(
                         painter = painterResource(id = R.drawable.ic_coin),
                         contentDescription = "Coin Balance",
                         modifier = Modifier
-                            .size(14.dp)
+                            .size(12.dp) // Smaller icon
                             .align(Alignment.Top),
-                        tint = Color.Gray
+                        tint = theme.textSecondary
+                            //    tint = Color(0xFF3A2DA3)
                     )
                     IconButton(
                         onClick = { navController.navigate("desposite") },
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp) // Smaller button
                     ) {
                         Icon(
                             Icons.Default.Add,
                             contentDescription = "Deposit",
-                            tint = Color.Black,
-                            modifier = Modifier.size(16.dp)
+                            tint = theme.textPrimary,
+                            modifier = Modifier.size(14.dp) // Smaller icon
                         )
                     }
                 }
@@ -166,16 +146,11 @@ fun Header(
                     Icon(
                         Icons.Default.Person,
                         contentDescription = "Profile",
-                        tint = Color.Black
+                        tint = theme.textPrimary,
+                        modifier = Modifier.size(20.dp) // Smaller icon
                     )
                 }
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HeaderPreview() {
-    Header(navController = rememberNavController())
 }

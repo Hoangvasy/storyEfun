@@ -1,4 +1,4 @@
-package com.example.storyefun.admin.ui
+package com.example.storyefun.ui.screens
 
 import android.content.Intent
 import android.os.Bundle
@@ -24,9 +24,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.storyefun.R
+import com.example.storyefun.admin.ui.PaymentNotification
 import com.example.storyefun.data.repository.TransactionRepository
 import com.example.storyefun.ui.theme.LocalAppColors
 import com.example.storyefun.viewModel.TransactionViewModel
@@ -83,7 +85,7 @@ fun OrderPaymentScreen(amount: Int, coin: Int) {
 
     val viewModel: TransactionViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
-            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return TransactionViewModel(TransactionRepository(), uid ?: "") as T
             }
         }

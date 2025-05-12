@@ -45,90 +45,92 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
 @Composable
-fun BookDetailScreen(navController: NavController, bookId : String, themeViewModel: ThemeViewModel, viewModel: BookViewModel = viewModel(), userViewModel: UserViewModel = viewModel()) {
+fun BookDetailScreen(
+    navController: NavController,
+    bookId: String,
+    themeViewModel: ThemeViewModel,
+    viewModel: BookViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel()
+) {
     var theme = LocalAppColors.current
     var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
     val isDarkMode by themeViewModel.isDarkTheme.collectAsState()
     val book by viewModel.book.observeAsState()
 
-
-
-
     LaunchedEffect(bookId) {
         viewModel.fetchBook(bookId)
         Log.e("info of lauched book: ", book.toString())
     }
 
+    Scaffold(
+        topBar = {
+            Header(
 
-
-
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        // Background Image
-        if (!isDarkMode) {
-
-
-        } else {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(theme.backgroundColor)
+                navController = navController,
+                themeViewModel = themeViewModel
             )
-        }
+        },
+        modifier = Modifier.fillMaxSize()
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues) // Apply padding to account for topBar
+        ) {
+            // Background Image
+            if (!isDarkMode) {
+                // Add light mode background if needed
+            } else {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(theme.backgroundColor)
+                )
+            }
 
-        if (book != null) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    var text by remember { mutableStateOf("") }
-                    var active by remember { mutableStateOf(false) }
-//                    Header(text, active, onQueryChange = { text = it }, onActiveChange = { active = it }, navController)
-                }
+            if (book != null) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item { MangaInfo(theme, book!!, navController, userViewModel) } // Safe to use !! after null check
 
-                item { MangaInfo(theme, book!!, navController, userViewModel) }  // safe to use !! here after null check
+                    item {
+                        TabRow(
+                            selectedTabIndex = selectedTabIndex,
+                            modifier = Modifier.fillMaxWidth(),
+                            containerColor = theme.backgroundContrast2
+                        ) {
+                            Tab(
+                                selected = selectedTabIndex == 0,
+                                onClick = { selectedTabIndex = 0 },
+                                text = { Text("Thông tin", color = theme.backgroundColor) }
+                            )
+                            Tab(
+                                selected = selectedTabIndex == 1,
+                                onClick = { selectedTabIndex = 1 },
+                                text = { Text("Chapter", color = theme.backgroundColor) }
+                            )
+                        }
+                    }
 
-                item {
-                    TabRow(
-                        selectedTabIndex = selectedTabIndex,
-                        modifier = Modifier.fillMaxWidth(),
-                        containerColor = theme.backgroundContrast2
-                    ) {
-                        Tab(
-                            selected = selectedTabIndex == 0,
-                            onClick = { selectedTabIndex = 0 },
-                            text = { Text("Thông tin", color = theme.backgroundColor) }
-                        )
-                        Tab(
-                            selected = selectedTabIndex == 1,
-                            onClick = { selectedTabIndex = 1 },
-                            text = { Text("Chapter", color = theme.backgroundColor) }
-                        )
+                    item {
+                        when (selectedTabIndex) {
+                            0 -> InformationSection(navController, theme, book!!)
+                            1 -> ChapterListSection(theme, book!!, navController)
+                        }
+                        CommentSection(theme, book!!.id, book!!.comments)
                     }
                 }
-
-                item {
-                    when (selectedTabIndex) {
-                        0 -> InformationSection(navController, theme, book!!)
-                        1 -> ChapterListSection(theme, book!!, navController)
-                    }
-                    CommentSection(theme, book!!.id, book!!.comments)
+            } else {
+                // Show loading or empty state
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = theme.textPrimary)
                 }
             }
-        } else {
-            // You can show loading or empty state here
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = theme.textPrimary)
-            }
         }
-
     }
 }
 @Composable
