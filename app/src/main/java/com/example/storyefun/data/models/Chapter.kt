@@ -5,5 +5,7 @@ data class Chapter(
     val title: String = "",      // Default value
     val order: Long = 0,
     val content: List<String> = emptyList(),
-    val price: Int = 0
+    //val locked: Boolean = false
+    val price : Int = 0,
+    val createdAt: Long = 0L // 👈 thêm dòng này
 )

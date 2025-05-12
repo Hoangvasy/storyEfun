@@ -22,6 +22,9 @@ class ChapterViewModel(
     private val _title = mutableStateOf("")
     val title: String get() = _title.value
 
+    private val _price = mutableStateOf(0)
+    val price: Int get() = _price.value
+
     private val _chapterNumber = mutableStateOf(1)
     val chapterNumber: Int get() = _chapterNumber.value
 
@@ -57,6 +60,9 @@ class ChapterViewModel(
     fun updateTitle(newTitle: String) {
         _title.value = newTitle
     }
+    fun updatePrice(newPrice: Int) {
+        _price.value = newPrice
+    }
 
     fun updateImageUris(uris: List<Uri>) {
         _imageUris.value = uris
@@ -71,7 +77,7 @@ class ChapterViewModel(
                 repository.uploadChapterImage(uri, "chapters") { url ->
                     imageUrls.add(url)
                     if (imageUrls.size == _imageUris.value.size) {
-                        repository.addChapter(bookId, volumeId, _title.value, imageUrls) {
+                        repository.addChapter(bookId, volumeId, _title.value, _price.value, imageUrls) {
                             _title.value = "Chapter ${_chapterNumber.value }"
                             _imageUris.value = emptyList()
                             _toastMessage.value = "Đã thêm chapter thành công"
