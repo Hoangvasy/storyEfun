@@ -5,14 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.storyefun.data.models.Chapter
-import com.example.storyefun.data.repository.ChapterRepository
+import com.example.storyefun.data.repository.BookRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class ChapterViewModel(
-    private val repository: ChapterRepository,
+    private val repository: BookRepository,
     private val bookId: String,
     private val volumeId: String
 ) : ViewModel() {
@@ -32,13 +31,25 @@ class ChapterViewModel(
     private val _isUploading = mutableStateOf(false)
     val isUploading: Boolean get() = _isUploading.value
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _toastMessage = MutableStateFlow<String?>(null)
+    val toastMessage: StateFlow<String?> = _toastMessage
+
     init {
-        // Lấy danh sách chương khi ViewModel khởi tạo
+        // Tải danh sách chapters khi khởi tạo
+        loadChapters()
+    }
+
+    fun loadChapters() {
         viewModelScope.launch {
-            repository.getChapters(bookId, volumeId).collect { chapters ->
+            _isLoading.value = true
+            repository.loadChapters(bookId, volumeId) { chapters ->
                 _chapters.value = chapters
                 _chapterNumber.value = chapters.size + 1
                 _title.value = "Chapter ${_chapterNumber.value}"
+                _isLoading.value = false
             }
         }
     }
@@ -56,12 +67,14 @@ class ChapterViewModel(
             _isUploading.value = true
             val imageUrls = mutableListOf<String>()
             _imageUris.value.forEach { uri ->
-                repository.uploadImageToCloudinary(uri, "chapters").collect { url ->
+                // Giả sử uploadChapterImage là hàm callback-based
+                repository.uploadChapterImage(uri, "chapters") { url ->
                     imageUrls.add(url)
                     if (imageUrls.size == _imageUris.value.size) {
-                        repository.uploadChapter(bookId, volumeId, _title.value, imageUrls) {
-                            _title.value = "Chapter ${_chapterNumber.value + 1}"
+                        repository.addChapter(bookId, volumeId, _title.value, imageUrls) {
+                            _title.value = "Chapter ${_chapterNumber.value }"
                             _imageUris.value = emptyList()
+                            _toastMessage.value = "Đã thêm chapter thành công"
                             onComplete()
                         }
                     }
@@ -69,5 +82,25 @@ class ChapterViewModel(
             }
             _isUploading.value = false
         }
+    }
+
+    fun deleteChapter(chapterId: String, onSuccess: () -> Unit = {}) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val success = repository.deleteChapter(bookId, volumeId, chapterId)
+            _isLoading.value = false
+
+            if (success) {
+                _toastMessage.value = "Đã xóa chapter thành công"
+                loadChapters() // Reload danh sách chapters
+                onSuccess()
+            } else {
+                _toastMessage.value = "Lỗi khi xóa chapter"
+            }
+        }
+    }
+
+    fun setToastMessage(message: String) {
+        _toastMessage.value = message
     }
 }

@@ -215,6 +215,20 @@ class BookRepository {
             emptyList()
         }
     }
+    suspend fun deleteVolume(bookId: String, volumeId: String): Boolean {
+        return try {
+            db.collection("books")
+                .document(bookId)
+                .collection("volumes")
+                .document(volumeId)
+                .delete()
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e("VolumeRepo", "deleteVolume error: ${e.message}")
+            false
+        }
+    }
 
 // CHAPTER
 suspend fun getNextChapterOrder(bookId: String, volumeID: String): Long {
@@ -345,7 +359,22 @@ suspend fun getNextChapterOrder(bookId: String, volumeID: String): Long {
             })
             .dispatch()
     }
-
+    suspend fun deleteChapter(bookId: String, volumeId: String, chapterId: String): Boolean {
+        return try {
+            db.collection("books")
+                .document(bookId)
+                .collection("volumes")
+                .document(volumeId)
+                .collection("chapters")
+                .document(chapterId)
+                .delete()
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e("ChapterRepo", "deleteChapter error: ${e.message}")
+            false
+        }
+    }
 
     suspend fun valueIncrease(type: String, bookId: String) {
         try {
