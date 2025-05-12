@@ -93,7 +93,7 @@ fun CategoriesScreen(navController: NavController) {
                 Toast.makeText(context, "Failed to load categories: ${it.message}", Toast.LENGTH_SHORT).show()
             }
     }
-    
+
     LaunchedEffect(selectedCategoryId.value) {
         selectedCategoryId.value?.let { categoryId ->
             firestore.collection("books")
@@ -115,9 +115,9 @@ fun CategoriesScreen(navController: NavController) {
     Scaffold(
         topBar = {
             Header(navController = navController)
-                Divider(
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    thickness = 1.dp)
+            Divider(
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                thickness = 1.dp)
         },
         bottomBar = { BottomBar(navController, "category") }
     ) { innerPadding ->

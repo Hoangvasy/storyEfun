@@ -510,7 +510,7 @@ fun ChapterListSection(theme: AppColors, book: Book, navController: NavControlle
                         ) {
                             Icon(
                                 painter = painterResource(
-                                    id = if (isLocked) R.drawable.add else R.drawable.ic_chapter
+                                    id = if (isLocked) R.drawable.locked else R.drawable.ic_chapter
                                 ),
                                 contentDescription = null,
                                 tint = if (isLocked) Color.Gray else theme.textSecondary,
