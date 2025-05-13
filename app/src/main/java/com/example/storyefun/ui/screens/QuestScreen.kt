@@ -111,8 +111,10 @@ fun QuestScreen(navController: NavController, userId: String) {
                             Text(
                                 text = when (quest.type) {
                                     "daily_login" -> "Đăng nhập hàng ngày"
-                                    "read_three_chapters" -> "Đọc 3 chapter"
+
                                     "online_one_minute" -> "Online 1 phút"
+                                    "online_two_minute" -> "Online 2 phút"
+                                    "online_twenty_minute" -> "Online 20 phút"
                                     else -> "Nhiệm vụ"
                                 },
                                 fontSize = 16.sp,
@@ -146,7 +148,7 @@ fun QuestScreen(navController: NavController, userId: String) {
                             )
                         ) {
                             Text(
-                                text = if (quest.completed) "Đã nhận" else "Nhận",
+                                text = if (quest.completed) "Xong" else "Nhận",
                                 fontSize = 14.sp,
                                 color = Color.White
                             )

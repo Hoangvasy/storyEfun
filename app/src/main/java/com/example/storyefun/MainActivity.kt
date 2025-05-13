@@ -25,7 +25,10 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private val questRepository = QuestRepository()
     private var elapsedTime = 0L
-    private var hasCompletedQuest = false
+    private var hasCompletedOneMin = false
+    private var hasCompletedTwoMin = false
+    private var hasCompletedTwentyMin = false
+
     private var trackingJob: Job? = null
     private var userId: String? = null
 
@@ -70,29 +73,75 @@ class MainActivity : ComponentActivity() {
 
     private fun startTrackingOnlineTime() {
         userId?.let { currentUserId ->
-            if (hasCompletedQuest) return
-
-            trackingJob?.cancel() // Hủy job cũ nếu có
+            trackingJob?.cancel()
             trackingJob = CoroutineScope(Dispatchers.Main).launch {
-                questRepository.resetDailyQuests(currentUserId) // Reset nhiệm vụ hàng ngày
-                while (!hasCompletedQuest) {
-                    delay(1_000L) // Đợi 1 giây
+                questRepository.resetDailyQuests(currentUserId)
+
+                while (true) {
+                    delay(1_000L)
                     elapsedTime += 1_000L
-                    if (elapsedTime >= 60_000L) { // 60 giây
-                        val quest = questRepository.getQuests(currentUserId).find { it.type == "online_one_minute" }
-                        if (quest != null && !quest.completed) {
-                            questRepository.updateQuestProgress(currentUserId, quest.id, 1L)
-                            val updatedQuest = questRepository.getQuests(currentUserId).find { it.id == quest.id }
-                            if (updatedQuest?.completed == true) {
-                                questRepository.completeQuest(currentUserId, quest.id, quest.reward)
+
+                    val quests = questRepository.getQuests(currentUserId)
+
+                    // 1 phút
+                    if (elapsedTime >= 10_000L && !hasCompletedOneMin) {
+                        quests.find { it.type == "online_one_minute" }?.let { quest ->
+                            if (!quest.completed) {
+                                questRepository.updateQuestProgress(currentUserId, quest.id, 1L)
+                                questRepository.getQuests(currentUserId)
+                                    .find { it.id == quest.id }
+                                    ?.takeIf { it.completed }
+                                    ?.let {
+                                        questRepository.completeQuest(currentUserId, it.id, it.reward)
+                                        hasCompletedOneMin = true
+                                    }
+                            } else {
+                                hasCompletedOneMin = true
                             }
-                            hasCompletedQuest = true
+                        }
+                    }
+
+                    // 2 phút
+                    if (elapsedTime >= 30_000L && !hasCompletedTwoMin) {
+                        quests.find { it.type == "online_two_minute" }?.let { quest ->
+                            if (!quest.completed) {
+                                questRepository.updateQuestProgress(currentUserId, quest.id, 1L)
+                                questRepository.getQuests(currentUserId)
+                                    .find { it.id == quest.id }
+                                    ?.takeIf { it.completed }
+                                    ?.let {
+                                        questRepository.completeQuest(currentUserId, it.id, it.reward)
+                                        hasCompletedTwoMin = true
+                                    }
+                            } else {
+                                hasCompletedTwoMin = true
+                            }
+                        }
+                    }
+
+                    // 20 phút
+                    if (elapsedTime >= 60_000L && !hasCompletedTwentyMin) {
+                        quests.find { it.type == "online_twenty_minute" }?.let { quest ->
+                            if (!quest.completed) {
+                                questRepository.updateQuestProgress(currentUserId, quest.id, 1L)
+                                questRepository.getQuests(currentUserId)
+                                    .find { it.id == quest.id }
+                                    ?.takeIf { it.completed }
+                                    ?.let {
+                                        questRepository.completeQuest(currentUserId, it.id, it.reward)
+                                        hasCompletedTwentyMin = true
+                                    }
+                            } else {
+                                hasCompletedTwentyMin = true
+                            }
                         }
                     }
                 }
             }
         }
     }
+
+
 
     private fun stopTrackingOnlineTime() {
         trackingJob?.cancel() // Hủy job khi ứng dụng vào background

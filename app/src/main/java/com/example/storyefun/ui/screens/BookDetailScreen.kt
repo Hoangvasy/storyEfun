@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-//import com.example.storyefun.ui.components.StatItem
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -92,7 +91,7 @@ fun BookDetailScreen(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    item { MangaInfo(theme, book!!, navController, userViewModel) }
+                    item { MangaInfo(theme, book!!, navController, userViewModel, viewModel) }
 
                     item {
                         TabRow(
@@ -131,16 +130,32 @@ fun BookDetailScreen(
 }
 
 @Composable
-fun MangaInfo(theme: AppColors, book: Book, navController: NavController, viewModel: UserViewModel) {
+fun MangaInfo(theme: AppColors, book: Book, navController: NavController, userViewModel: UserViewModel, bookViewModel: BookViewModel) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-
     var isLiked by remember { mutableStateOf(false) }
     var isFollowed by remember { mutableStateOf(false) }
+    var showUnlockDialog by remember { mutableStateOf(false) }
+    var selectedChapter by remember { mutableStateOf<Chapter?>(null) }
+    var selectedVolumeOrder by remember { mutableStateOf<Long?>(null) }
+    var coinBalance by remember { mutableStateOf<Int?>(null) }
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
 
-    LaunchedEffect(book.id) {
-        isLiked = withContext(Dispatchers.IO) { viewModel.isLikedBook(book.id) }
-        isFollowed = withContext(Dispatchers.IO) { viewModel.isFollowedBook(book.id) }
+    LaunchedEffect(book.id, uid) {
+        isLiked = withContext(Dispatchers.IO) { userViewModel.isLikedBook(book.id) }
+        isFollowed = withContext(Dispatchers.IO) { userViewModel.isFollowedBook(book.id) }
+        if (uid != null) {
+            FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    coinBalance = document.getLong("coin")?.toInt() ?: 0
+                }
+                .addOnFailureListener {
+                    coinBalance = 0
+                }
+        }
     }
 
     Column(
@@ -232,11 +247,11 @@ fun MangaInfo(theme: AppColors, book: Book, navController: NavController, viewMo
                             ) {
                                 scope.launch {
                                     if (isFollowed) {
-                                        viewModel.unfollowingBook(book.id)
+                                        userViewModel.unfollowingBook(book.id)
                                         book.follows--
                                         isFollowed = false
                                     } else {
-                                        viewModel.followingBook(book.id)
+                                        userViewModel.followingBook(book.id)
                                         book.follows++
                                         isFollowed = true
                                     }
@@ -250,11 +265,11 @@ fun MangaInfo(theme: AppColors, book: Book, navController: NavController, viewMo
                             ) {
                                 scope.launch {
                                     if (isLiked) {
-                                        viewModel.unlikingBook(book.id)
+                                        userViewModel.unlikingBook(book.id)
                                         book.likes--
                                         isLiked = false
                                     } else {
-                                        viewModel.likingBook(book.id)
+                                        userViewModel.likingBook(book.id)
                                         book.likes++
                                         isLiked = true
                                     }
@@ -264,7 +279,18 @@ fun MangaInfo(theme: AppColors, book: Book, navController: NavController, viewMo
 
                         Button(
                             onClick = {
-                                navController.navigate("reading/${book.id}/1/1")
+                                val (volumeOrder, chapterOrder) = getFirstChapter(book) ?: (1L to 1L)
+                                val firstVolume = book.volume.sortedBy { it.order }.firstOrNull()
+                                val firstChapter = firstVolume?.chapters?.sortedBy { it.order }?.firstOrNull()
+                                if (firstChapter != null && (bookViewModel.isChapterUnlocked(firstChapter.id) || firstChapter.price == 0)) {
+                                    navController.navigate("reading/${book.id}/$volumeOrder/$chapterOrder")
+                                } else if (firstChapter != null) {
+                                    selectedChapter = firstChapter
+                                    selectedVolumeOrder = volumeOrder
+                                    showUnlockDialog = true
+                                } else {
+                                    Toast.makeText(context, "Không có chương nào để đọc", Toast.LENGTH_SHORT).show()
+                                }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -282,7 +308,88 @@ fun MangaInfo(theme: AppColors, book: Book, navController: NavController, viewMo
                 }
             }
         }
+
+        if (showUnlockDialog && selectedChapter != null && selectedVolumeOrder != null && uid != null) {
+            AlertDialog(
+
+                onDismissRequest = { showUnlockDialog = false },
+                modifier = Modifier.background(theme.backgroundContrast2, RoundedCornerShape(12.dp)),
+                title = {
+                    Text(
+                        "Mở khóa chương",
+                        color = theme.backgroundColor,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                },
+                text = {
+                    Text(
+                        "Bạn có $coinBalance coin. Mở khóa chương này với ${selectedChapter?.price} coin?",
+                        color = theme.backgroundColor,
+                        fontSize = 16.sp
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val chapter = selectedChapter ?: return@TextButton
+                            val volumeOrder = selectedVolumeOrder ?: return@TextButton
+                            val userDocRef = FirebaseFirestore.getInstance()
+                                .collection("users")
+                                .document(uid)
+
+                            if (coinBalance != null && coinBalance!! >= (selectedChapter?.price ?: 0)) {
+                                val newCoin = coinBalance!! - (selectedChapter?.price?.toInt() ?: 0)
+
+                                userDocRef.update(
+                                    mapOf(
+                                        "coin" to newCoin,
+                                        "unlockedChapterIds" to FieldValue.arrayUnion(chapter.id)
+                                    )
+                                ).addOnSuccessListener {
+                                    coinBalance = newCoin
+                                    Toast.makeText(context, "Chương đã được mở khóa", Toast.LENGTH_LONG).show()
+                                    navController.navigate("reading/${book.id}/${volumeOrder}/${chapter.order}")
+                                    showUnlockDialog = false
+                                    bookViewModel.refreshUnlockedChapterIds()
+                                }.addOnFailureListener { e ->
+                                    Log.e("Firestore", "Lỗi khi mở khóa chương: ${e.message}")
+                                    Toast.makeText(context, "Không thể mở khóa chương", Toast.LENGTH_LONG).show()
+                                }
+                            } else {
+                                showUnlockDialog = false
+                                navController.navigate("desposite")
+                            }
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = theme.backgroundColor)
+                    ) {
+                        Text("Mở khóa", fontWeight = FontWeight.Medium)
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showUnlockDialog = false },
+                        colors = ButtonDefaults.textButtonColors(contentColor = theme.backgroundColor)
+                    ) {
+                        Text("Hủy", fontWeight = FontWeight.Medium)
+                    }
+                }
+            )
+        }
     }
+}
+
+/**
+ * Retrieves the order of the first chapter of the first volume of the book.
+ * @param book The book to extract the first chapter from.
+ * @return A Pair of (volumeOrder, chapterOrder) or null if no volumes/chapters exist.
+ */
+private fun getFirstChapter(book: Book): Pair<Long, Long>? {
+    // Sort volumes by order to get the first volume
+    val firstVolume = book.volume.sortedBy { it.order }.firstOrNull() ?: return null
+    // Sort chapters by order to get the first chapter
+    val firstChapter = firstVolume.chapters.sortedBy { it.order }.firstOrNull() ?: return null
+    return firstVolume.order to firstChapter.order
 }
 
 @Composable
@@ -449,48 +556,65 @@ fun ChapterListSection(theme: AppColors, book: Book, navController: NavControlle
         if (showUnlockDialog && selectedChapter != null && selectedVolumeOrder != null && uid != null) {
             AlertDialog(
                 onDismissRequest = { showUnlockDialog = false },
-                title = { Text("Mở khóa chương") },
+                modifier = Modifier.background(theme.backgroundColor, RoundedCornerShape(12.dp)),
+                title = {
+                    Text(
+                        "Mở khóa chương",
+                        color = theme.textPrimary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                },
                 text = {
-                    Text("Bạn có $coinBalance coin. Mở khóa chương này với ${selectedChapter?.price} coin?")
+                    Text(
+                        "Bạn có $coinBalance coin. Mở khóa chương này với ${selectedChapter?.price} coin?",
+                        color = theme.textSecondary,
+                        fontSize = 16.sp
+                    )
                 },
                 confirmButton = {
-                    TextButton(onClick = {
-                        val chapter = selectedChapter ?: return@TextButton
-                        val volumeOrder = selectedVolumeOrder ?: return@TextButton
-                        val userDocRef = FirebaseFirestore.getInstance()
-                            .collection("users")
-                            .document(uid)
+                    TextButton(
+                        onClick = {
+                            val chapter = selectedChapter ?: return@TextButton
+                            val volumeOrder = selectedVolumeOrder ?: return@TextButton
+                            val userDocRef = FirebaseFirestore.getInstance()
+                                .collection("users")
+                                .document(uid)
 
-                        if (coinBalance != null && coinBalance!! >= (selectedChapter?.price ?: 0)) {
-                            val newCoin = coinBalance!! - (selectedChapter?.price?.toInt() ?: 0)
+                            if (coinBalance != null && coinBalance!! >= (selectedChapter?.price ?: 0)) {
+                                val newCoin = coinBalance!! - (selectedChapter?.price?.toInt() ?: 0)
 
-                            userDocRef.update(
-                                mapOf(
-                                    "coin" to newCoin,
-                                    "unlockedChapterIds" to FieldValue.arrayUnion(chapter.id)
-                                )
-                            ).addOnSuccessListener {
-                                coinBalance = newCoin
-                                Toast.makeText(context, "Chương đã được mở khóa", Toast.LENGTH_LONG).show()
-                                navController.navigate("reading/${book.id}/${volumeOrder}/${chapter.order}")
+                                userDocRef.update(
+                                    mapOf(
+                                        "coin" to newCoin,
+                                        "unlockedChapterIds" to FieldValue.arrayUnion(chapter.id)
+                                    )
+                                ).addOnSuccessListener {
+                                    coinBalance = newCoin
+                                    Toast.makeText(context, "Chương đã được mở khóa", Toast.LENGTH_LONG).show()
+                                    navController.navigate("reading/${book.id}/${volumeOrder}/${chapter.order}")
+                                    showUnlockDialog = false
+                                    viewModel.refreshUnlockedChapterIds()
+                                }.addOnFailureListener { e ->
+                                    Log.e("Firestore", "Lỗi khi mở khóa chương: ${e.message}")
+                                    Toast.makeText(context, "Không thể mở khóa chương", Toast.LENGTH_LONG).show()
+                                }
+                            } else {
                                 showUnlockDialog = false
-                                // Update BookViewModel's unlockedChapterIds
-                                viewModel.refreshUnlockedChapterIds()
-                            }.addOnFailureListener { e ->
-                                Log.e("Firestore", "Lỗi khi mở khóa chương: ${e.message}")
-                                Toast.makeText(context, "Không thể mở khóa chương", Toast.LENGTH_LONG).show()
+                                navController.navigate("desposite")
                             }
-                        } else {
-                            showUnlockDialog = false
-                            navController.navigate("desposite")
-                        }
-                    }) {
-                        Text("Mở khóa")
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = theme.textPrimary)
+                    ) {
+                        Text("Mở khóa", fontWeight = FontWeight.Medium)
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showUnlockDialog = false }) {
-                        Text("Hủy")
+                    TextButton(
+                        onClick = { showUnlockDialog = false },
+                        colors = ButtonDefaults.textButtonColors(contentColor = theme.textSecondary)
+                    ) {
+                        Text("Hủy", fontWeight = FontWeight.Medium)
                     }
                 }
             )
@@ -521,7 +645,7 @@ fun ChapterItem(
                 }
             },
         colors = CardDefaults.cardColors(containerColor = theme.backgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(1.dp)
     ) {
         Row(
             modifier = Modifier
@@ -530,10 +654,10 @@ fun ChapterItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row (
+            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ){
+            ) {
                 Text(
                     text = chapter.title,
                     color = if (viewModel.isChapterUnlocked(chapter.id)) theme.textPrimary else theme.textSecondary,
@@ -541,15 +665,14 @@ fun ChapterItem(
                     maxLines = 1
                 )
                 if (viewModel.isChapterUnlocked(chapter.id) || chapter.price == 0) {
+                    Log.e("unlock", "${chapter.id} la id")
                     Icon(
                         painter = painterResource(id = R.drawable.ic_unlocked),
                         contentDescription = "Coin",
                         modifier = Modifier.size(14.dp),
                         tint = theme.textSecondary
                     )
-                }
-                else
-                {
+                } else {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_lock),
                         contentDescription = "Coin",
@@ -602,7 +725,7 @@ fun StatItem(
             painter = painterResource(id = icon),
             contentDescription = null,
             tint = color,
-            modifier = Modifier.size(20.dp) // Tăng kích thước icon
+            modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(

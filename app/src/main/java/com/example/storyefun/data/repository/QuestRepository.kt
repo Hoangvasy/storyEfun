@@ -53,21 +53,29 @@ class QuestRepository {
                         "resetTime" to Timestamp(nextReset / 1000, 0)
                     ),
                     mapOf(
-                        "type" to "read_three_chapters",
-                        "completed" to false,
-                        "progress" to 0L,
-                        "requiredProgress" to 3L,
-                        "reward" to 15L,
-                        "resetTime" to Timestamp(nextReset / 1000, 0)
-                    ),
-                    mapOf(
                         "type" to "online_one_minute",
                         "completed" to false,
                         "progress" to 0L,
                         "requiredProgress" to 1L,
                         "reward" to 5L,
                         "resetTime" to Timestamp(nextReset / 1000, 0)
-                    )
+                    ),
+                    mapOf(
+                        "type" to "online_two_minute",
+                        "completed" to false,
+                        "progress" to 0L,
+                        "requiredProgress" to 1L,
+                        "reward" to 5L,
+                        "resetTime" to Timestamp(nextReset / 1000, 0)
+                    ),
+                    mapOf(
+                        "type" to "online_twenty_minute",
+                        "completed" to false,
+                        "progress" to 0L,
+                        "requiredProgress" to 1L,
+                        "reward" to 5L,
+                        "resetTime" to Timestamp(nextReset / 1000, 0)
+                    ),
                 )
 
                 val batch = db.batch()
