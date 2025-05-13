@@ -10,6 +10,7 @@ import com.example.profileui.ProfileScreen
 import com.example.storyefun.ui.screens.*
 
 import com.example.storyefun.admin.ui.*
+import com.example.storyefun.ui.QuestScreen
 import com.example.storyefun.ui.UserManageScreen
 
 
@@ -53,6 +54,7 @@ sealed class Screen(val route: String) {
     object PaymentNotification : Screen("paymentNotification")
     object HistoricalTransaction : Screen("historicalTransaction")
     object RevenueStatistics : Screen("revenueStatistics")
+    object Quest : Screen("quest")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -145,7 +147,10 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
         composable(Screen.RevenueStatistics.route) {
             RevenueStatisticsScreen(navController)
         }
+        composable(Screen.Quest.route) {
+            QuestScreen(navController, currentUser?.uid ?: "")
 
+        }
 
     }
 }
