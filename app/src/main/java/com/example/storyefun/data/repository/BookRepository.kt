@@ -53,8 +53,12 @@ class BookRepository {
                     if (volume != null) {
                         // Fetch chapters for this volume
                         val chaptersSnapshot = volumeDoc.reference.collection("chapters").get().await()
-                        val chapterList = chaptersSnapshot.mapNotNull { it.toObject(Chapter::class.java) }
-
+                        val chapterList = chaptersSnapshot.mapNotNull { doc ->
+                            val chapter = doc.toObject(Chapter::class.java)
+                            chapter?.apply {
+                                id = doc.id // <- manually assign document ID
+                            }
+                        }
                         volume.chapters = chapterList
                         volumeList.add(volume)
                     }
