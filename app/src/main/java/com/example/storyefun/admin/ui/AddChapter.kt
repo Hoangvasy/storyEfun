@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -25,6 +26,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -129,7 +131,12 @@ fun AddChapterScreen(navController: NavController, bookId: String, volumeId: Str
                 textStyle = LocalTextStyle.current.copy(fontSize = 20.sp),
                 shape = RoundedCornerShape(12.dp)
             )
+           // var chapterPrice by remember { mutableStateOf<Int?>(null) }
 
+            ChapterPriceSelector(
+                selectedPrice = viewModel.price,
+                onPriceChange = { viewModel.updatePrice(it?:0) }
+            )
             Button(
                 onClick = { imagePickerLauncher.launch("image/*") },
                 modifier = Modifier
@@ -326,6 +333,57 @@ fun SwipeToDeleteChapter(
                             .padding(top = 8.dp)
                     )
                 }
+            }
+        }
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChapterPriceSelector(
+    selectedPrice: Int?,
+    onPriceChange: (Int?) -> Unit
+) {
+    val options = listOf(0, 100, 200, 500, 1000)
+    var expanded by remember { mutableStateOf(false) }
+    var text by remember { mutableStateOf(selectedPrice?.toString() ?: "") }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            value = text,
+            onValueChange = {
+                text = it
+                onPriceChange(it.toIntOrNull())
+            },
+            label = { Text("💰 Giá chương", fontSize = 16.sp) },
+            textStyle = LocalTextStyle.current.copy(fontSize = 20.sp),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            singleLine = true,
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+                .padding(bottom = 12.dp),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { price ->
+                DropdownMenuItem(
+                    text = { Text(if (price == 0) "Miễn phí" else "$price đ") },
+                    onClick = {
+                        text = price.toString()
+                        onPriceChange(price)
+                        expanded = false
+                    }
+                )
             }
         }
     }

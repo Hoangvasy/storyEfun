@@ -273,7 +273,7 @@ suspend fun getNextChapterOrder(bookId: String, volumeID: String): Long {
                             title = data["title"] as? String ?: "",
                             content = (data["content"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
                             order = data["order"] as? Long ?: 0L,
-                            locked = data["locked"] as? Boolean ?: false
+                            price = data["price"] as? Int ?: 0
                         )
                     }
                     onChaptersLoaded(chapters)
@@ -298,11 +298,11 @@ suspend fun getNextChapterOrder(bookId: String, volumeID: String): Long {
             emptyList() // Nếu có lỗi, trả về danh sách trống
         }
     }
-
     fun addChapter(
         bookId: String,
         volumeId: String,
         title: String,
+        price: Int,
         imageUrls: List<String>,
         onComplete: () -> Unit
     ) {
@@ -311,28 +311,33 @@ suspend fun getNextChapterOrder(bookId: String, volumeID: String): Long {
             .collection("volumes").document(volumeId)
             .collection("chapters")
 
-        val chapterData = hashMapOf(
-            "title" to title,
-            "content" to imageUrls,
-            "order" to System.currentTimeMillis(),
-            "createdAt" to System.currentTimeMillis(),
-            "locked" to false
-        )
+        chaptersRef.orderBy("order", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .limit(1)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                // Lấy order lớn nhất hiện có, nếu không có thì dùng 1
+                val maxOrder = snapshot.documents.firstOrNull()?.getLong("order") ?: 0L
+                val newOrder = maxOrder + 1
 
-        chaptersRef.add(chapterData)
-            .addOnSuccessListener {
-                chaptersRef.orderBy("order").get().addOnSuccessListener { snapshot ->
-                    val chapterDocs = snapshot.documents
-                    if (chapterDocs.size > 2) {
-                        chapterDocs.drop(2).forEach { doc ->
-                            chaptersRef.document(doc.id).update("locked", true)
-                        }
+                val chapterData = hashMapOf(
+                    "title" to title,
+                    "content" to imageUrls,
+                    "order" to newOrder,
+                    "price" to price,
+                    "createdAt" to System.currentTimeMillis(),
+                    "locked" to false
+                )
+
+                chaptersRef.add(chapterData)
+                    .addOnSuccessListener {
+                        onComplete()
                     }
-                    onComplete()
-                }
+                    .addOnFailureListener { e ->
+                        println("Error adding chapter: ${e.message}")
+                    }
             }
             .addOnFailureListener { e ->
-                println("Error: ${e.message}")
+                println("Error getting max order: ${e.message}")
             }
     }
 
