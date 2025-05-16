@@ -481,13 +481,13 @@ suspend fun getNextChapterOrder(bookId: String, volumeID: String): Long {
             .dispatch()
     }
 
-    fun uploadBook(book: Book, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
-        db.collection("books")
-            .document(book.id)
-            .set(book)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e -> onFailure(e.message ?: "Unknown error") }
-    }
+        fun uploadBook(book: Book, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+            db.collection("books")
+                .document(book.id)
+                .set(book)
+                .addOnSuccessListener { onSuccess() }
+                .addOnFailureListener { e -> onFailure(e.message ?: "Unknown error") }
+        }
     private suspend fun <T> List<Task<T>>.awaitAll(): List<T> {
         return map { it.await() }
     }

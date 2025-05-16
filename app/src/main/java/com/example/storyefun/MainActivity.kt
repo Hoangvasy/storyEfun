@@ -1,6 +1,7 @@
 package com.example.storyefun
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.collectAsState
@@ -72,6 +73,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startTrackingOnlineTime() {
+        val context = this@MainActivity
         userId?.let { currentUserId ->
             trackingJob?.cancel()
             trackingJob = CoroutineScope(Dispatchers.Main).launch {
@@ -88,13 +90,16 @@ class MainActivity : ComponentActivity() {
                         quests.find { it.type == "online_one_minute" }?.let { quest ->
                             if (!quest.completed) {
                                 questRepository.updateQuestProgress(currentUserId, quest.id, 1L)
+
                                 questRepository.getQuests(currentUserId)
                                     .find { it.id == quest.id }
                                     ?.takeIf { it.completed }
                                     ?.let {
                                         questRepository.completeQuest(currentUserId, it.id, it.reward)
                                         hasCompletedOneMin = true
+                                        Toast.makeText(context, "Bạn đã nhận được phần thưởng Online 1 phút: ${it.reward} coin!", Toast.LENGTH_SHORT).show()
                                     }
+
                             } else {
                                 hasCompletedOneMin = true
                             }
@@ -112,6 +117,7 @@ class MainActivity : ComponentActivity() {
                                     ?.let {
                                         questRepository.completeQuest(currentUserId, it.id, it.reward)
                                         hasCompletedTwoMin = true
+                                        Toast.makeText(context, "Bạn đã nhận được phần thưởng Online 2 phút: ${it.reward} coin!", Toast.LENGTH_SHORT).show()
                                     }
                             } else {
                                 hasCompletedTwoMin = true
@@ -130,6 +136,7 @@ class MainActivity : ComponentActivity() {
                                     ?.let {
                                         questRepository.completeQuest(currentUserId, it.id, it.reward)
                                         hasCompletedTwentyMin = true
+                                        Toast.makeText(context, "Bạn đã nhận được phần thưởng Online 20 phút: ${it.reward} coin!", Toast.LENGTH_SHORT).show()
                                     }
                             } else {
                                 hasCompletedTwentyMin = true

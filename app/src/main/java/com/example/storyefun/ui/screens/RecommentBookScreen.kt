@@ -48,7 +48,7 @@ fun RecommendedBookScreen(navController: NavController) {
                 books.clear()
                 for (document in result) {
                     val book = document.toObject(Book::class.java)
-                    if (book.views >= 100) {
+                    if (book.views >= 1) {
                         books.add(book)
                     }
                 }

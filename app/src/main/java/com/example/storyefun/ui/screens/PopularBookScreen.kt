@@ -48,7 +48,7 @@ fun PopularBookScreen(navController: NavController) {
                 books.clear()
                 for (document in result) {
                     val book = document.toObject(Book::class.java)
-                    if (book.likes >= 100) {
+                    if (book.likes >= 1) {
                         books.add(book)
                     }
                 }

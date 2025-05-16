@@ -161,19 +161,12 @@ fun DespositeScreen() {
                     )
                     {
                         Text(
-                            text = "Số dư: ${coinBalance?.toString() ?: "Đang tải..."}",
+                            text = "Số dư: ${coinBalance?.toString() ?: "Đang tải..."} \uD83D\uDC8E",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color(0xFF424242)
                         )
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_coin),
-                            contentDescription = "Coin Balance",
-                            modifier = Modifier
-                                .size(12.dp)
-                                .align(Alignment.Top),
-                            tint = Color.Gray
-                        )
+
                     }
 
                 }
@@ -269,20 +262,12 @@ fun AmountBox(option: AmountOption, isSelected: Boolean, onClick: () -> Unit) {
                     modifier = Modifier.padding(top = 4.dp)
                 ) {
                     Text(
-                        text = "+${option.coin}",
+                        text = "+${option.coin} 💎",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF616161)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_coin),
-                        contentDescription = "Coin",
-                        modifier = Modifier
-                            .size(14.dp)
-                            .align(Alignment.Top),
-                        tint = Color.Gray
-                    )
+
                 }
             }
         }

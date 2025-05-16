@@ -52,15 +52,19 @@ fun NewBookScreen(navController: NavController) {
 
     LaunchedEffect(Unit) {
         firestore.collection("books")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(4)
             .get()
             .addOnSuccessListener { result ->
+                val bookList = result.map { document -> document.toObject(Book::class.java) }.toMutableList()
                 books.clear()
-                for (document in result) {
-                    val book = document.toObject(Book::class.java)
-                    books.add(book)
+
+                val randomBooks = mutableListOf<Book>()
+                repeat(minOf(5, bookList.size)) {
+                    val randomIndex = (bookList.indices).random()
+                    randomBooks.add(bookList[randomIndex])
+                    bookList.removeAt(randomIndex)
                 }
+
+                books.addAll(randomBooks)
             }
             .addOnFailureListener {
                 Toast.makeText(context, "Failed to load books: ${it.message}", Toast.LENGTH_SHORT).show()
